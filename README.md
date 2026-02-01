@@ -1,78 +1,76 @@
-# [Nombre de la Aplicación]
+# Scissors, Please
 
 ## 👥 Miembros del Equipo
-| Nombre y Apellidos | Correo URJC | Usuario GitHub |
-|:--- |:--- |:--- |
-| [Nombre 1] | [email1]@alumnos.urjc.es | [User1] |
-| [Nombre 2] | [email2]@alumnos.urjc.es | [User2] |
-| [Nombre 3] | [email3]@alumnos.urjc.es | [User3] |
-| [Nombre 4] | [email4]@alumnos.urjc.es | [User4] |
+| Nombre y Apellidos                | Correo URJC                          | Usuario GitHub                                         |
+|:---                               |:---                                  |:---                                                    |
+| Jorge Cimadevilla Aniz            | j.cimadevilla.2022@alumnos.urjc.es   | [Lamoara](https://github.com/lamoara)                  |
+| Marcelo Atanasio Domínguez Mateo  | ma.dominguez.2022@alumnos.urjc.es    | [Sa4dUs](https://github.com/sa4dus)                    |
+| Alejandro García Prada            | a.garciap.2022@alumnos.urjc.es       | [AlexGarciaPrada](https://github.com/AlexGarciaPrada)  |
 
 ---
 
 ## 🎭 **Preparación 1: Definición del Proyecto**
 
 ### **Descripción del Tema**
-[Escribe aquí una descripción breve y concisa de qué trata tu aplicación, el sector al que pertenece y qué valor aporta al usuario].
+La aplicación web tiene como objetivo permitir a los usuarios subir bots del juego Piedra, papel o tijera y combatir contra los de otros usuarios.
+Esta aplicación también permite a los usuarios practicar algoritmia en un entorno real.
 
 ### **Entidades**
 Indicar las entidades principales que gestionará la aplicación y las relaciones entre ellas:
 
-1. **[Entidad 1]**: [Ej: Usuario]
-2. **[Entidad 2]**: [Ej: Producto]
-3. **[Entidad 3]**: [Ej: Pedido]
-4. **[Entidad 4]**: [Ej: Categoría]
+1. **Usuario**
+2. **Bot**
+3. **Partida**
+4. **Torneo**
 
 **Relaciones entre entidades:**
-- [Ej: Usuario - Pedido: Un usuario puede tener múltiples pedidos (1:N)]
-- [Ej: Pedido - Producto: Un pedido puede contener múltiples productos y un producto puede estar en múltiples pedidos (N:M)]
-- [Ej: Producto - Categoría: Un producto pertenece a una categoría (N:1)]
-- [Descripción de otras relaciones relevantes]
+- Usuario - Bot: Un usuario puede tener mútiples bots en juego (1:N)
+- Partida - Bot: Una partida está compuesta por dos bots (1:N)
+- Torneo - Bot: Un torneo está compuesto por varios bots (1:N)
+- Torneo - Partida: En un torneo transcurren una serie de partidas (1:N)
 
 ### **Permisos de los Usuarios**
 Describir los permisos de cada tipo de usuario e indicar de qué entidades es dueño:
 
 * **Usuario Anónimo**: 
-  - Permisos: [Ej: Visualización de catálogo, búsqueda de productos, registro]
-  - No es dueño de ninguna entidad
+  - Permisos: visualizar partidas y torneos en juego, rankings por elo. 
+  - No es dueño de ninguna entidad.
 
 * **Usuario Registrado**: 
-  - Permisos: [Ej: Gestión de perfil, realizar pedidos, crear valoraciones]
-  - Es dueño de: [Ej: Sus propios Pedidos, su Perfil de Usuario, sus Valoraciones]
+  - Permisos: Gestión de perfil, crear, eliminar y editar bots, participar en partidas y torneos.
+  - Es dueño de: Sus bots y datos personales.
 
 * **Administrador**: 
-  - Permisos: [Ej: Gestión completa de productos (CRUD), visualización de estadísticas, moderación de contenido]
-  - Es dueño de: [Ej: Productos, Categorías, puede gestionar todos los Pedidos y Usuarios]
+  - Permisos: Crear, eliminar y editar torneos. Gestionar usuarios.
 
 ### **Imágenes**
 Indicar qué entidades tendrán asociadas una o varias imágenes:
 
-- **[Entidad con imágenes 1]**: [Ej: Usuario - Una imagen de avatar por usuario]
-- **[Entidad con imágenes 2]**: [Ej: Producto - Múltiples imágenes por producto (galería)]
-- **[Entidad con imágenes 3]**: [Ej: Categoría - Una imagen representativa por categoría]
+- **Usuario**: Una imagen de avatar por usuario.
+- **Bot**: Una imagen para el bot.
+- **Torneo**: Una imagen que representa al torneo.
 
 ### **Gráficos**
 Indicar qué información se mostrará usando gráficos y de qué tipo serán:
 
-- **Gráfico 1**: [Ej: Ventas mensuales - Gráfico de barras]
-- **Gráfico 2**: [Ej: Productos más vendidos - Gráfico de tarta/circular]
-- **Gráfico 3**: [Ej: Evolución de usuarios registrados - Gráfico de líneas]
-- **Gráfico 4**: [Ej: Distribución de pedidos por categoría - Gráfico de barras horizontales]
+- **Resultados**: Gráfico circular que indica las victorias, derrotas y empates de cada bot y usuario. 
+- **Progresión de ELO**: Gráfico de líneas que indica la progresión del ELO de un bot.
+- **Usuarios registrados**: Histograma que indica el número de usuarios registrados cada mes.
+- **Estadísticas de uso**: Gráfico circular con las opciones más jugadas a lo largo de un torneo.
 
 ### **Tecnología Complementaria**
 Indicar qué tecnología complementaria se empleará:
 
-- [Ej: Envío de correos electrónicos automáticos mediante JavaMailSender]
-- [Ej: Generación de PDFs de facturas usando iText o similar]
-- [Ej: Sistema de autenticación OAuth2 o JWT]
-- [Otras tecnologías externas que se integrarán]
+- Sistema de autenticación con OAuth2.
+- Intérpretar código en python en el servidor.
+- Notificaciones en tiempo real con WebSockets.
 
 ### **Algoritmo o Consulta Avanzada**
 Indicar cuál será el algoritmo o consulta avanzada que se implementará:
 
-- **Algoritmo/Consulta**: [Ej: Sistema de recomendaciones basado en el historial de compras del usuario]
-- **Descripción**: [Ej: Analiza los productos comprados previamente y sugiere productos similares o complementarios utilizando filtrado colaborativo]
-- **Alternativa**: [Ej: Consulta compleja que agrupe ventas por categoría, mes y región, con cálculo de tendencias]
+- **Algoritmo de emparejamiento**: algoritmo de emparejamiento en tiempo real.
+- **Ranking**: se mostrará una clasificación de los bots por elo.
+- **Bots destacados**: a partir de varias estadísticas, se calculará una serie de bots relevantes.
 
 ---
 
