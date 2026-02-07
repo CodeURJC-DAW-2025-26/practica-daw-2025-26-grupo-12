@@ -56,6 +56,17 @@ body {
     color: var(--bs-body-bg);
 }
 
+.btn-outline-muted {
+    color: #cbd5e1;
+    border-color: #64748b;
+}
+
+.btn-outline-muted:hover {
+    color: var(--bs-body-bg);
+    background-color: #e2e8f0;
+    border-color: #e2e8f0;
+}
+
 .form-control {
     background-color: #0f172a;
     border-color: var(--bs-border-color);
