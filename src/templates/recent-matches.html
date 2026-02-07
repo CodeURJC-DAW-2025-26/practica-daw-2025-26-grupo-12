@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recent Matches - Scissors, Please</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="/css/custom.css" rel="stylesheet">
+</head>
+
+<body class="d-flex flex-column min-vh-100">
+
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="home-auth.html">✂️ Scissors, Please</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarRecentMatches">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarRecentMatches">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="home-auth.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="match-list-auth.html">Best Matches</a></li>
+                    <li class="nav-item"><a class="nav-link" href="tournament-list-auth.html">Tournaments</a></li>
+                </ul>
+                <div class="d-flex gap-2 mt-3 mt-lg-0">
+                    <a href="user-detail-auth.html" class="btn btn-outline-muted btn-sm px-3">Profile</a>
+                    <a href="index.html" class="btn btn-primary btn-sm px-3">Log Out</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 fw-bold mb-0">My Recent Matches</h1>
+            <div class="btn-group">
+                <button type="button" class="btn btn-outline-muted btn-sm active">All</button>
+                <button type="button" class="btn btn-outline-muted btn-sm">Wins</button>
+                <button type="button" class="btn btn-outline-muted btn-sm">Losses</button>
+            </div>
+        </div>
+
+        <div class="card border-secondary shadow-sm">
+            <div class="table-responsive">
+                <table class="table mb-0 align-middle text-nowrap">
+                    <thead>
+                        <tr class="text-secondary small text-uppercase">
+                            <th scope="col" class="ps-4">Match ID</th>
+                            <th scope="col">My Bot</th>
+                            <th scope="col">Opponent</th>
+                            <th scope="col">Result</th>
+                            <th scope="col">Date</th>
+                            <th scope="col" class="text-end pe-4">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="ps-4 text-secondary">#4021</td>
+                            <td>AlphaBot</td>
+                            <td class="text-secondary">BetaMaster</td>
+                            <td><span class="badge badge-soft-success rounded-pill px-3">Win</span></td>
+                            <td class="text-secondary">2 mins ago</td>
+                            <td class="text-end pe-4">
+                                <a href="match-stats-auth.html" class="btn btn-sm btn-outline-muted">View</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="ps-4 text-secondary">#4018</td>
+                            <td>Randomizer</td>
+                            <td class="text-secondary">AlphaBot</td>
+                            <td><span class="badge badge-soft-danger rounded-pill px-3">Loss</span></td>
+                            <td class="text-secondary">45 mins ago</td>
+                            <td class="text-end pe-4">
+                                <a href="match-stats-auth.html" class="btn btn-sm btn-outline-muted">View</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="ps-4 text-secondary">#4014</td>
+                            <td>PaperMaster</td>
+                            <td class="text-secondary">Roshambo_X</td>
+                            <td><span class="badge bg-secondary rounded-pill px-3">Draw</span></td>
+                            <td class="text-secondary">Yesterday</td>
+                            <td class="text-end pe-4">
+                                <a href="match-stats-auth.html" class="btn btn-sm btn-outline-muted">View</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
