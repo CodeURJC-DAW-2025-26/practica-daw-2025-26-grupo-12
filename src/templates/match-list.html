@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Matches - Scissors, Please</title>
+    <title>Best Matches - Scissors, Please</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -15,23 +15,31 @@
 
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="/">✂️ Scissors, Please</a>
-            <div class="collapse navbar-collapse">
+            <a class="navbar-brand fw-bold" href="index.html">✂️ Scissors, Please</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMatches">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarMatches">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item"><a class="nav-link" href="#">Rankings</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="#">Matches</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="match-list.html">Best Matches</a></li>
+                    <li class="nav-item"><a class="nav-link" href="tournament-list.html">Tournaments</a></li>
                 </ul>
+                <div class="d-flex gap-2 mt-3 mt-lg-0">
+                    <a href="login.html" class="btn btn-outline-muted btn-sm px-3">Log In</a>
+                    <a href="sign-up.html" class="btn btn-primary btn-sm px-3">Sign Up</a>
+                </div>
             </div>
         </div>
     </nav>
 
     <div class="container py-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="h3 fw-bold mb-0">Recent Matches</h1>
+            <h1 class="h3 fw-bold mb-0">Best Matches</h1>
             <div class="btn-group">
-                <button type="button" class="btn btn-outline-secondary btn-sm active">All</button>
-                <button type="button" class="btn btn-outline-secondary btn-sm">Won</button>
-                <button type="button" class="btn btn-outline-secondary btn-sm">Lost</button>
+                <button type="button" class="btn btn-outline-muted btn-sm active">Top 24h</button>
+                <button type="button" class="btn btn-outline-muted btn-sm">This Week</button>
+                <button type="button" class="btn btn-outline-muted btn-sm">All Time</button>
             </div>
         </div>
 
@@ -43,6 +51,7 @@
                             <th scope="col" class="ps-4">Match ID</th>
                             <th scope="col">Player 1</th>
                             <th scope="col">Player 2</th>
+                            <th scope="col">Top ELO</th>
                             <th scope="col">Result</th>
                             <th scope="col">Date</th>
                             <th scope="col" class="text-end pe-4">Action</th>
@@ -65,10 +74,11 @@
                                     <span class="text-secondary">BetaMaster</span>
                                 </div>
                             </td>
+                            <td class="text-secondary">2450</td>
                             <td><span class="badge badge-soft-success rounded-pill px-3">Win</span></td>
                             <td class="text-secondary">2 mins ago</td>
                             <td class="text-end pe-4">
-                                <a href="bot_detail.html" class="btn btn-sm btn-outline-secondary">View</a>
+                                <a href="match-stats.html" class="btn btn-sm btn-outline-muted">View</a>
                             </td>
                         </tr>
 
@@ -88,10 +98,11 @@
                                     <span class="text-secondary">AlphaBot</span>
                                 </div>
                             </td>
+                            <td class="text-secondary">2310</td>
                             <td><span class="badge badge-soft-danger rounded-pill px-3">Loss</span></td>
                             <td class="text-secondary">15 mins ago</td>
                             <td class="text-end pe-4">
-                                <a href="#" class="btn btn-sm btn-outline-secondary">View</a>
+                                <a href="match-stats.html" class="btn btn-sm btn-outline-muted">View</a>
                             </td>
                         </tr>
 
@@ -113,6 +124,9 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
 </body>
 
 </html>
