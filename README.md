@@ -83,20 +83,67 @@ Indicar cuál será el algoritmo o consulta avanzada que se implementará:
 > Vídeo mostrando las principales funcionalidades de la aplicación web.
 
 ### **Diagrama de Navegación**
-Diagrama que muestra cómo se navega entre las diferentes páginas de la aplicación:
+Diagramas que muestran cómo se navega entre las diferentes páginas de la aplicación:
 
-![Diagrama de Navegación](images/navigation-diagram.png)
+#### **Navegación Anónima**
+![Navegación Anónima](images/anonimo-navegacion.svg)
 
-> [Descripción opcional del flujo de navegación: Ej: "El usuario puede acceder desde la página principal a todas las secciones mediante el menú de navegación. Los usuarios anónimos solo tienen acceso a las páginas públicas, mientras que los registrados pueden acceder a su perfil y panel de usuario."]
+#### **Navegación Usuario Autenticado**
+![Navegación Autenticado](images/autenticado-navegacion.svg)
+
+#### **Navegación Administrador**
+![Navegación Admin](images/admin-navegacion.svg)
+
+#### **Relación Entre Paquetes**
+![Relación Navegación](images/relacion-navegacion.svg)
+
+> La navegación está separada en tres paquetes (anónimo, autenticado y admin) con sus rutas específicas y puntos de transición.
 
 ### **Capturas de Pantalla y Descripción de Páginas**
 
 #### **1. Página Principal / Home**
 ![Página Principal](images/home-page.png)
 
-> [Descripción breve: Ej: "Página de inicio que muestra los productos destacados, categorías principales y un banner promocional. Incluye barra de navegación y acceso a registro/login para usuarios no autenticados."]
+> Página de inicio con navegación global, héroe de bienvenida y accesos a partidas, bots y torneos.
 
-#### **AQUÍ AÑADIR EL RESTO DE PÁGINAS**
+#### **Listado de páginas (maquetadas)**
+| Página | Template | Captura |
+|:--|:--|:--|
+| Home (anónimo) | `index.html` | ✅ `images/home-page.png` |
+| Home (auth) | `home-auth.html` | ⏳ Pendiente |
+| Login | `login.html` | ⏳ Pendiente |
+| Sign Up | `sign-up.html` | ⏳ Pendiente |
+| Match List (anónimo) | `match-list.html` | ⏳ Pendiente |
+| Match List (auth) | `match-list-auth.html` | ⏳ Pendiente |
+| Match Stats (anónimo) | `match-stats.html` | ⏳ Pendiente |
+| Match Stats (auth) | `match-stats-auth.html` | ⏳ Pendiente |
+| Match Search | `match-search.html` | ⏳ Pendiente |
+| Match Battle | `match-battle.html` | ⏳ Pendiente |
+| Recent Matches | `recent-matches.html` | ⏳ Pendiente |
+| My Bots | `my-bots.html` | ⏳ Pendiente |
+| Bot Create | `bot-create.html` | ⏳ Pendiente |
+| Bot Detail (anónimo) | `bot-detail.html` | ⏳ Pendiente |
+| Bot Detail (auth) | `bot-detail-auth.html` | ⏳ Pendiente |
+| Bot Edit | `bot-edit.html` | ⏳ Pendiente |
+| Tournaments List (anónimo) | `tournament-list.html` | ⏳ Pendiente |
+| Tournaments List (auth) | `tournament-list-auth.html` | ⏳ Pendiente |
+| Tournament Detail (anónimo) | `tournament-detail.html` | ⏳ Pendiente |
+| Tournament Detail (auth) | `tournament-detail-auth.html` | ⏳ Pendiente |
+| Tournament Detail Open (anónimo) | `tournament-detail-open.html` | ⏳ Pendiente |
+| Tournament Detail Open (auth) | `tournament-detail-open-auth.html` | ⏳ Pendiente |
+| Tournament Join | `tournament-join.html` | ⏳ Pendiente |
+| Tournament Results (anónimo) | `tournament-results.html` | ⏳ Pendiente |
+| Tournament Results (auth) | `tournament-results-auth.html` | ⏳ Pendiente |
+| My Tournaments | `my-tournaments-auth.html` | ⏳ Pendiente |
+| Admin Panel | `admin-panel-admin.html` | ⏳ Pendiente |
+| Admin Create Tournament | `admin-tournament-create-admin.html` | ⏳ Pendiente |
+| Admin Edit Tournament | `admin-tournament-edit-admin.html` | ⏳ Pendiente |
+| Admin Tournament Detail | `admin-tournament-detail-admin.html` | ⏳ Pendiente |
+| User Detail (anónimo) | `user-detail.html` | ⏳ Pendiente |
+| User Detail (auth) | `user-detail-auth.html` | ⏳ Pendiente |
+| User Detail from Bot (anónimo) | `user-detail-from-bot.html` | ⏳ Pendiente |
+| User Detail from Bot (auth) | `user-detail-from-bot-auth.html` | ⏳ Pendiente |
+| Error | `error.html` | ⏳ Pendiente |
 
 ---
 
@@ -454,4 +501,3 @@ Diagrama mostrando los componentes React, hooks personalizados, servicios y sus 
 |3| [Descripción commit 3](URL_commit_3)  | [Archivo3](URL_archivo_3)   |
 |4| [Descripción commit 4](URL_commit_4)  | [Archivo4](URL_archivo_4)   |
 |5| [Descripción commit 5](URL_commit_5)  | [Archivo5](URL_archivo_5)   |
-
