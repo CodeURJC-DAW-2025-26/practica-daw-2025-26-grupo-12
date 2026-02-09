@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Scissors, Please</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="/css/custom.css" rel="stylesheet">
+</head>
+
+<body class="d-flex flex-column min-vh-100">
+
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">✂️ Scissors, Please</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarAdminPanel">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarAdminPanel">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/matches/list">Best Matches</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/admin/panel">Tournaments</a></li>
+                </ul>
+                <div class="d-flex gap-2 mt-3 mt-lg-0 align-items-center">
+                    <span class="badge bg-primary">Admin</span>
+                    <a href="/" class="btn btn-outline-muted btn-sm px-3">Log Out</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+            <div>
+                <p class="text-secondary mb-1 small text-uppercase">Administration</p>
+                <h1 class="h3 fw-bold mb-0">Tournament Admin</h1>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="card p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2 class="h5 fw-bold mb-0">Managed Tournaments</h2>
+                        <div class="d-flex flex-wrap gap-2 align-items-center">
+                            <span class="badge bg-secondary">3 total</span>
+                            <a href="/admin/tournament/create" class="btn btn-outline-muted btn-sm">New
+                                Tournament</a>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table mb-0 align-middle text-nowrap">
+                            <thead>
+                                <tr class="text-secondary small text-uppercase">
+                                    <th scope="col" class="ps-3">Tournament</th>
+                                    <th scope="col">Start</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col" class="text-end pe-3">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="ps-3">
+                                        <div class="fw-medium">Quantum Open</div>
+                                        <div class="text-secondary small">64 slots • Single Elimination</div>
+                                    </td>
+                                    <td class="text-secondary">Feb 28, 2026</td>
+                                    <td><span class="badge bg-secondary">Scheduled</span></td>
+                                    <td class="text-end pe-3">
+                                        <div class="d-flex flex-wrap gap-2 justify-content-end">
+                                            <a href="/admin/tournament/detail"
+                                                class="btn btn-outline-muted btn-sm">View</a>
+                                            <a href="/admin/tournament/edit"
+                                                class="btn btn-outline-muted btn-sm">Edit</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="ps-3">
+                                        <div class="fw-medium">Night Owl League</div>
+                                        <div class="text-secondary small">24 slots • Round Robin</div>
+                                    </td>
+                                    <td class="text-secondary">Mar 05, 2026</td>
+                                    <td><span class="badge bg-warning text-dark">In Progress</span></td>
+                                    <td class="text-end pe-3">
+                                        <div class="d-flex flex-wrap gap-2 justify-content-end">
+                                            <a href="/admin/tournament/detail"
+                                                class="btn btn-outline-muted btn-sm">View</a>
+                                            <a href="/admin/tournament/edit"
+                                                class="btn btn-outline-muted btn-sm">Edit</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="ps-3">
+                                        <div class="fw-medium">Winter Cup 2026</div>
+                                        <div class="text-secondary small">32 slots • Single Elimination</div>
+                                    </td>
+                                    <td class="text-secondary">Jan 12, 2026</td>
+                                    <td><span class="badge bg-success">Completed</span></td>
+                                    <td class="text-end pe-3">
+                                        <div class="d-flex flex-wrap gap-2 justify-content-end">
+                                            <a href="/admin/tournament/detail"
+                                                class="btn btn-outline-muted btn-sm">View</a>
+                                            <a href="/admin/tournament/edit"
+                                                class="btn btn-outline-muted btn-sm">Edit</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="row g-4 mt-1">
+            <div class="col-12">
+                <div class="card p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2 class="h5 fw-bold mb-0">Registered Users (Monthly)</h2>
+                        <span class="badge bg-secondary">Histogram</span>
+                    </div>
+                    <div class="bg-secondary-bg border border-secondary rounded p-4">
+                        <svg viewBox="0 0 360 160" width="100%" height="160" role="img"
+                            aria-label="Histogram of registered users by month">
+                            <line x1="30" y1="10" x2="30" y2="140" stroke="#334155" stroke-width="1"></line>
+                            <line x1="30" y1="140" x2="340" y2="140" stroke="#334155" stroke-width="1"></line>
+
+                            <rect x="50" y="90" width="24" height="50" fill="#3b82f6"></rect>
+                            <rect x="90" y="75" width="24" height="65" fill="#3b82f6"></rect>
+                            <rect x="130" y="60" width="24" height="80" fill="#3b82f6"></rect>
+                            <rect x="170" y="45" width="24" height="95" fill="#3b82f6"></rect>
+                            <rect x="210" y="70" width="24" height="70" fill="#3b82f6"></rect>
+                            <rect x="250" y="85" width="24" height="55" fill="#3b82f6"></rect>
+                            <rect x="290" y="65" width="24" height="75" fill="#3b82f6"></rect>
+
+                            <text x="50" y="155" fill="#94a3b8" font-size="10">Aug</text>
+                            <text x="90" y="155" fill="#94a3b8" font-size="10">Sep</text>
+                            <text x="130" y="155" fill="#94a3b8" font-size="10">Oct</text>
+                            <text x="170" y="155" fill="#94a3b8" font-size="10">Nov</text>
+                            <text x="210" y="155" fill="#94a3b8" font-size="10">Dec</text>
+                            <text x="250" y="155" fill="#94a3b8" font-size="10">Jan</text>
+                            <text x="290" y="155" fill="#94a3b8" font-size="10">Feb</text>
+                        </svg>
+                        <div class="d-flex flex-wrap gap-2 mt-3">
+                            <span class="badge bg-secondary">Peak: Nov</span>
+                            <span class="badge bg-secondary">Latest: Feb</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
