@@ -77,26 +77,232 @@ Indicar cuál será el algoritmo o consulta avanzada que se implementará:
 ## 🛠 **Preparación 2: Maquetación de páginas con HTML y CSS**
 
 ### **Vídeo de Demostración**
-📹 **[Enlace al vídeo en YouTube](https://www.youtube.com/watch?v=x91MPoITQ3I)**
+📹 **[Enlace al vídeo en YouTube](https://www.youtube.com/watch?v=SnyTBY28ct4)**
 > Vídeo mostrando las principales funcionalidades de la aplicación web.
 
 ### **Diagrama de Navegación**
-Diagrama que muestra cómo se navega entre las diferentes páginas de la aplicación:
+Diagramas que muestran cómo se navega entre las diferentes páginas de la aplicación:
 
-![Diagrama de Navegación](images/navigation-diagram.png)
+#### **Navegación Anónima**
+![Navegación Anónima](images/anonimo-navegacion.svg)
 
-> [Descripción opcional del flujo de navegación: Ej: "El usuario puede acceder desde la página principal a todas las secciones mediante el menú de navegación. Los usuarios anónimos solo tienen acceso a las páginas públicas, mientras que los registrados pueden acceder a su perfil y panel de usuario."]
+#### **Navegación Usuario Autenticado**
+![Navegación Autenticado](images/autenticado-navegacion.svg)
+
+#### **Navegación Administrador**
+![Navegación Admin](images/admin-navegacion.svg)
+
+#### **Relación Entre Paquetes**
+![Relación Navegación](images/relacion-navegacion.svg)
+
+> La navegación está separada en tres paquetes (anónimo, autenticado y admin) con sus rutas específicas y puntos de transición.
 
 ### **Capturas de Pantalla y Descripción de Páginas**
 
-#### **1. Página Principal / Home**
-![Página Principal](images/home-page.png)
+#### **1. index.html**
+![index.html](images/screenshots/index.png)
 
-> [Descripción breve: Ej: "Página de inicio que muestra los productos destacados, categorías principales y un banner promocional. Incluye barra de navegación y acceso a registro/login para usuarios no autenticados."]
+> Esta es la página principal que se muestra a los usuarios cuando acceden a la aplicación sin haber iniciado sesión. Presenta una vista general de la plataforma y ofrece opciones para iniciar sesión o registrarse, actuando como punto de entrada público a la web.
 
-#### **AQUÍ AÑADIR EL RESTO DE PÁGINAS**
+#### **2. home-auth.html**
+![home-auth.html](images/screenshots/home-auth.png)
+
+> Esta es la página Home que se muestra a los usuarios autenticados. Se presentan datos personalizados, como los bots del usuario, estadísticas relevantes y un listado de los últimos torneos en los que ha participado, proporcionando una visión general de su actividad dentro de la plataforma.
+
+#### **3. home-admin.html**
+![home-admin.html](images/screenshots/home-admin.png)
+
+> Esta es la página principal del administrador. Su diseño es similar al de la página pública, pero adaptada al rol de administrador, sustituyendo los botones de registro e inicio de sesión por una opción para cerrar sesión. Desde aquí el administrador puede navegar hacia las secciones de gestión.
 
 ---
+
+### **Autenticación / Auth**
+
+#### **4. login.html**
+![login.html](images/screenshots/login.png)
+
+> Esta es la página de inicio de sesión de los usuarios. Permite acceder a la plataforma introduciendo las credenciales de la cuenta y ofrece opciones adicionales como iniciar sesión con Google (previsto para futuras prácticas), navegar a la página de registro o iniciar sesión como administrador.
+
+#### **5. sign-up.html**
+![sign-up.html](images/screenshots/sign-up.png)
+
+> Esta es la página de registro para nuevos usuarios. Contiene un formulario con los campos necesarios para crear una cuenta (correo electrónico, nombre de usuario, contraseña y confirmación de contraseña). También incluye un enlace directo a la página de login para usuarios que ya disponen de una cuenta.
+
+---
+
+### **Bots**
+
+#### **6. bot-create.html**
+![bot-create.html](images/screenshots/bot-create.png)
+
+> Esta es la página destinada a la creación de bots por parte del usuario. Se presenta como un formulario donde se pueden definir las características del bot y se incluyen opciones para importar el código del bot desde archivos en Python o JavaScript.
+
+#### **7. bot-detail.html**
+![bot-detail.html](images/screenshots/bot-detail.png)
+
+> Esta página muestra los detalles de un bot cuando el usuario no está autenticado. Permite consultar información básica y estadísticas del bot. Existen versiones análogas para usuarios autenticados y administradores, diferenciándose principalmente en las opciones de navegación y botones disponibles.
+
+#### **8. bot-detail-admin.html**
+![bot-detail-admin.html](images/screenshots/bot-detail-admin.png)
+
+> Esta es la versión de la página de detalles del bot para el administrador. Ofrece la misma información general del bot, pero con opciones adicionales de navegación y control propias del rol administrativo.
+
+#### **9. bot-edit.html**
+![bot-edit.html](images/screenshots/bot-edit.png)
+
+> Esta es la página que permite a un usuario autenticado modificar las propiedades de su bot. Desde aquí puede editar sus parámetros y realizar pruebas mediante test matches para evaluar su rendimiento antes de competir en torneos.
+
+#### **10. my-bots.html**
+![my-bots.html](images/screenshots/my-bots.png)
+
+> Esta es la página de “Mis Bots” para usuarios autenticados. Permite consultar todos los bots creados por el usuario, mostrando su nombre, estrategia, ELO y etiquetas de características. Incluye botones para ver o editar cada bot, así como opciones rápidas para crear un nuevo bot, importar bots existentes o filtrar la lista. En un panel lateral se presenta un resumen con estadísticas del usuario, como el total de bots y el ELO más alto, junto con accesos directos a acciones frecuentes, como abrir el bot más reciente o ver partidas recientes.
+
+---
+
+### **Torneos / Tournaments**
+
+#### **11. admin-tournament-create-admin.html**
+![admin-tournament-create-admin.html](images/screenshots/admin-tournament-create-admin.png)
+
+> Esta es la página destinada a la creación de torneos por parte del administrador. Se compone de un formulario donde se introducen los datos principales del torneo, como título, número máximo de jugadores, fechas, formato y descripción. También permite añadir información opcional como premio e imagen representativa mediante un modal de subida de archivos.
+
+#### **12. admin-tournament-detail-admin.html**
+![admin-tournament-detail-admin.html](images/screenshots/admin-tournament-detail-admin.png)
+
+> Esta página muestra la información detallada de un torneo desde el punto de vista del administrador. Incluye un resumen con el estado del torneo, fechas clave, número de participantes y formato de competición, además de acciones administrativas y tabla con los bots participantes.
+
+#### **13. admin-tournament-edit-admin.html**
+![admin-tournament-edit-admin.html](images/screenshots/admin-tournament-edit-admin.png)
+
+> Página utilizada por el administrador para modificar la configuración de un torneo existente. Se pueden cambiar parámetros como fecha de inicio, número máximo de jugadores, estado del torneo y añadir notas internas. Incluye opciones para guardar cambios o resetear campos.
+
+#### **14. tournament-create.html**
+![tournament-create.html](images/screenshots/tournament-create.png)
+
+> Página de creación de torneos accesible desde la vista pública. No permite crear torneos directamente, muestra un mensaje indicando que esta funcionalidad es exclusiva del panel de administración e incluye accesos rápidos para iniciar sesión.
+
+#### **15. tournament-detail-auth.html**
+![tournament-detail-auth.html](images/screenshots/tournament-detail-auth.png)
+
+> Muestra información completa del torneo, incluyendo fechas, premio, formato, número de plazas y organizador, además de descripción y reglas. La inscripción está cerrada y el botón correspondiente aparece deshabilitado.
+
+#### **16. tournament-detail-open-auth.html**
+![tournament-detail-open-auth.html](images/screenshots/tournament-detail-open-auth.png)
+
+> Muestra la información principal del torneo con inscripciones activas. Incluye descripción, reglas y un botón para unirse al torneo, además de otro para regresar a la lista.
+
+#### **17. tournament-detail-open.html**
+![tournament-detail-open.html](images/screenshots/tournament-detail-open.png)
+
+> Versión pública de la página de detalles de un torneo abierto, accesible sin autenticación. Permite consultar información pero restringe la acción de inscripción.
+
+#### **18. tournament-detail.html**
+![tournament-detail.html](images/screenshots/tournament-detail.png)
+
+> Página pública de detalles de un torneo cuyo periodo de inscripción aún no está abierto o está cerrado. La acción de registro aparece deshabilitada.
+
+#### **19. tournament-join.html**
+![tournament-join.html](images/screenshots/tournament-join.png)
+
+> Permite seleccionar un bot del usuario para participar en el torneo, añadir nota opcional y aceptar reglas. Muestra resumen del torneo y recompensas, con botones para confirmar o cancelar la inscripción.
+
+#### **20. tournament-list-auth.html**
+![tournament-list-auth.html](images/screenshots/tournament-list-auth.png)
+
+> Presenta los torneos organizados por categorías según su estado: abiertos, en progreso, próximos y finalizados. Incluye enlaces a detalles y acciones según el estado del torneo.
+
+#### **21. tournament-list.html**
+![tournament-list.html](images/screenshots/tournament-list.png)
+
+> Versión pública del listado de torneos, accesible sin autenticación, con restricciones en acciones y redirecciones a páginas informativas o de login cuando se requiere.
+
+#### **22. tournament-result-auth.html**
+![tournament-result-auth.html](images/screenshots/tournament-result-auth.png)
+
+> Presenta resumen del torneo finalizado, ganador, premio, tabla de resultados, ranking Top 8 y gráficos de uso de movimientos. Incluye opciones de descarga de informes.
+
+#### **23. tournament-results.html**
+![tournament-result.html](images/screenshots/tournament-results.png)
+
+> Versión pública de la página de resultados del torneo, con la misma información visual y estadísticas que la versión autenticada.
+
+#### **24. my-tournaments-auth.html**
+![my-tournaments-auth.html](images/screenshots/my-tournaments-auth.png)
+
+> Lista los torneos en los que el usuario está registrado o ha participado, con filtros, búsqueda y enlaces a detalles o resultados finales. Muestra resumen visual con badges y botones de acción contextualizados.
+
+
+### **Partidas / Matches**
+
+#### **25. match-battle.html**
+![match-battle.html](images/screenshots/match-battle.png)
+
+> Página que representa el estado de una partida en curso entre dos bots, con nombres, identificadores gráficos, indicador “VS” y spinner de carga. Incluye botón para acceder a resultados.
+
+#### **26. match-list-admin.html**
+![match-list-admin.html](images/screenshots/match-list-admin.png)
+
+> Tabla con mejores enfrentamientos, criterios temporales, identificador de partida, bots, ELO máximo, resultado y fecha. Permite visualizar detalles y cuenta con paginación.
+
+#### **27. match-list-auth.html**
+![match-list-auth.html](images/screenshots/match-list-auth.png)
+
+> Similar a la versión administrativa, con tabla de información básica y filtros temporales. Permite acceder a estadísticas detalladas de cada partida y paginación.
+
+#### **28. match-list.html**
+![match-list.html](images/screenshots/match-list.png)
+
+> Tabla informativa de enfrentamientos destacados accesible sin autenticación, con paginación y filtros temporales.
+
+#### **29. match-search.html**
+![match-search.html](images/screenshots/match-search.png)
+
+> Página que indica que el sistema está buscando un oponente adecuado, mostrando indicador visual de carga y opciones para cancelar o forzar inicio de partida.
+
+#### **30. match-stats.html**
+![match-stats.html](images/screenshots/match-stats.png)
+
+> Muestra información detallada de un combate entre dos bots, incluyendo marcador final, ELO, cronología de rondas y gráficos. No permite acciones de usuario como rematch.
+
+#### **31. match-stats-auth.html**
+![match-stats-auth.html](images/screenshots/match-stats-auth.png)
+
+> Contiene la misma información que la versión pública, con funcionalidades adicionales como botón de “Rematch” y enlaces a perfiles de los bots.
+
+#### **32. match-stats-admin.html**
+![match-stats-admin.html](images/screenshots/match-stats-admin.png)
+
+> Incluye toda la información visual y analítica de la partida, adaptada a administrador con controles de navegación y gestión.
+
+#### **33. recent-matches.html**
+![recent-matches.html](images/screenshots/recent-matches.png)
+
+> Listado de últimos enfrentamientos del usuario, con ID, bots, resultado, fecha y acceso a estadísticas detalladas. Incluye filtros por tipo de resultado.
+
+---
+
+### **Perfil de Usuario / User Details**
+
+#### **34. user-detail-auth.html**
+![user-detail-auth.html](images/screenshots/user-detail-auth.png)
+
+> Muestra datos personales, estadísticas generales, Top Bots y actividad reciente. Permite actualizar foto de perfil y navegar a otras secciones.
+
+#### **35. user-detail-from-bot-auth.html**
+![user-detail-from-bot-auth.html](images/screenshots/user-detail-from-bot-auth.png)
+
+> Similar a la página de perfil propio, pero muestra información de otro usuario desde la vista de un bot, con opción de volver al detalle del bot.
+
+#### **36. user-detail-from-bot-admin.html**
+![user-detail-from-bot-admin.html](images/screenshots/user-detail-from-bot-admin.png)
+
+> Versión para administrador cuando accede desde la vista de un bot. Incluye navegación adaptada al rol y controles administrativos.
+
+#### **37. user-detail.html**
+![user-detail.html](images/screenshots/user-detail.png)
+
+> Versión pública del perfil de usuario, accesible sin autenticación. Muestra información básica, Top Bots y actividad reciente, sin posibilidad de edición ni acciones administrativas.
+
 
 ## 🛠 **Práctica 1: Web con HTML generado en servidor y AJAX**
 
@@ -452,4 +658,3 @@ Diagrama mostrando los componentes React, hooks personalizados, servicios y sus 
 |3| [Descripción commit 3](URL_commit_3)  | [Archivo3](URL_archivo_3)   |
 |4| [Descripción commit 4](URL_commit_4)  | [Archivo4](URL_archivo_4)   |
 |5| [Descripción commit 5](URL_commit_5)  | [Archivo5](URL_archivo_5)   |
-

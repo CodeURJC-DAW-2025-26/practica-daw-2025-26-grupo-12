@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tournament Results - Scissors, Please</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="/css/custom.css" rel="stylesheet">
+</head>
+
+<body class="d-flex flex-column min-vh-100">
+
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="index.html">✂️ Scissors, Please</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarTournamentResults">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarTournamentResults">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="match-list.html">Best Matches</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="tournament-list.html">Tournaments</a></li>
+                </ul>
+                <div class="d-flex gap-2 mt-3 mt-lg-0">
+                    <a href="login.html" class="btn btn-outline-muted btn-sm px-3">Log In</a>
+                    <a href="sign-up.html" class="btn btn-primary btn-sm px-3">Sign Up</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+            <div>
+                <p class="text-secondary mb-1 small text-uppercase">Finals</p>
+                <h1 class="h3 fw-bold mb-0">Winter Cup 2026 Results</h1>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="tournament-list.html" class="btn btn-outline-muted btn-sm">Back to Tournaments</a>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <div class="col-12">
+                <div class="card p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2 class="h5 fw-bold mb-0">Tournament Summary</h2>
+                        <span class="badge bg-secondary">Finished</span>
+                    </div>
+                    <p class="text-secondary mb-3">Classic single elimination tournament. Fast brackets and aggressive playstyles.</p>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="card p-3 stat-card h-100">
+                                <h6 class="text-secondary text-uppercase small fw-bold mb-2">Winner</h6>
+                                <div class="d-flex align-items-baseline">
+                                    <span class="h2 fw-bold mb-0 text-white">AlphaBot</span>
+                                </div>
+                                <p class="text-secondary small mb-0">Owner: Jorge C.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card p-3 stat-card h-100">
+                                <h6 class="text-secondary text-uppercase small fw-bold mb-2">Prize</h6>
+                                <div class="d-flex align-items-baseline">
+                                    <span class="h2 fw-bold mb-0 text-white">No Prize</span>
+                                </div>
+                                <p class="text-secondary small mb-0">Not specified</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card p-3 stat-card h-100">
+                                <h6 class="text-secondary text-uppercase small fw-bold mb-2">Participants</h6>
+                                <div class="d-flex align-items-baseline">
+                                    <span class="h2 fw-bold mb-0 text-white">32</span>
+                                </div>
+                                <p class="text-secondary small mb-0">Full bracket</p>
+                            </div>
+                        </div>
+                    </div>
+                    <hr class="border-secondary my-4">
+                    <div class="table-responsive">
+                        <table class="table mb-0 align-middle text-nowrap">
+                            <thead>
+                                <tr class="text-secondary small text-uppercase">
+                                    <th scope="col" class="ps-3">Stage</th>
+                                    <th scope="col">Winner</th>
+                                    <th scope="col">Score</th>
+                                    <th scope="col" class="text-end pe-3">Loser</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="ps-3">Final</td>
+                                    <td>AlphaBot</td>
+                                    <td class="text-secondary">12 - 8</td>
+                                    <td class="text-end pe-3">PaperMaster</td>
+                                </tr>
+                                <tr>
+                                    <td class="ps-3">Semi</td>
+                                    <td>AlphaBot</td>
+                                    <td class="text-secondary">11 - 9</td>
+                                    <td class="text-end pe-3">Randomizer</td>
+                                </tr>
+                                <tr>
+                                    <td class="ps-3">Semi</td>
+                                    <td>PaperMaster</td>
+                                    <td class="text-secondary">13 - 7</td>
+                                    <td class="text-end pe-3">Roshambo_X</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="card p-4">
+                    <h2 class="h5 fw-bold mb-3">Top 8</h2>
+                    <ol class="list-group list-group-numbered list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            AlphaBot <span class="badge bg-primary rounded-pill">Champion</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            PaperMaster <span class="badge bg-secondary rounded-pill">Finalist</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Randomizer <span class="badge bg-secondary rounded-pill">Semi</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Roshambo_X <span class="badge bg-secondary rounded-pill">Semi</span>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="card p-4">
+                    <h2 class="h5 fw-bold mb-3">Download Reports</h2>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button class="btn btn-outline-muted btn-sm">Bracket PDF</button>
+                        <button class="btn btn-outline-muted btn-sm">Match Logs</button>
+                        <button class="btn btn-outline-muted btn-sm">Stats CSV</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-1">
+            <div class="col-lg-6">
+                <div class="card p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3 class="h6 fw-bold mb-0">Tournament Move Usage</h3>
+                        <span class="badge bg-secondary">Pie Chart</span>
+                    </div>
+                    <div class="bg-secondary-bg border border-secondary rounded p-4 text-center">
+                        <svg viewBox="0 0 120 120" width="160" height="160" class="mb-3">
+                            <circle cx="60" cy="60" r="52" fill="none" stroke="#1e293b" stroke-width="16"></circle>
+                            <circle cx="60" cy="60" r="52" fill="none" stroke="#3b82f6" stroke-width="16"
+                                stroke-dasharray="138 188" stroke-dashoffset="0"></circle>
+                            <circle cx="60" cy="60" r="52" fill="none" stroke="#38bdf8" stroke-width="16"
+                                stroke-dasharray="112 214" stroke-dashoffset="-138"></circle>
+                            <circle cx="60" cy="60" r="52" fill="none" stroke="#fbbf24" stroke-width="16"
+                                stroke-dasharray="96 230" stroke-dashoffset="-250"></circle>
+                        </svg>
+                        <div class="d-flex flex-wrap justify-content-center gap-2">
+                            <span class="badge bg-primary">Rock 42%</span>
+                            <span class="badge bg-info">Paper 34%</span>
+                            <span class="badge bg-warning text-dark">Scissors 24%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
