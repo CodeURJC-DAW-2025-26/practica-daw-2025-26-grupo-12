@@ -1,14 +1,13 @@
 package es.codeurjc.grupo12.scissors_please;
 
-import java.util.Map;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class HelloController {
 
-    @GetMapping("/")
-    public String hello() {
-        return "Hello, World!";
-    }
+  @GetMapping("/")
+  public String hello() {
+    return "Hello, World!";
+  }
 }
