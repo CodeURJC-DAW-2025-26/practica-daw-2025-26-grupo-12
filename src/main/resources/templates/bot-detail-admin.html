@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Detail Admin - Scissors, Please</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="/css/custom.css" rel="stylesheet">
+</head>
+
+<body class="d-flex flex-column min-vh-100">
+
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">✂️ Scissors, Please</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarBotDetail">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarBotDetail">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/matches/list">Best Matches</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/admin/panel">Tournaments</a></li>
+                </ul>
+                <div class="d-flex gap-2 mt-3 mt-lg-0">
+                    <span class="badge bg-primary d-inline-flex align-items-center">Admin</span>
+                    <a href="/" class="btn btn-outline-muted btn-sm px-3">Log Out</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+
+        <div class="row mb-5 align-items-end">
+            <div class="col-md-auto">
+                <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white display-4 fw-bold"
+                    style="width: 100px; height: 100px;">A</div>
+            </div>
+            <div class="col">
+                <h1 class="h2 fw-bold mb-1">AlphaBot</h1>
+                <p class="text-secondary mb-1">Owner: <a href="/user/profile"
+                        class="text-decoration-none text-white fw-semibold">Jorge Cimadevilla</a></p>
+                <p class="text-secondary mb-2">Created: Oct 2025</p>
+                <p class="text-secondary mb-0">
+                    Learns opponent tendencies and counters predictable patterns with adaptive weights.
+                </p>
+            </div>
+            <div class="col-md-auto mt-3 mt-md-0 d-flex flex-wrap gap-2"></div>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <div class="col-md-3">
+                <div class="card p-3 stat-card h-100">
+                    <h6 class="text-secondary text-uppercase small fw-bold mb-2">Global Rank</h6>
+                    <div class="d-flex align-items-baseline">
+                        <span class="h2 fw-bold mb-0 text-white">#42</span>
+                        <span class="text-success small ms-2">↑ 3</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card p-3 stat-card h-100">
+                    <h6 class="text-secondary text-uppercase small fw-bold mb-2">ELO Rating</h6>
+                    <div class="d-flex align-items-baseline">
+                        <span class="h2 fw-bold mb-0 text-white">1,824</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card p-3 stat-card h-100">
+                    <h6 class="text-secondary text-uppercase small fw-bold mb-2">Win Rate</h6>
+                    <div class="d-flex align-items-baseline">
+                        <span class="h2 fw-bold mb-0 text-success">68%</span>
+                        <span class="text-secondary small ms-2">524 matches</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card p-3 stat-card h-100">
+                    <h6 class="text-secondary text-uppercase small fw-bold mb-2">Streak</h6>
+                    <div class="d-flex align-items-baseline">
+                        <span class="h2 fw-bold mb-0 text-white">+5</span>
+                        <span class="text-success small ms-2">wins</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <div class="col-lg-6">
+                <div class="card p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3 class="h6 fw-bold mb-0">Results Breakdown</h3>
+                        <span class="badge bg-secondary">Pie Chart</span>
+                    </div>
+                    <div class="bg-secondary-bg border border-secondary rounded p-4 text-center">
+                        <svg viewBox="0 0 120 120" width="160" height="160" class="mb-3">
+                            <circle cx="60" cy="60" r="52" fill="none" stroke="#1e293b" stroke-width="16"></circle>
+                            <circle cx="60" cy="60" r="52" fill="none" stroke="#22c55e" stroke-width="16"
+                                stroke-dasharray="196 130" stroke-dashoffset="0"></circle>
+                            <circle cx="60" cy="60" r="52" fill="none" stroke="#ef4444" stroke-width="16"
+                                stroke-dasharray="98 228" stroke-dashoffset="-196"></circle>
+                            <circle cx="60" cy="60" r="52" fill="none" stroke="#94a3b8" stroke-width="16"
+                                stroke-dasharray="33 293" stroke-dashoffset="-294"></circle>
+                        </svg>
+                        <div class="d-flex flex-wrap justify-content-center gap-2">
+                            <span class="badge bg-success">Win 60%</span>
+                            <span class="badge bg-danger">Loss 30%</span>
+                            <span class="badge bg-secondary">Draw 10%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3 class="h6 fw-bold mb-0">ELO Progression</h3>
+                        <span class="badge bg-secondary">Line Chart</span>
+                    </div>
+                    <div class="bg-secondary-bg border border-secondary rounded p-4 text-center">
+                        <svg viewBox="0 0 280 140" width="100%" height="160" class="mb-3">
+                            <line x1="20" y1="20" x2="20" y2="120" stroke="#334155" stroke-width="1"></line>
+                            <line x1="20" y1="120" x2="260" y2="120" stroke="#334155" stroke-width="1"></line>
+                            <line x1="20" y1="90" x2="260" y2="90" stroke="#1f2937" stroke-width="1"></line>
+                            <line x1="20" y1="60" x2="260" y2="60" stroke="#1f2937" stroke-width="1"></line>
+                            <line x1="20" y1="30" x2="260" y2="30" stroke="#1f2937" stroke-width="1"></line>
+                            <polyline fill="none" stroke="#8b5cf6" stroke-width="3"
+                                points="30,95 70,80 110,85 150,60 190,65 230,45 260,35">
+                                <title>Match 1: 1760 → Match 7: 1824</title>
+                            </polyline>
+                            <circle cx="30" cy="95" r="4" fill="#94a3b8">
+                                <title>Match 1: ELO 1760</title>
+                            </circle>
+                            <circle cx="70" cy="80" r="4" fill="#94a3b8">
+                                <title>Match 2: ELO 1778</title>
+                            </circle>
+                            <circle cx="110" cy="85" r="4" fill="#94a3b8">
+                                <title>Match 3: ELO 1772</title>
+                            </circle>
+                            <circle cx="150" cy="60" r="4" fill="#94a3b8">
+                                <title>Match 4: ELO 1796</title>
+                            </circle>
+                            <circle cx="190" cy="65" r="4" fill="#94a3b8">
+                                <title>Match 5: ELO 1790</title>
+                            </circle>
+                            <circle cx="230" cy="45" r="4" fill="#94a3b8">
+                                <title>Match 6: ELO 1810</title>
+                            </circle>
+                            <circle cx="260" cy="35" r="5" fill="#22c55e">
+                                <title>Match 7: ELO 1824 (Current)</title>
+                            </circle>
+                            <text x="22" y="18" fill="#94a3b8" font-size="9">ELO</text>
+                            <text x="30" y="135" fill="#94a3b8" font-size="9">M1</text>
+                            <text x="70" y="135" fill="#94a3b8" font-size="9">M2</text>
+                            <text x="110" y="135" fill="#94a3b8" font-size="9">M3</text>
+                            <text x="150" y="135" fill="#94a3b8" font-size="9">M4</text>
+                            <text x="190" y="135" fill="#94a3b8" font-size="9">M5</text>
+                            <text x="230" y="135" fill="#94a3b8" font-size="9">M6</text>
+                            <text x="256" y="135" fill="#94a3b8" font-size="9">M7</text>
+                        </svg>
+                        <div class="d-flex flex-wrap justify-content-center gap-2">
+                            <span class="badge bg-secondary">Start 1760</span>
+                            <span class="badge bg-primary">Current 1824</span>
+                            <span class="badge bg-success">Trend +64</span>
+                        </div>
+                        <div class="d-flex flex-wrap justify-content-center gap-3 mt-2 text-secondary small">
+                            <span class="d-inline-flex align-items-center gap-2">
+                                <span class="badge bg-primary"> </span> Line
+                            </span>
+                            <span class="d-inline-flex align-items-center gap-2">
+                                <span class="badge bg-success"> </span> Current
+                            </span>
+                            <span class="d-inline-flex align-items-center gap-2">
+                                <span class="badge bg-secondary"> </span> Past Matches
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 bg-transparent">
+            <div class="card p-4">
+                <h3 class="h5 fw-bold mb-3">Match History</h3>
+                <div class="table-responsive">
+                    <table class="table mb-0 align-middle text-nowrap">
+                        <thead>
+                            <tr class="text-secondary small text-uppercase">
+                                <th scope="col" class="ps-3">Match ID</th>
+                                <th scope="col">Opponent</th>
+                                <th scope="col">Result</th>
+                                <th scope="col">Score</th>
+                                <th scope="col">Date</th>
+                                <th scope="col" class="text-end pe-3">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="ps-3 text-secondary">#4021</td>
+                                <td>BetaMaster</td>
+                                <td><span class="badge badge-soft-success rounded-pill px-3">Win</span></td>
+                                <td class="text-secondary">12 - 8</td>
+                                <td class="text-secondary">2 mins ago</td>
+                                <td class="text-end pe-3">
+                                    <a href="/matches/stats" class="btn btn-outline-muted btn-sm">View</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="ps-3 text-secondary">#4018</td>
+                                <td>Randomizer</td>
+                                <td><span class="badge badge-soft-danger rounded-pill px-3">Loss</span></td>
+                                <td class="text-secondary">9 - 11</td>
+                                <td class="text-secondary">45 mins ago</td>
+                                <td class="text-end pe-3">
+                                    <a href="/matches/stats" class="btn btn-outline-muted btn-sm">View</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="ps-3 text-secondary">#4014</td>
+                                <td>Roshambo_X</td>
+                                <td><span class="badge bg-secondary rounded-pill px-3">Draw</span></td>
+                                <td class="text-secondary">10 - 10</td>
+                                <td class="text-secondary">Yesterday</td>
+                                <td class="text-end pe-3">
+                                    <a href="/matches/stats" class="btn btn-outline-muted btn-sm">View</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
