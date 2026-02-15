@@ -11,16 +11,6 @@ public class MainController {
     return "index";
   }
 
-  @GetMapping("/login")
-  public String login() {
-    return "login";
-  }
-
-  @GetMapping("/sign-up")
-  public String signUp() {
-    return "sign-up";
-  }
-
   @GetMapping("/home")
   public String home() {
     return "home-auth";
