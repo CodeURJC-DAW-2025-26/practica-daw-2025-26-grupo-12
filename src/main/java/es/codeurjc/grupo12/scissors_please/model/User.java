@@ -23,8 +23,11 @@ public class User {
   @Column(unique = true, nullable = false)
   private String email;
 
-  @Column(nullable = false)
+  @Column(nullable = true)
   private String password;
+
+  @Column(name = "oauth_provider")
+  private String oauthProvider;
 
   @ElementCollection(fetch = jakarta.persistence.FetchType.EAGER)
   @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))

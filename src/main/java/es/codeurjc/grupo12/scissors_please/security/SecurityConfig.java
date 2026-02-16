@@ -1,5 +1,6 @@
 package es.codeurjc.grupo12.scissors_please.security;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -10,7 +11,10 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+  private final CustomOAuth2UserService customOAuth2UserService;
 
   @Bean
   PasswordEncoder passwordEncoder() {
@@ -46,6 +50,13 @@ public class SecurityConfig {
                     .defaultSuccessUrl("/home", true)
                     .failureUrl("/login?error")
                     .permitAll())
+        .oauth2Login(
+            oauth2 ->
+                oauth2
+                    .loginPage("/login")
+                    .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                    .defaultSuccessUrl("/home", true)
+                    .failureUrl("/login?error"))
         .logout(logout -> logout.logoutUrl("/logout").logoutSuccessUrl("/").permitAll())
         .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()));
 

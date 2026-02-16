@@ -32,6 +32,7 @@ public class UserService {
     user.setUsername(username);
     user.setEmail(email);
     user.setPassword(passwordEncoder.encode(password));
+    user.setOauthProvider("local");
     user.setRoles(List.of("USER"));
 
     User savedUser = userRepository.save(user);
