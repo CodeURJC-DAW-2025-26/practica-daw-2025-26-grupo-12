@@ -1,15 +1,14 @@
 package es.codeurjc.grupo12.scissors_please.model;
 
-import java.util.List;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.util.List;
 import lombok.Data;
 
-@Table(name="bots")
+@Table(name = "bots")
 @Entity
 @Data
 public class Bot {
@@ -25,5 +24,4 @@ public class Bot {
   private boolean isPublic;
   private int elo;
   private List<String> tags;
-
 }

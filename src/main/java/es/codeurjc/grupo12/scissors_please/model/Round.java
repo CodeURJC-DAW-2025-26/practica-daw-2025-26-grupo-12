@@ -7,7 +7,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
 
-@Table(name="rounds")
+@Table(name = "rounds")
 @Data
 @Entity
 public class Round {
@@ -15,10 +15,9 @@ public class Round {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
-  
+
   private int roundNumber;
   private String bot1Move;
   private String bot2Move;
   private String result;
-
 }

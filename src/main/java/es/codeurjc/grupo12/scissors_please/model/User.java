@@ -8,17 +8,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
-
+import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-
 
 @Entity
 @Table(name = "users")
@@ -47,6 +44,6 @@ public class User {
   @Column(name = "role")
   private List<String> roles = new ArrayList<>();
 
-  @OneToMany(cascade=CascadeType.ALL)
+  @OneToMany(cascade = CascadeType.ALL)
   private List<Bot> bots;
 }
