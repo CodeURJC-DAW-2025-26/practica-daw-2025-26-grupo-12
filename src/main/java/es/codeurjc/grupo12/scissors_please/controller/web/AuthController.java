@@ -18,10 +18,10 @@ public class AuthController {
       @RequestParam(required = false) String success,
       Model model) {
     if (error != null) {
-      model.addAttribute("error", true);
+      model.addAttribute("errorMessage", "Invalid username or password");
     }
     if (success != null) {
-      model.addAttribute("success", true);
+      model.addAttribute("successMessage", "Account created successfully! You can now log in.");
     }
     return "login";
   }
@@ -40,13 +40,13 @@ public class AuthController {
       Model model) {
     try {
       if (!password.equals(confirmPassword)) {
-        model.addAttribute("error", "Passwords do not match");
+        model.addAttribute("errorMessage", "Passwords do not match");
         return "sign-up";
       }
       userService.registerUser(username, email, password);
       return "redirect:/login?success";
     } catch (Exception e) {
-      model.addAttribute("error", e.getMessage());
+      model.addAttribute("errorMessage", e.getMessage());
       return "sign-up";
     }
   }
