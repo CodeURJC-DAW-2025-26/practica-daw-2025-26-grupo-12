@@ -1,0 +1,36 @@
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+        <a class="navbar-brand" href="/">✂️ Scissors, Please</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="/matches/list">Best Matches</a></li>
+                {{#admin}}
+                <li class="nav-item"><a class="nav-link" href="/admin/panel">Tournaments</a></li>
+                {{/admin}}
+                {{^admin}}
+                <li class="nav-item"><a class="nav-link" href="/tournaments/list">Tournaments</a></li>
+                {{/admin}}
+            </ul>
+            <div class="d-flex gap-2 align-items-center">
+                {{#logged}}
+                {{#admin}}
+                <span class="badge bg-primary me-2">Admin</span>
+                {{/admin}}
+                <a href="/user/profile" class="btn btn-outline-muted btn-sm px-3">Profile</a>
+                <form action="/logout" method="post" style="display: inline;">
+                    <input type="hidden" name="_csrf" value="{{_csrf.token}}" />
+                    <button type="submit" class="btn btn-primary btn-sm px-3">Log Out</button>
+                </form>
+                {{/logged}}
+                {{^logged}}
+                <a href="/login" class="btn btn-outline-muted btn-sm px-3">Log In</a>
+                <a href="/sign-up" class="btn btn-primary btn-sm px-3">Sign Up</a>
+                {{/logged}}
+            </div>
+        </div>
+    </div>
+</nav>

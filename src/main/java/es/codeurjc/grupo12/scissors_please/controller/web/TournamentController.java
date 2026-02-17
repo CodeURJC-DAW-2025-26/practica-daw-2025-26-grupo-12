@@ -1,4 +1,4 @@
-package es.codeurjc.grupo12.scissors_please.controller;
+package es.codeurjc.grupo12.scissors_please.controller.web;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
