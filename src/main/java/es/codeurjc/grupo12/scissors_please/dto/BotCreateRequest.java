@@ -16,39 +16,39 @@ public class BotCreateRequest {
   public static final int MAX_TAGS = 10;
   public static final int MAX_TAG_LENGTH = 30;
 
-  @NotBlank(message = "El nombre del bot es obligatorio")
+  @NotBlank(message = "Bot name is required")
   @Size(
       max = MAX_NAME_LENGTH,
-      message = "El nombre no puede superar " + MAX_NAME_LENGTH + " caracteres")
+      message = "Bot name cannot exceed " + MAX_NAME_LENGTH + " characters")
   private String name;
 
   @Size(
       max = MAX_DESCRIPTION_LENGTH,
-      message = "La descripción no puede superar " + MAX_DESCRIPTION_LENGTH + " caracteres")
+      message = "Description cannot exceed " + MAX_DESCRIPTION_LENGTH + " characters")
   private String description;
 
   @Size(
       max = MAX_LANGUAGE_LENGTH,
-      message = "El lenguaje no puede superar " + MAX_LANGUAGE_LENGTH + " caracteres")
+      message = "Language cannot exceed " + MAX_LANGUAGE_LENGTH + " characters")
   private String language;
 
   @Size(
       max = MAX_CODE_LENGTH,
-      message = "El código no puede superar " + MAX_CODE_LENGTH + " caracteres")
+      message = "Code cannot exceed " + MAX_CODE_LENGTH + " characters")
   private String code;
 
   @Size(
       max = MAX_IMAGE_LENGTH,
-      message = "La imagen no puede superar " + MAX_IMAGE_LENGTH + " caracteres")
+      message = "Image cannot exceed " + MAX_IMAGE_LENGTH + " characters")
   private String image;
 
   private boolean isPublic;
 
-  @Size(max = MAX_TAGS, message = "No puedes añadir más de " + MAX_TAGS + " tags")
+  @Size(max = MAX_TAGS, message = "You cannot add more than " + MAX_TAGS + " tags")
   private List<
           @Size(
               max = MAX_TAG_LENGTH,
-              message = "Cada tag debe tener máximo " + MAX_TAG_LENGTH + " caracteres")
+              message = "Each tag must be at most " + MAX_TAG_LENGTH + " characters")
           String>
       tags = new ArrayList<>();
 }

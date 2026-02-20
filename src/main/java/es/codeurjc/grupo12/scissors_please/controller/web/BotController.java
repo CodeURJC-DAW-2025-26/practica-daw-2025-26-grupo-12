@@ -25,9 +25,7 @@ public class BotController {
 
   @GetMapping("/my-bots")
   public String myBotsPage(
-      @RequestParam(required = false) String user,
-      Authentication authentication,
-      Model model) {
+      @RequestParam(required = false) String user, Authentication authentication, Model model) {
     User currentUser = userService.getCurrentUser(authentication);
     User targetUser = resolveTargetUser(user, currentUser);
     boolean showPrivate = canViewPrivate(currentUser, targetUser);
