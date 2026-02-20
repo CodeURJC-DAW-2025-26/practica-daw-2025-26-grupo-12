@@ -4,6 +4,7 @@ import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.repository.BotRepository;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,18 @@ public class BotService {
     }
 
     return new ArrayList<>(botRepository.findByOwnerAndIsPublicTrue(user));
+  }
+
+  @Transactional(readOnly = true)
+  public List<Bot> getTopBotsForUser(User user, boolean includePrivate, int limit) {
+    if (limit <= 0) {
+      return new ArrayList<>();
+    }
+
+    List<Bot> bots = getBotsForUser(user, includePrivate);
+    bots.sort(Comparator.comparingInt(Bot::getElo).reversed());
+    int end = Math.min(limit, bots.size());
+    return new ArrayList<>(bots.subList(0, end));
   }
 
   private List<Bot> sliceByRange(List<Bot> bots, int from, int to) {

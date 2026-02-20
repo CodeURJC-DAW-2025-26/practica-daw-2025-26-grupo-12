@@ -32,14 +32,10 @@ public class BotCreateRequest {
       message = "Language cannot exceed " + MAX_LANGUAGE_LENGTH + " characters")
   private String language;
 
-  @Size(
-      max = MAX_CODE_LENGTH,
-      message = "Code cannot exceed " + MAX_CODE_LENGTH + " characters")
+  @Size(max = MAX_CODE_LENGTH, message = "Code cannot exceed " + MAX_CODE_LENGTH + " characters")
   private String code;
 
-  @Size(
-      max = MAX_IMAGE_LENGTH,
-      message = "Image cannot exceed " + MAX_IMAGE_LENGTH + " characters")
+  @Size(max = MAX_IMAGE_LENGTH, message = "Image cannot exceed " + MAX_IMAGE_LENGTH + " characters")
   private String image;
 
   private boolean isPublic;
