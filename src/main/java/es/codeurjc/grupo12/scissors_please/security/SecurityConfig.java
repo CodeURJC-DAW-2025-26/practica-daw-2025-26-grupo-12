@@ -16,8 +16,10 @@ import org.springframework.security.web.session.HttpSessionEventPublisher;
 @EnableWebSecurity
 public class SecurityConfig {
 
-  @Autowired private CustomOAuth2UserService customOAuth2UserService;
-  @Autowired private LoginFailureHandler loginFailureHandler;
+  @Autowired
+  private CustomOAuth2UserService customOAuth2UserService;
+  @Autowired
+  private LoginFailureHandler loginFailureHandler;
 
   @Bean
   PasswordEncoder passwordEncoder() {
@@ -38,45 +40,41 @@ public class SecurityConfig {
   SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http.csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
         .authorizeHttpRequests(
-            authz ->
-                authz
-                    .requestMatchers(
-                        "/",
-                        "/home",
-                        "/login",
-                        "/sign-up",
-                        "/register",
-                        "/css/**",
-                        "/js/**",
-                        "/images/**",
-                        "/h2-console/**")
-                    .permitAll()
-                    .requestMatchers("/admin/**")
-                    .hasRole("ADMIN")
-                    .requestMatchers("/api/admin/**")
-                    .hasRole("ADMIN")
-                    .anyRequest()
-                    .authenticated())
+            authz -> authz
+                .requestMatchers(
+                    "/",
+                    "/home",
+                    "/login",
+                    "/sign-up",
+                    "/register",
+                    "/css/**",
+                    "/js/**",
+                    "/images/**",
+                    "/h2-console/**")
+                .permitAll()
+                .requestMatchers("/admin/**")
+                .hasRole("ADMIN")
+                .requestMatchers("/api/admin/**")
+                .hasRole("ADMIN")
+                .anyRequest()
+                .authenticated())
         .formLogin(
-            form ->
-                form.loginPage("/login")
-                    .loginProcessingUrl("/login")
-                    .defaultSuccessUrl("/home", true)
-                    .failureHandler(loginFailureHandler)
-                    .permitAll())
+            form -> form.loginPage("/login")
+                .loginProcessingUrl("/login")
+                .defaultSuccessUrl("/home", true)
+                .failureHandler(loginFailureHandler)
+                .permitAll())
         .oauth2Login(
-            oauth2 ->
-                oauth2
-                    .loginPage("/login")
-                    .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
-                    .defaultSuccessUrl("/home", true)
-                    .failureHandler(loginFailureHandler))
+            oauth2 -> oauth2
+                .loginPage("/login")
+                .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                .defaultSuccessUrl("/home", true)
+                .failureHandler(loginFailureHandler))
         .sessionManagement(
-            session ->
-                session
-                    .maximumSessions(-1)
-                    .sessionRegistry(sessionRegistry())
-                    .expiredUrl("/login?blocked"))
+            session -> session
+                .maximumSessions(-1)
+                .sessionRegistry(sessionRegistry())
+                .expiredUrl("/login?blocked"))
         .logout(logout -> logout.logoutUrl("/logout").logoutSuccessUrl("/").permitAll())
         .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()));
 
