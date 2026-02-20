@@ -1,0 +1,31 @@
+{{#bots}}
+<tr class="bot-row">
+    <td class="ps-3">
+        <div class="d-flex align-items-center">
+            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white me-2"
+                style="width: 32px; height: 32px;"></div>
+            <div>
+                <span class="fw-medium d-block">{{name}}</span>
+                {{#tags}}
+                <span class="badge bg-secondary">{{.}}</span>
+                {{/tags}}
+            </div>
+        </div>
+    </td>
+    <td class="text-secondary">{{description}}</td>
+    <td class="text-secondary">{{elo}}</td>
+    <td class="text-end pe-3">
+        <div class="d-flex flex-wrap gap-2 justify-content-end">
+            <a href="/bots/detail" class="btn btn-primary btn-sm">View</a>
+            <a href="/bots/edit" class="btn btn-outline-muted btn-sm">Edit</a>
+        </div>
+    </td>
+</tr>
+{{/bots}}
+{{#showEmpty}}
+<tr>
+    <td class="ps-3" colspan="4">
+        <span class="text-secondary">No bots available.</span>
+    </td>
+</tr>
+{{/showEmpty}}

@@ -22,30 +22,31 @@
             <div class="col-lg-8">
                 <div class="card p-4">
                     <h2 class="h5 fw-bold mb-3">Bot Details</h2>
-                    <form action="#" method="get">
+                    <form id="botCreateForm" method="post" action="/bots/create" novalidate>
+                        <input type="hidden" name="_csrf" value="{{_csrf.token}}">
                         <div class="row g-3">
                             <div class="col-md-7">
                                 <label for="botName" class="form-label text-uppercase small">Bot Name</label>
-                                <input type="text" class="form-control form-control-lg" id="botName" name="botName"
-                                    placeholder="New challenger" required>
+                                <input type="text" class="form-control form-control-lg" id="botName" name="name"
+                                    placeholder="New challenger" required maxlength="60">
                             </div>
                             <div class="col-md-5">
                                 <label for="visibility" class="form-label text-uppercase small">Visibility</label>
-                                <select class="form-select form-control-lg" id="visibility" name="visibility">
-                                    <option selected>Public</option>
-                                    <option>Private</option>
+                                <select class="form-select form-control-lg" id="visibility" name="isPublic" required>
+                                    <option value="true" selected>Public</option>
+                                    <option value="false">Private</option>
                                 </select>
                             </div>
                             <div class="col-12">
                                 <label for="tags" class="form-label text-uppercase small">Tags</label>
                                 <input type="text" class="form-control form-control-lg" id="tags" name="tags"
-                                    placeholder="Add multiple tags separated by commas">
+                                    placeholder="Add multiple tags separated by commas" maxlength="300">
                                 <div class="form-text text-secondary">Example: aggressive, random, counter</div>
                             </div>
                             <div class="col-12">
                                 <label for="description" class="form-label text-uppercase small">Description</label>
                                 <textarea class="form-control form-control-lg" id="description" name="description"
-                                    rows="4" placeholder="Describe your bot strategy."></textarea>
+                                    rows="4" placeholder="Describe your bot strategy." maxlength="500"></textarea>
                             </div>
                             <div class="col-12">
                                 <label for="botImage" class="form-label text-uppercase small">Bot Image</label>
@@ -56,7 +57,7 @@
                                 </div>
                             </div>
                             <div class="col-12 d-flex flex-wrap gap-2 mt-2">
-                                <a href="/bots/edit" class="btn btn-primary">Create and Edit</a>
+                                <button type="submit" class="btn btn-primary">Create and Edit</button>
                                 <button type="reset" class="btn btn-outline-muted">Clear</button>
                             </div>
                         </div>
