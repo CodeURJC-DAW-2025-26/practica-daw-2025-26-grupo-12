@@ -34,72 +34,13 @@
                                     <th scope="col" class="text-end pe-3">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="ps-3">
-                                        <div class="d-flex align-items-center">
-                                            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white me-2"
-                                                style="width: 32px; height: 32px;">A</div>
-                                            <div>
-                                                <span class="fw-medium d-block">AlphaBot</span>
-                                                <span class="badge bg-secondary">pattern</span>
-                                                <span class="badge bg-secondary">adaptive</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="text-secondary">Pattern Matching</td>
-                                    <td class="text-secondary">1824</td>
-                                    <td class="text-end pe-3">
-                                        <div class="d-flex flex-wrap gap-2 justify-content-end">
-                                            <a href="/bots/detail" class="btn btn-primary btn-sm">View</a>
-                                            <a href="/bots/edit" class="btn btn-outline-muted btn-sm">Edit</a>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="ps-3">
-                                        <div class="d-flex align-items-center">
-                                            <div class="rounded-circle bg-info d-flex align-items-center justify-content-center text-white me-2"
-                                                style="width: 32px; height: 32px;">R</div>
-                                            <div>
-                                                <span class="fw-medium d-block">Randomizer</span>
-                                                <span class="badge bg-secondary">random</span>
-                                                <span class="badge bg-secondary">fast</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="text-secondary">Random</td>
-                                    <td class="text-secondary">1650</td>
-                                    <td class="text-end pe-3">
-                                        <div class="d-flex flex-wrap gap-2 justify-content-end">
-                                            <a href="/bots/detail" class="btn btn-primary btn-sm">View</a>
-                                            <a href="/bots/edit" class="btn btn-outline-muted btn-sm">Edit</a>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="ps-3">
-                                        <div class="d-flex align-items-center">
-                                            <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white me-2"
-                                                style="width: 32px; height: 32px;">P</div>
-                                            <div>
-                                                <span class="fw-medium d-block">PaperMaster</span>
-                                                <span class="badge bg-secondary">probability</span>
-                                                <span class="badge bg-secondary">counter</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="text-secondary">Probability</td>
-                                    <td class="text-secondary">1720</td>
-                                    <td class="text-end pe-3">
-                                        <div class="d-flex flex-wrap gap-2 justify-content-end">
-                                            <a href="/bots/detail" class="btn btn-primary btn-sm">View</a>
-                                            <a href="/bots/edit" class="btn btn-outline-muted btn-sm">Edit</a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
+                            <tbody id="bots-body"></tbody>
                         </table>
+                    </div>
+                    <div class="d-flex justify-content-center mt-3">
+                        <button id="bots-load-more" class="btn btn-outline-muted btn-sm" type="button">
+                            Load more
+                        </button>
                     </div>
                 </div>
             </div>
@@ -110,11 +51,11 @@
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             Total bots
-                            <span class="badge bg-primary rounded-pill">3</span>
+                            <span class="badge bg-primary rounded-pill">{{totalBots}}</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             Best ELO
-                            <span class="badge bg-secondary rounded-pill">1824</span>
+                            <span class="badge bg-secondary rounded-pill">{{bestElo}}</span>
                         </li>
                     </ul>
                 </div>
@@ -130,6 +71,58 @@
     </div>
 
     {{> components/scripts}}
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const botsBody = document.getElementById("bots-body");
+            const loadMoreButton = document.getElementById("bots-load-more");
+            const pageSize = 10;
+            let from = 0;
+            const params = new URLSearchParams(window.location.search);
+            const user = params.get("user");
+
+            const buildUrl = (start, end) => {
+                const url = new URL("/bots/my-bots/rows", window.location.origin);
+                url.searchParams.set("from", start);
+                url.searchParams.set("to", end);
+                if (user) {
+                    url.searchParams.set("user", user);
+                }
+                return url.toString();
+            };
+
+            const appendRows = (html) => {
+                const template = document.createElement("template");
+                template.innerHTML = html.trim();
+                const rows = template.content.querySelectorAll("tr");
+                rows.forEach((row) => botsBody.appendChild(row));
+                if (rows.length === 0) {
+                    loadMoreButton.disabled = true;
+                    loadMoreButton.classList.add("d-none");
+                }
+            };
+
+            const loadBots = () => {
+                const nextFrom = from;
+                const nextTo = from + pageSize;
+                loadMoreButton.disabled = true;
+                fetch(buildUrl(nextFrom, nextTo))
+                    .then((response) => response.text())
+                    .then((html) => {
+                        appendRows(html);
+                        from = nextTo;
+                        if (!loadMoreButton.classList.contains("d-none")) {
+                            loadMoreButton.disabled = false;
+                        }
+                    })
+                    .catch(() => {
+                        loadMoreButton.disabled = false;
+                    });
+            };
+
+            loadMoreButton.addEventListener("click", loadBots);
+            loadBots();
+        });
+    </script>
 
     <div class="modal fade" id="importBotModal" tabindex="-1" aria-labelledby="importBotModalLabel"
         aria-hidden="true">

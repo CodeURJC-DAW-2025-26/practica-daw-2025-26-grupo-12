@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -70,5 +72,33 @@ public class UserService {
   @Transactional(readOnly = true)
   public List<User> getAllUsers() {
     return userRepository.findAll();
+  }
+
+  @Transactional(readOnly = true)
+  public User getCurrentUser(Authentication authentication) {
+    if (authentication == null) {
+      throw new IllegalArgumentException("User not authenticated");
+    }
+
+    Optional<User> byUsername = userRepository.findByUsername(authentication.getName());
+    if (byUsername.isPresent()) {
+      return byUsername.get();
+    }
+
+    Object principal = authentication.getPrincipal();
+    if (principal instanceof OAuth2User oauth2User) {
+      Object emailAttribute = oauth2User.getAttributes().get("email");
+      if (emailAttribute != null) {
+        return userRepository
+            .findByEmail(emailAttribute.toString())
+            .orElseThrow(() -> new IllegalArgumentException("User not found with email"));
+      }
+    }
+
+    throw new IllegalArgumentException("User not found for current authentication");
+  }
+
+  public boolean isAdmin(User user) {
+    return user.getRoles() != null && user.getRoles().contains("ADMIN");
   }
 }
