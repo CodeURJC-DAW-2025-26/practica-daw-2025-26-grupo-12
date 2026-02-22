@@ -1,6 +1,5 @@
 package es.codeurjc.grupo12.scissors_please.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -9,16 +8,17 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Table(name = "bots")
 @Entity
-@Getter
-@Setter
+@Data
 public class Bot {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,14 +26,17 @@ public class Bot {
 
   private String name;
   private String description;
-  @JsonIgnore private String code;
+  private String code;
   private String language;
   private String image;
   private boolean isPublic;
   private int elo;
 
-  @Column(name = "owner_id", nullable = false)
-  private Long ownerId;
+  @ManyToOne
+  @JoinColumn(name = "owner_id")
+  private User owner;
+
+  @CreationTimestamp private LocalDateTime createdAt;
 
   @ElementCollection
   @CollectionTable(name = "bot_tags", joinColumns = @JoinColumn(name = "bot_id"))

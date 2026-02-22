@@ -123,8 +123,10 @@ public class BotController {
     return "bot-edit";
   }
 
-  @GetMapping("/detail")
-  public String botDetail() {
+  @GetMapping("/detail/{id}")
+  public String botDetail(@PathVariable Long id, Model model) {
+    Bot bot = botService.getBotById(id);
+    model.addAttribute("bot", bot);
     return "bot-detail";
   }
 
