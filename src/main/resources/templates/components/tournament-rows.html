@@ -1,0 +1,24 @@
+{{#tournaments}}
+<tr class="tournament-row">
+    <td class="ps-3">
+        <div class="fw-medium">{{name}}</div>
+        <div class="text-secondary small">{{summary}}</div>
+    </td>
+    <td>
+        <span class="badge {{badgeClass}}">{{status}}</span>
+    </td>
+    <td class="text-end pe-3">
+        {{#actionDisabled}}
+        <button class="btn btn-outline-muted btn-sm" disabled>{{actionLabel}}</button>
+        {{/actionDisabled}}
+        {{^actionDisabled}}
+        <a href="{{actionHref}}" class="btn btn-outline-muted btn-sm">{{actionLabel}}</a>
+        {{/actionDisabled}}
+    </td>
+</tr>
+{{/tournaments}}
+{{#showEmpty}}
+<tr class="tournament-empty-row">
+    <td class="ps-3 text-secondary" colspan="3">No tournaments available.</td>
+</tr>
+{{/showEmpty}}

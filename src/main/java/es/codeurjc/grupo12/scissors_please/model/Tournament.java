@@ -6,8 +6,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.Data;
 
@@ -22,8 +22,7 @@ public class Tournament {
   private String name;
   private String description;
   private String status;
-
-  @OneToOne private User creator;
+  private LocalDate startDate;
 
   @OneToMany private List<Bot> participants;
 

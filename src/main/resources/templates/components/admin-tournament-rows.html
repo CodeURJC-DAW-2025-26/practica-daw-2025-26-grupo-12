@@ -1,0 +1,22 @@
+{{#tournaments}}
+<tr class="admin-tournament-row">
+    <td class="ps-3">
+        <div class="fw-medium">{{name}}</div>
+        <div class="text-secondary small">{{summary}}</div>
+    </td>
+    <td>
+        <span class="badge {{badgeClass}}">{{status}}</span>
+    </td>
+    <td class="text-end pe-3">
+        <div class="d-flex flex-wrap gap-2 justify-content-end">
+            <a href="/admin/tournament/detail" class="btn btn-outline-muted btn-sm">View</a>
+            <a href="/admin/tournament/edit" class="btn btn-outline-muted btn-sm">Edit</a>
+        </div>
+    </td>
+</tr>
+{{/tournaments}}
+{{#showEmpty}}
+<tr class="admin-tournament-empty-row">
+    <td class="ps-3 text-secondary" colspan="3">No tournaments available.</td>
+</tr>
+{{/showEmpty}}
