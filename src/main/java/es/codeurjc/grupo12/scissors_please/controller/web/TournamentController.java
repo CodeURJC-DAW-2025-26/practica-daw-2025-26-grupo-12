@@ -29,7 +29,8 @@ public class TournamentController {
   public String tournamentListPage(@PageableDefault(size = 5) Pageable pageable, Model model) {
     TournamentService.TournamentPage tournamentPage = tournamentService.getTournamentPage(pageable);
     model.addAttribute("tournaments", tournamentPage.tournaments());
-    model.addAttribute("showEmpty", pageable.getPageNumber() == 0 && tournamentPage.tournaments().isEmpty());
+    model.addAttribute(
+        "showEmpty", pageable.getPageNumber() == 0 && tournamentPage.tournaments().isEmpty());
     model.addAttribute("nextPage", tournamentPage.nextPage());
     model.addAttribute("hasMore", tournamentPage.hasMore());
     model.addAttribute("totalElements", tournamentPage.totalElements());

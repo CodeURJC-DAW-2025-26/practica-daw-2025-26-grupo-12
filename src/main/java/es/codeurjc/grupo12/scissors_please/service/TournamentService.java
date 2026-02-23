@@ -22,7 +22,8 @@ public class TournamentService {
     Pageable safePageable = PageRequest.of(safePage, safeSize);
 
     Page<Tournament> pageResult = tournamentRepository.findAllByOrderByStartDateAsc(safePageable);
-    List<TournamentListItem> tournaments = pageResult.getContent().stream().map(this::toListItem).toList();
+    List<TournamentListItem> tournaments =
+        pageResult.getContent().stream().map(this::toListItem).toList();
     long totalElements = pageResult.getTotalElements();
     int fromItem = tournaments.isEmpty() ? 0 : (safePage * safeSize) + 1;
     int toItem = tournaments.isEmpty() ? 0 : fromItem + tournaments.size() - 1;
