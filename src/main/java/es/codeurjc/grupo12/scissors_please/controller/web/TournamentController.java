@@ -14,13 +14,9 @@ public class TournamentController {
   }
 
   @GetMapping("/detail")
-  public String tournamentDetail() {
+  public String tournamentDetail(org.springframework.ui.Model model) {
+    model.addAttribute("open", true);
     return "tournament-detail";
-  }
-
-  @GetMapping("/detail-open")
-  public String tournamentDetailOpen() {
-    return "tournament-detail-open";
   }
 
   @GetMapping("/create")
