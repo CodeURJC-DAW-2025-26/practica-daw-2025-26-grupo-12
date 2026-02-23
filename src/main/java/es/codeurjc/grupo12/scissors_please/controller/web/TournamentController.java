@@ -13,29 +13,10 @@ public class TournamentController {
     return "tournament-list";
   }
 
-  @GetMapping("/list-auth")
-  public String tournamentListAuth() {
-    return "tournament-list-auth";
-  }
-
   @GetMapping("/detail")
-  public String tournamentDetail() {
+  public String tournamentDetail(org.springframework.ui.Model model) {
+    model.addAttribute("open", true);
     return "tournament-detail";
-  }
-
-  @GetMapping("/detail-auth")
-  public String tournamentDetailAuth() {
-    return "tournament-detail-auth";
-  }
-
-  @GetMapping("/detail-open")
-  public String tournamentDetailOpen() {
-    return "tournament-detail-open";
-  }
-
-  @GetMapping("/detail-open-auth")
-  public String tournamentDetailOpenAuth() {
-    return "tournament-detail-open-auth";
   }
 
   @GetMapping("/create")
@@ -51,10 +32,5 @@ public class TournamentController {
   @GetMapping("/results")
   public String tournamentResults() {
     return "tournament-results";
-  }
-
-  @GetMapping("/results-auth")
-  public String tournamentResultsAuth() {
-    return "tournament-results-auth";
   }
 }
