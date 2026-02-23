@@ -4,7 +4,6 @@
 {{> components/head}}
 
 <body class="d-flex flex-column min-vh-100">
-{{#bot}}
     {{> components/navbar}}
 
     <div class="container py-5">
@@ -15,12 +14,12 @@
                     style="width: 100px; height: 100px;">A</div>
             </div>
             <div class="col">
-                <h1 class="h2 fw-bold mb-1">{{name}}</h1>
+                <h1 class="h2 fw-bold mb-1">{{bot.name}}</h1>
                 <p class="text-secondary mb-1">Owner: <a href="/user/profile"
-                        class="text-decoration-none text-white fw-semibold">{{owner}}</a></p>
-                <p class="text-secondary mb-2">Created: {{createdAt}}</p>
+                        class="text-decoration-none text-white fw-semibold">{{bot.owner.username}}</a></p>
+                <p class="text-secondary mb-2">Created: {{bot.createdAt}}</p>
                 <p class="text-secondary mb-0">
-                    {{description}}
+                    {{bot.description}}
                 </p>
             </div>
             <div class="col-md-auto mt-3 mt-md-0 d-flex flex-wrap gap-2">
@@ -46,7 +45,7 @@
                 <div class="card p-3 stat-card h-100">
                     <h6 class="text-secondary text-uppercase small fw-bold mb-2">ELO Rating</h6>
                     <div class="d-flex align-items-baseline">
-                        <span class="h2 fw-bold mb-0 text-white">{{elo}}</span>
+                        <span class="h2 fw-bold mb-0 text-white">{{bot.elo}}</span>
                     </div>
                 </div>
             </div>
@@ -218,7 +217,6 @@
     </div>
 
     {{> components/scripts}}
-    {{/bot}}
 </body>
 
 </html>

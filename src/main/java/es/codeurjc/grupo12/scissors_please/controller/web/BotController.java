@@ -100,7 +100,6 @@ public class BotController {
     bot.setName(name);
     bot.setDescription(description);
     bot.setLanguage(language);
-    bot.setCode(code);
     bot.setImage(image);
     bot.setPublic(isPublic);
     bot.setTags(parseTags(tags));
@@ -118,9 +117,37 @@ public class BotController {
     return REDIRECT_MY_BOTS;
   }
 
-  @GetMapping("/edit")
-  public String editBot() {
+  @GetMapping("/edit/{id}")
+  public String editBot(@PathVariable Long id, Model model) {
+    Bot bot = botService.getBotById(id);
+    model.addAttribute("bot", bot);
     return "bot-edit";
+  }
+
+  @PostMapping("/edit/{id}")
+  public String editBot(
+      @PathVariable Long id,
+      @RequestParam String botName,
+      @RequestParam(required = false) String description,
+      @RequestParam(required = false) String language,
+      @RequestParam(required = false) String code,
+      @RequestParam(required = false) String image,
+      @RequestParam boolean visibility,
+      @RequestParam(required = false) String tags,
+      Authentication authentication) {
+
+    Bot bot = botService.getBotById(id);
+    bot.setName(botName);
+    bot.setDescription(description != null ? description : "");
+    bot.setLanguage(language != null ? language : "");
+    bot.setCode(code != null ? code : "");
+    bot.setImage(image != null ? image : "");
+    bot.setPublic(visibility);
+    bot.setTags(parseTags(tags));
+
+    botService.updateBot(bot);
+
+    return "redirect:/bots/my-bots";
   }
 
   @GetMapping("/detail/{id}")
