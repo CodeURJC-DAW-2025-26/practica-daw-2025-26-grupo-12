@@ -12,9 +12,4 @@ public class UserController {
   public String userProfile() {
     return "user-detail";
   }
-
-  @GetMapping("/profile-auth")
-  public String userProfileAuth() {
-    return "user-detail-auth";
-  }
 }

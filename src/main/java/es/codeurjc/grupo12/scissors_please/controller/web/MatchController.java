@@ -13,19 +13,9 @@ public class MatchController {
     return "match-list";
   }
 
-  @GetMapping("/list-auth")
-  public String matchListAuth() {
-    return "match-list-auth";
-  }
-
   @GetMapping("/stats")
   public String matchStats() {
     return "match-stats";
-  }
-
-  @GetMapping("/stats-auth")
-  public String matchStatsAuth() {
-    return "match-stats-auth";
   }
 
   @GetMapping("/battle")

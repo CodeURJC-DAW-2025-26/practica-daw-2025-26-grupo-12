@@ -23,7 +23,13 @@
                     Learns opponent tendencies and counters predictable patterns with adaptive weights.
                 </p>
             </div>
-            <div class="col-md-auto mt-3 mt-md-0 d-flex flex-wrap gap-2"></div>
+            <div class="col-md-auto mt-3 mt-md-0 d-flex flex-wrap gap-2">
+                {{#logged}}
+                <button class="btn btn-outline-muted">Export Bot</button>
+                <a href="/bots/edit" class="btn btn-outline-muted">Edit Bot</a>
+                <a href="/matches/search" class="btn btn-primary">Find Match</a>
+                {{/logged}}
+            </div>
         </div>
 
         <div class="row g-4 mb-5">

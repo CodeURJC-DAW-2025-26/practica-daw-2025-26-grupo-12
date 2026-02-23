@@ -10,7 +10,7 @@ public class AdminController {
 
   @GetMapping("/panel")
   public String adminPanel() {
-    return "admin-panel-admin";
+    return "admin-panel";
   }
 
   @GetMapping("/home")
@@ -20,16 +20,16 @@ public class AdminController {
 
   @GetMapping("/tournament/create")
   public String adminTournamentCreate() {
-    return "admin-tournament-create-admin";
+    return "admin-tournament-create";
   }
 
   @GetMapping("/tournament/edit")
   public String adminTournamentEdit() {
-    return "admin-tournament-edit-admin";
+    return "admin-tournament-edit";
   }
 
   @GetMapping("/tournament/detail")
   public String adminTournamentDetail() {
-    return "admin-tournament-detail-admin";
+    return "admin-tournament-detail";
   }
 }
