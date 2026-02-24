@@ -26,15 +26,21 @@ public class MainController {
 
   @GetMapping("/home")
   public String home(Authentication authentication, Model model) {
-    boolean logged = isAuthenticated(authentication);
-    if (logged) {
-      User currentUser = userService.getCurrentUser(authentication);
-      if (!userService.isAdmin(currentUser)) {
-        List<Bot> topBots = botService.getTopBotsForUser(currentUser, true, 3);
-        model.addAttribute("topBots", topBots);
-        model.addAttribute("hasBots", !topBots.isEmpty());
-      }
+    User currentUser = isAuthenticated(authentication) ? userService.getCurrentUser(authentication) : null;
+    HomeMode homeMode = resolveHomeMode(currentUser);
+
+    if (homeMode == HomeMode.USER) {
+      List<Bot> topBots = botService.getTopBotsForUser(currentUser, true, 3);
+      model.addAttribute("topBots", topBots);
+      model.addAttribute("hasBots", !topBots.isEmpty());
     }
+
+    model.addAttribute(
+        "homeMode",
+        new HomeModeView(
+            homeMode == HomeMode.GUEST, homeMode == HomeMode.USER, homeMode == HomeMode.ADMIN));
+    model.addAttribute("logged", homeMode != HomeMode.GUEST);
+    model.addAttribute("admin", homeMode == HomeMode.ADMIN);
     return "home";
   }
 
@@ -43,4 +49,29 @@ public class MainController {
         && authentication.isAuthenticated()
         && !(authentication instanceof AnonymousAuthenticationToken);
   }
+
+  private boolean hasRole(User user, String role) {
+    return user.getRoles() != null && user.getRoles().contains(role);
+  }
+
+  private HomeMode resolveHomeMode(User user) {
+    if (user == null) {
+      return HomeMode.GUEST;
+    }
+    if (hasRole(user, "ADMIN")) {
+      return HomeMode.ADMIN;
+    }
+    if (hasRole(user, "USER")) {
+      return HomeMode.USER;
+    }
+    return HomeMode.GUEST;
+  }
+
+  private enum HomeMode {
+    GUEST,
+    USER,
+    ADMIN
+  }
+
+  public record HomeModeView(boolean guest, boolean user, boolean admin) {}
 }

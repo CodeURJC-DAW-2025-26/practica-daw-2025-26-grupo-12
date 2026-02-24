@@ -7,7 +7,7 @@
 
   {{> components/navbar}}
 
-  {{^logged}}
+  {{#homeMode.guest}}
   <header class="hero-section text-center mb-5">
     <div class="container">
       <div class="row justify-content-center">
@@ -128,10 +128,9 @@
       </main>
     </div>
   </div>
-  {{/logged}}
+  {{/homeMode.guest}}
 
-  {{#logged}}
-  {{#admin}}
+  {{#homeMode.admin}}
   <header class="hero-section text-center mb-5">
     <div class="container">
       <div class="row justify-content-center">
@@ -252,9 +251,9 @@
       </main>
     </div>
   </div>
-  {{/admin}}
+  {{/homeMode.admin}}
 
-  {{^admin}}
+  {{#homeMode.user}}
   <header class="hero-section mb-5">
     <div class="container">
       <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4">
@@ -413,14 +412,12 @@
       </div>
     </div>
   </div>
-  {{/admin}}
-  {{/logged}}
+  {{/homeMode.user}}
 
   {{> components/footer}}
 
   {{> components/scripts}}
-  {{#logged}}
-  {{^admin}}
+  {{#homeMode.user}}
   <script>
     const selectedBotName = document.getElementById('selectedBotName');
     document.querySelectorAll('[data-bot]').forEach((item) => {
@@ -429,8 +426,7 @@
       });
     });
   </script>
-  {{/admin}}
-  {{/logged}}
+  {{/homeMode.user}}
 </body>
 
 </html>
