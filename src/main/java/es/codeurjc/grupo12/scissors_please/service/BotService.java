@@ -87,5 +87,10 @@ public class BotService {
   }
 
   public record BotPage(
-      List<Bot> bots, int nextPage, boolean hasMore, long totalElements, int fromItem, int toItem) {}
+      List<Bot> bots,
+      int nextPage,
+      boolean hasMore,
+      long totalElements,
+      int fromItem,
+      int toItem) {}
 }

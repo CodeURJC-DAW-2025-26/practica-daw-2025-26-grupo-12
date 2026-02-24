@@ -26,8 +26,7 @@ public class Bot {
 
   private String name;
   private String description;
-  @JsonIgnore
-  private String code;
+  @JsonIgnore private String code;
   private String language;
   private String image;
   private boolean isPublic;
