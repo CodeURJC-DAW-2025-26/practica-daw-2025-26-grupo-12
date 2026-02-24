@@ -61,4 +61,13 @@ public class BotService {
     bot.setOwner(owner);
     return botRepository.save(bot);
   }
+
+  public void deleteBot(Long id) {
+    botRepository.deleteById(id);
+  }
+
+  @Transactional(readOnly = true)
+  public java.util.Optional<Bot> getBotById(Long id) {
+    return botRepository.findById(id);
+  }
 }
