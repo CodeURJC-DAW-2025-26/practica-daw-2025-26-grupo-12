@@ -39,11 +39,6 @@ public class AdminController {
     return "components/admin-tournament-page-chunk";
   }
 
-  @GetMapping("/home")
-  public String adminHome() {
-    return "home-admin";
-  }
-
   @GetMapping("/tournament/create")
   public String adminTournamentCreate() {
     return "admin-tournament-create";
