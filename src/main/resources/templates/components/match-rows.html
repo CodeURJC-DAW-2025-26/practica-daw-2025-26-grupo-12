@@ -1,0 +1,30 @@
+{{#matches}}
+<tr class="match-row">
+    <td class="ps-4 text-secondary">#{{id}}</td>
+    <td>
+        <div class="d-flex align-items-center">
+            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white me-2"
+                style="width: 32px; height: 32px;">{{bot1Initial}}</div>
+            <span class="fw-medium">{{bot1Name}}</span>
+        </div>
+    </td>
+    <td>
+        <div class="d-flex align-items-center">
+            <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white me-2"
+                style="width: 32px; height: 32px;">{{bot2Initial}}</div>
+            <span class="text-secondary">{{bot2Name}}</span>
+        </div>
+    </td>
+    <td class="text-secondary">{{topElo}}</td>
+    <td><span class="badge {{resultBadgeClass}} rounded-pill px-3">{{result}}</span></td>
+    <td class="text-secondary">{{date}}</td>
+    <td class="text-end pe-4">
+        <a href="{{actionHref}}" class="btn btn-sm btn-outline-muted">View</a>
+    </td>
+</tr>
+{{/matches}}
+{{#showEmpty}}
+<tr class="match-empty-row">
+    <td class="ps-4 text-secondary" colspan="7">No matches available.</td>
+</tr>
+{{/showEmpty}}
