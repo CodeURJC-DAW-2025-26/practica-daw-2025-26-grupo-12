@@ -10,11 +10,13 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.List;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Table(name = "matches")
 @Entity
-@Data
+@Getter
+@Setter
 public class Match {
 
   @Id

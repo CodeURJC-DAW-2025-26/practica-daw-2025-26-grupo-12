@@ -1,6 +1,6 @@
 package es.codeurjc.grupo12.scissors_please.model;
 
-import jakarta.persistence.CascadeType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -9,17 +9,18 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "users")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
@@ -34,6 +35,7 @@ public class User {
   private String email;
 
   @Column(nullable = true)
+  @JsonIgnore
   private String password;
 
   @Column(name = "oauth_provider")
@@ -43,7 +45,4 @@ public class User {
   @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
   @Column(name = "role")
   private List<String> roles = new ArrayList<>();
-
-  @OneToMany(cascade = CascadeType.ALL)
-  private List<Bot> bots;
 }

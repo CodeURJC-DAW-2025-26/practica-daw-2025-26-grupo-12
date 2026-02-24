@@ -9,10 +9,12 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.util.List;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Table(name = "tournaments")
-@Data
+@Getter
+@Setter
 @Entity
 public class Tournament {
   @Id
