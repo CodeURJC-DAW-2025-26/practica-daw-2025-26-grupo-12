@@ -26,7 +26,8 @@ public class MainController {
 
   @GetMapping("/home")
   public String home(Authentication authentication, Model model) {
-    User currentUser = isAuthenticated(authentication) ? userService.getCurrentUser(authentication) : null;
+    User currentUser =
+        isAuthenticated(authentication) ? userService.getCurrentUser(authentication) : null;
     HomeMode homeMode = resolveHomeMode(currentUser);
 
     if (homeMode == HomeMode.USER) {
