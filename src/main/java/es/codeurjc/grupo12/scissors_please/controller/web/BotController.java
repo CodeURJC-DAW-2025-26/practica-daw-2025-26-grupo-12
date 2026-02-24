@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequiredArgsConstructor
 public class BotController {
 
+  private static final String REDIRECT_MY_BOTS = "redirect:/bots/my-bots";
+
   private final BotService botService;
   private final UserService userService;
 
@@ -74,8 +76,8 @@ public class BotController {
   @GetMapping("/create")
   public String createBot(Authentication authentication) {
     User currentUser = userService.getCurrentUser(authentication);
-    if (userService.isAdmin(currentUser)) {
-      return "redirect:/bots/my-bots";
+    if (isAdmin(currentUser)) {
+      return REDIRECT_MY_BOTS;
     }
     return "bot-create";
   }
@@ -91,8 +93,8 @@ public class BotController {
       @RequestParam(required = false) String tags,
       Authentication authentication) {
     User currentUser = userService.getCurrentUser(authentication);
-    if (userService.isAdmin(currentUser)) {
-      return "redirect:/bots/my-bots";
+    if (isAdmin(currentUser)) {
+      return REDIRECT_MY_BOTS;
     }
     Bot bot = new Bot();
     bot.setName(name);
@@ -103,7 +105,7 @@ public class BotController {
     bot.setPublic(isPublic);
     bot.setTags(parseTags(tags));
     botService.createBot(bot, currentUser);
-    return "redirect:/bots/my-bots";
+    return REDIRECT_MY_BOTS;
   }
 
   @PostMapping("/{id}/delete")
@@ -113,7 +115,7 @@ public class BotController {
     if (canManageBot(currentUser, bot)) {
       botService.deleteBot(id);
     }
-    return "redirect:/bots/my-bots";
+    return REDIRECT_MY_BOTS;
   }
 
   @GetMapping("/edit")
@@ -147,12 +149,15 @@ public class BotController {
   }
 
   private boolean canManageBot(User currentUser, Bot bot) {
-    return userService.isAdmin(currentUser)
+    return isAdmin(currentUser)
         || (bot.getOwnerId() != null && bot.getOwnerId().equals(currentUser.getId()));
   }
 
   private boolean canViewPrivate(User currentUser, User targetUser) {
-    return userService.isAdmin(currentUser)
-        || targetUser.getUsername().equals(currentUser.getUsername());
+    return isAdmin(currentUser) || targetUser.getUsername().equals(currentUser.getUsername());
+  }
+
+  private boolean isAdmin(User user) {
+    return userService.isAdmin(user);
   }
 }
