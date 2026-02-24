@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -50,6 +51,7 @@ public class BotController {
     List<Bot> bots = botService.getBotsWithinRange(targetUser, showPrivate, from, to);
     model.addAttribute("bots", bots);
     model.addAttribute("showEmpty", from == 0 && bots.isEmpty());
+    model.addAttribute("canManage", showPrivate);
     return "components/bot-rows";
   }
 
@@ -81,6 +83,16 @@ public class BotController {
     return "redirect:/bots/my-bots";
   }
 
+  @PostMapping("/{id}/delete")
+  public String deleteBot(@PathVariable Long id, Authentication authentication) {
+    User currentUser = userService.getCurrentUser(authentication);
+    Bot bot = botService.getBotById(id).orElseThrow();
+    if (canManageBot(currentUser, bot)) {
+      botService.deleteBot(id);
+    }
+    return "redirect:/bots/my-bots";
+  }
+
   @GetMapping("/edit")
   public String editBot() {
     return "bot-edit";
@@ -109,6 +121,12 @@ public class BotController {
     return user == null || user.isBlank()
         ? currentUser
         : userService.findByUsername(user).orElse(currentUser);
+  }
+
+  private boolean canManageBot(User currentUser, Bot bot) {
+    return userService.isAdmin(currentUser)
+        || (bot.getOwner() != null
+            && bot.getOwner().getUsername().equals(currentUser.getUsername()));
   }
 
   private boolean canViewPrivate(User currentUser, User targetUser) {
