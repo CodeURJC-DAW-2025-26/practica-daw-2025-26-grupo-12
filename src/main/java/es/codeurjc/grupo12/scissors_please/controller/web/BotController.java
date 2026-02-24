@@ -7,6 +7,8 @@ import es.codeurjc.grupo12.scissors_please.service.UserService;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,7 +28,10 @@ public class BotController {
 
   @GetMapping("/my-bots")
   public String myBotsPage(
-      @RequestParam(required = false) String user, Authentication authentication, Model model) {
+      @RequestParam(required = false) String user,
+      @PageableDefault(size = 5) Pageable pageable,
+      Authentication authentication,
+      Model model) {
     User currentUser = userService.getCurrentUser(authentication);
     User targetUser = resolveTargetUser(user, currentUser);
     boolean showPrivate = canViewPrivate(currentUser, targetUser);
@@ -35,28 +40,43 @@ public class BotController {
     model.addAttribute("totalBots", bots.size());
     model.addAttribute("bestElo", bestElo);
     model.addAttribute("username", targetUser.getUsername());
+    model.addAttribute("size", Math.max(pageable.getPageSize(), 1));
+    model.addAttribute("fromItem", 0);
+    model.addAttribute("toItem", 0);
+    model.addAttribute("totalElements", 0);
+    model.addAttribute(
+        "userQuery",
+        targetUser.getUsername().equals(currentUser.getUsername()) ? "" : targetUser.getUsername());
     return "my-bots";
   }
 
-  @GetMapping("/my-bots/rows")
-  public String myBotsRows(
+  @GetMapping("/my-bots/page")
+  public String myBotsChunk(
       @RequestParam(required = false) String user,
-      @RequestParam(defaultValue = "0") int from,
-      @RequestParam(defaultValue = "10") int to,
+      @PageableDefault(size = 5) Pageable pageable,
       Authentication authentication,
       Model model) {
     User currentUser = userService.getCurrentUser(authentication);
     User targetUser = resolveTargetUser(user, currentUser);
     boolean showPrivate = canViewPrivate(currentUser, targetUser);
-    List<Bot> bots = botService.getBotsWithinRange(targetUser, showPrivate, from, to);
-    model.addAttribute("bots", bots);
-    model.addAttribute("showEmpty", from == 0 && bots.isEmpty());
+    BotService.BotPage botPage = botService.getBotPage(targetUser, showPrivate, pageable);
+    model.addAttribute("bots", botPage.bots());
+    model.addAttribute("showEmpty", pageable.getPageNumber() == 0 && botPage.bots().isEmpty());
     model.addAttribute("canManage", showPrivate);
-    return "components/bot-rows";
+    model.addAttribute("nextPage", botPage.nextPage());
+    model.addAttribute("hasMore", botPage.hasMore());
+    model.addAttribute("totalElements", botPage.totalElements());
+    model.addAttribute("fromItem", botPage.fromItem());
+    model.addAttribute("toItem", botPage.toItem());
+    return "components/bot-page-chunk";
   }
 
   @GetMapping("/create")
-  public String createBot() {
+  public String createBot(Authentication authentication) {
+    User currentUser = userService.getCurrentUser(authentication);
+    if (userService.isAdmin(currentUser)) {
+      return "redirect:/bots/my-bots";
+    }
     return "bot-create";
   }
 
@@ -71,6 +91,9 @@ public class BotController {
       @RequestParam(required = false) String tags,
       Authentication authentication) {
     User currentUser = userService.getCurrentUser(authentication);
+    if (userService.isAdmin(currentUser)) {
+      return "redirect:/bots/my-bots";
+    }
     Bot bot = new Bot();
     bot.setName(name);
     bot.setDescription(description);
@@ -125,8 +148,7 @@ public class BotController {
 
   private boolean canManageBot(User currentUser, Bot bot) {
     return userService.isAdmin(currentUser)
-        || (bot.getOwner() != null
-            && bot.getOwner().getUsername().equals(currentUser.getUsername()));
+        || (bot.getOwnerId() != null && bot.getOwnerId().equals(currentUser.getId()));
   }
 
   private boolean canViewPrivate(User currentUser, User targetUser) {

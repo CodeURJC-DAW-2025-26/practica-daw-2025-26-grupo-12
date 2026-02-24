@@ -24,6 +24,11 @@
         <div class="row g-4">
             <div class="col-lg-8">
                 <div class="card p-4">
+                    <div class="d-flex justify-content-between align-items-center gap-3 mb-3 flex-wrap">
+                        <h2 class="h5 fw-bold mb-0">Bot List</h2>
+                        <span id="bot-counter" class="text-secondary small">Showing {{fromItem}}-{{toItem}} of
+                            {{totalElements}}</span>
+                    </div>
                     <div class="table-responsive">
                         <table class="table mb-0 align-middle text-nowrap">
                             <thead>
@@ -38,8 +43,13 @@
                         </table>
                     </div>
                     <div class="d-flex justify-content-center mt-3">
-                        <button id="bots-load-more" class="btn btn-outline-muted btn-sm" type="button">
-                            Load more
+                        <button id="bots-load-more" class="btn btn-outline-muted btn-sm" type="button"
+                            data-load-more="bots"
+                            data-endpoint="/bots/my-bots/page"
+                            data-user="{{userQuery}}"
+                            data-body-id="bots-body" data-counter-id="bot-counter"
+                            data-meta-class="bot-meta-row" data-size="{{size}}">
+                            Show more
                         </button>
                     </div>
                 </div>
@@ -71,57 +81,9 @@
     </div>
 
     {{> components/scripts}}
+    <script src="/js/paginated-tournaments.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            const botsBody = document.getElementById("bots-body");
-            const loadMoreButton = document.getElementById("bots-load-more");
-            const pageSize = 10;
-            let from = 0;
-            const params = new URLSearchParams(window.location.search);
-            const user = params.get("user");
-
-            const buildUrl = (start, end) => {
-                const url = new URL("/bots/my-bots/rows", window.location.origin);
-                url.searchParams.set("from", start);
-                url.searchParams.set("to", end);
-                if (user) {
-                    url.searchParams.set("user", user);
-                }
-                return url.toString();
-            };
-
-            const appendRows = (html) => {
-                const template = document.createElement("template");
-                template.innerHTML = html.trim();
-                const rows = template.content.querySelectorAll("tr");
-                rows.forEach((row) => botsBody.appendChild(row));
-                if (rows.length === 0) {
-                    loadMoreButton.disabled = true;
-                    loadMoreButton.classList.add("d-none");
-                }
-            };
-
-            const loadBots = () => {
-                const nextFrom = from;
-                const nextTo = from + pageSize;
-                loadMoreButton.disabled = true;
-                fetch(buildUrl(nextFrom, nextTo))
-                    .then((response) => response.text())
-                    .then((html) => {
-                        appendRows(html);
-                        from = nextTo;
-                        if (!loadMoreButton.classList.contains("d-none")) {
-                            loadMoreButton.disabled = false;
-                        }
-                    })
-                    .catch(() => {
-                        loadMoreButton.disabled = false;
-                    });
-            };
-
-            loadMoreButton.addEventListener("click", loadBots);
-            loadBots();
-
             const deleteModal = document.getElementById('deleteBotModal');
             if (deleteModal) {
                 deleteModal.addEventListener('show.bs.modal', (event) => {

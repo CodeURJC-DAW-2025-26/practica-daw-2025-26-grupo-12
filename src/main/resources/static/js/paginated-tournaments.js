@@ -1,6 +1,7 @@
 (() => {
   const initLoadMore = (button) => {
     const endpoint = button.dataset.endpoint;
+    const user = button.dataset.user;
     const bodyId = button.dataset.bodyId;
     const counterId = button.dataset.counterId;
     const metaClass = button.dataset.metaClass;
@@ -52,7 +53,14 @@
       setLoadingState(true);
 
       try {
-        const response = await fetch(`${endpoint}?page=${nextPage}&size=${size}`, {
+        const url = new URL(endpoint, window.location.origin);
+        if (user) {
+          url.searchParams.set("user", user);
+        }
+        url.searchParams.set("page", nextPage);
+        url.searchParams.set("size", size);
+
+        const response = await fetch(url.toString(), {
           headers: { "X-Requested-With": "XMLHttpRequest" },
         });
 
@@ -82,6 +90,6 @@
   };
 
   document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll("[data-load-more='tournaments']").forEach(initLoadMore);
+    document.querySelectorAll("[data-load-more]").forEach(initLoadMore);
   });
 })();
