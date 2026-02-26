@@ -27,7 +27,8 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
       """)
   Page<Match> findBestMatches(Pageable pageable);
 
-  List<Match> findDistinctByBot1OwnerIdOrBot2OwnerIdOrderByTimestampDesc(Long bot1OwnerId, Long bot2OwnerId);
+  List<Match> findDistinctByBot1OwnerIdOrBot2OwnerIdOrderByTimestampDesc(
+      Long bot1OwnerId, Long bot2OwnerId);
 
   List<Match> findAllByOrderByTimestampDesc();
 }

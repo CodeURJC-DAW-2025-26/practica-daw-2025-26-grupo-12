@@ -1,18 +1,17 @@
 package es.codeurjc.grupo12.scissors_please.controller.web;
 
-import es.codeurjc.grupo12.scissors_please.service.TournamentAutomationService;
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.security.ActiveSessionService;
+import es.codeurjc.grupo12.scissors_please.service.TournamentAutomationService;
 import es.codeurjc.grupo12.scissors_please.service.TournamentService;
+import es.codeurjc.grupo12.scissors_please.service.UserService;
+import es.codeurjc.grupo12.scissors_please.service.UserService.UserStatusFilter;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import es.codeurjc.grupo12.scissors_please.service.UserService;
-import es.codeurjc.grupo12.scissors_please.service.UserService.UserStatusFilter;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -20,9 +19,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -198,6 +194,7 @@ public class AdminController {
       case NOT_FOUND -> "redirect:/admin/tournament/detail?runResult=not-found";
     };
   }
+
   private Integer parseMaxPlayers(String value, List<String> errors) {
     if (value.isBlank()) {
       errors.add("Max players is required.");
@@ -251,6 +248,7 @@ public class AdminController {
     model.addAttribute("formatDoubleSelected", "Double Elimination".equals(format));
     model.addAttribute("formatRoundRobinSelected", "Round Robin".equals(format));
   }
+
   @GetMapping("/users")
   public String adminUsers(
       @RequestParam(name = "q", required = false) String query,

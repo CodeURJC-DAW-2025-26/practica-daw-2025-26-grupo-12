@@ -4,15 +4,14 @@ import es.codeurjc.grupo12.scissors_please.model.Tournament;
 import es.codeurjc.grupo12.scissors_please.repository.TournamentRepository;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.Comparator;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -70,7 +69,9 @@ public class TournamentService {
       return List.of();
     }
 
-    return tournamentRepository.findDistinctByParticipantsOwnerIdOrderByStartDateAsc(userId).stream()
+    return tournamentRepository
+        .findDistinctByParticipantsOwnerIdOrderByStartDateAsc(userId)
+        .stream()
         .limit(safeLimit)
         .map(tournament -> toUserTournamentItem(tournament, true))
         .toList();
@@ -175,7 +176,9 @@ public class TournamentService {
     int formatStart = markerIndex + "format:".length();
     int formatEnd = description.indexOf(" - ", formatStart);
     String rawFormat =
-        formatEnd >= 0 ? description.substring(formatStart, formatEnd) : description.substring(formatStart);
+        formatEnd >= 0
+            ? description.substring(formatStart, formatEnd)
+            : description.substring(formatStart);
     String format = rawFormat.trim();
     return format.isBlank() ? "Unknown" : format;
   }
@@ -313,6 +316,7 @@ public class TournamentService {
       boolean selectedAll,
       boolean selectedRegistered,
       boolean selectedNotRegistered) {}
+
   public record AdminTournamentDetail(
       Long id,
       String name,

@@ -13,6 +13,7 @@ public interface TournamentRepository extends JpaRepository<Tournament, Long> {
   List<Tournament> findAllByOrderByStartDateAsc();
 
   List<Tournament> findDistinctByParticipantsOwnerIdOrderByStartDateAsc(Long ownerId);
+
   List<Tournament> findByStatusIgnoreCaseAndStartDateLessThanEqualOrderByStartDateAsc(
       String status, LocalDate startDate);
 }

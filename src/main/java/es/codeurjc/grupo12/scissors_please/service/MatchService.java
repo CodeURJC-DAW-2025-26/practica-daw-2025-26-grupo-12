@@ -55,8 +55,10 @@ public class MatchService {
         .toList();
   }
 
-  public UserRecentMatchSection getUserRecentMatchSection(Long userId, String participationFilterParam) {
-    ParticipationFilter participationFilter = ParticipationFilter.fromParam(participationFilterParam);
+  public UserRecentMatchSection getUserRecentMatchSection(
+      Long userId, String participationFilterParam) {
+    ParticipationFilter participationFilter =
+        ParticipationFilter.fromParam(participationFilterParam);
 
     List<Match> allMatches = matchRepository.findAllByOrderByTimestampDesc();
     Set<Long> playedMatchIds =
@@ -68,7 +70,9 @@ public class MatchService {
 
     List<UserMatchItem> matches =
         allMatches.stream()
-            .filter(match -> matchesParticipationFilter(match.getId(), playedMatchIds, participationFilter))
+            .filter(
+                match ->
+                    matchesParticipationFilter(match.getId(), playedMatchIds, participationFilter))
             .map(match -> toUserMatchItem(match, userId, playedMatchIds.contains(match.getId())))
             .toList();
 
