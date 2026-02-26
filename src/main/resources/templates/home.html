@@ -259,10 +259,14 @@
       <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4">
         <div class="d-flex align-items-center gap-3">
           <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold"
-            style="width: 64px; height: 64px; font-size: 1.5rem;">J</div>
+            style="width: 64px; height: 64px; font-size: 1.5rem;">{{currentUserInitial}}</div>
           <div>
-            <h1 class="h3 fw-bold mb-1">Jorge Cimadevilla</h1>
-            <p class="text-secondary mb-0">Logged in • 3 bots • ELO 1824</p>
+            <h1 class="h3 fw-bold mb-1">{{currentUsername}}</h1>
+            <p class="text-secondary mb-0">
+              Logged in • {{totalBotCount}} bots
+              {{#hasRanking}}• ELO {{currentBestElo}}{{/hasRanking}}
+              {{^hasRanking}}• No ranked bots yet{{/hasRanking}}
+            </p>
           </div>
         </div>
         <div class="d-flex flex-wrap gap-3 align-items-center">
@@ -399,10 +403,15 @@
         <div class="card p-4">
           <h2 class="h5 fw-bold mb-3">My Rankings</h2>
           <p class="text-secondary mb-2">Current placement in the global ladder.</p>
+          {{#hasRanking}}
           <div class="d-flex align-items-center gap-2">
-            <span class="display-6 fw-bold">#18</span>
-            <span class="text-success small">↑ 2</span>
+            <span class="display-6 fw-bold">#{{globalRank}}</span>
+            <span class="text-secondary small">of {{globalRankingTotal}} users</span>
           </div>
+          {{/hasRanking}}
+          {{^hasRanking}}
+          <p class="mb-0 text-secondary">Create and play with at least one bot to get your ranking.</p>
+          {{/hasRanking}}
         </div>
       </div>
     </div>
