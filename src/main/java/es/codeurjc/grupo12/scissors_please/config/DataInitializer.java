@@ -1,12 +1,15 @@
 package es.codeurjc.grupo12.scissors_please.config;
 
 import es.codeurjc.grupo12.scissors_please.model.Bot;
+import es.codeurjc.grupo12.scissors_please.model.Match;
 import es.codeurjc.grupo12.scissors_please.model.Tournament;
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.repository.BotRepository;
+import es.codeurjc.grupo12.scissors_please.repository.MatchRepository;
 import es.codeurjc.grupo12.scissors_please.repository.TournamentRepository;
 import es.codeurjc.grupo12.scissors_please.repository.UserRepository;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -24,6 +27,7 @@ public class DataInitializer {
   public CommandLineRunner initData(
       UserRepository userRepository,
       BotRepository botRepository,
+      MatchRepository matchRepository,
       TournamentRepository tournamentRepository,
       PasswordEncoder passwordEncoder) {
     return args -> {
@@ -102,6 +106,49 @@ public class DataInitializer {
 
         botRepository.saveAll(bots);
         log.info("15 seed bots created");
+      }
+
+      if (matchRepository.count() == 0) {
+        List<Bot> bots = botRepository.findAll();
+        if (bots.size() < 2) {
+          log.warn("Not enough bots found. Skipping seed match generation");
+          return;
+        }
+
+        List<Match> matches = new ArrayList<>();
+        LocalDateTime baseTimestamp = LocalDateTime.now();
+
+        for (int i = 1; i <= 18; i++) {
+          Bot bot1 = bots.get((i - 1) % bots.size());
+          Bot bot2 = bots.get(i % bots.size());
+
+          int bot1Score = (i % 3) + 1;
+          int bot2Score = ((i + 1) % 3) + 1;
+          String result;
+
+          if (i % 5 == 0) {
+            bot1Score = 2;
+            bot2Score = 2;
+            result = "Draw";
+          } else if (bot1Score > bot2Score) {
+            result = "Win";
+          } else {
+            result = "Loss";
+          }
+
+          Match match = new Match();
+          match.setBot1(bot1);
+          match.setBot2(bot2);
+          match.setBot1Score(bot1Score);
+          match.setBot2Score(bot2Score);
+          match.setResult(result);
+          match.setTimestamp(baseTimestamp.minusMinutes(i * 15L));
+          match.setRounds(new ArrayList<>());
+          matches.add(match);
+        }
+
+        matchRepository.saveAll(matches);
+        log.info("18 seed matches created");
       }
     };
   }
