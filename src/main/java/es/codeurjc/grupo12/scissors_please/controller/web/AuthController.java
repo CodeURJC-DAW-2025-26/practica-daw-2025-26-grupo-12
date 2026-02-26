@@ -15,8 +15,13 @@ public class AuthController {
   @GetMapping("/login")
   public String loginPage(
       @RequestParam(required = false) String error,
+      @RequestParam(required = false) String blocked,
       @RequestParam(required = false) String success,
       Model model) {
+    if (blocked != null) {
+      model.addAttribute("errorMessage", "Your account is blocked. Contact an administrator.");
+      return "login";
+    }
     if (error != null) {
       model.addAttribute("errorMessage", "Invalid username or password");
     }

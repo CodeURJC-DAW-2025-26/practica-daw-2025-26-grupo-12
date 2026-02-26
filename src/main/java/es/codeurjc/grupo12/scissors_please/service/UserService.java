@@ -35,6 +35,7 @@ public class UserService {
     user.setEmail(email);
     user.setPassword(passwordEncoder.encode(password));
     user.setOauthProvider("local");
+    user.setBlocked(false);
     user.setRoles(List.of("USER"));
 
     User savedUser = userRepository.save(user);
@@ -75,6 +76,40 @@ public class UserService {
   }
 
   @Transactional(readOnly = true)
+  public List<User> searchUsers(String query) {
+    return searchUsers(query, UserStatusFilter.ALL);
+  }
+
+  @Transactional(readOnly = true)
+  public List<User> searchUsers(String query, UserStatusFilter statusFilter) {
+    UserStatusFilter effectiveStatusFilter =
+        statusFilter == null ? UserStatusFilter.ALL : statusFilter;
+    if (query == null || query.isBlank()) {
+      return switch (effectiveStatusFilter) {
+        case ALL -> userRepository.findTop25ByOrderByUsernameAsc();
+        case BLOCKED -> userRepository.findTop25ByBlockedOrderByUsernameAsc(true);
+        case ACTIVE -> userRepository.findTop25ByBlockedOrderByUsernameAsc(false);
+      };
+    }
+
+    String normalizedQuery = query.trim();
+    return switch (effectiveStatusFilter) {
+      case ALL ->
+          userRepository
+              .findTop25ByUsernameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrderByUsernameAsc(
+                  normalizedQuery, normalizedQuery);
+      case BLOCKED ->
+          userRepository
+              .findTop25ByBlockedAndUsernameContainingIgnoreCaseOrBlockedAndEmailContainingIgnoreCaseOrderByUsernameAsc(
+                  true, normalizedQuery, true, normalizedQuery);
+      case ACTIVE ->
+          userRepository
+              .findTop25ByBlockedAndUsernameContainingIgnoreCaseOrBlockedAndEmailContainingIgnoreCaseOrderByUsernameAsc(
+                  false, normalizedQuery, false, normalizedQuery);
+    };
+  }
+
+  @Transactional(readOnly = true)
   public User getCurrentUser(Authentication authentication) {
     if (authentication == null) {
       throw new IllegalArgumentException("User not authenticated");
@@ -100,5 +135,60 @@ public class UserService {
 
   public boolean isAdmin(User user) {
     return user.getRoles() != null && user.getRoles().contains("ADMIN");
+  }
+
+  public User blockUser(Long userId, User actingAdmin) {
+    return changeBlockedStatus(userId, actingAdmin, true);
+  }
+
+  public User unblockUser(Long userId, User actingAdmin) {
+    return changeBlockedStatus(userId, actingAdmin, false);
+  }
+
+  private User changeBlockedStatus(Long userId, User actingAdmin, boolean blocked) {
+    User targetUser = getUserById(userId);
+    if (targetUser.getId().equals(actingAdmin.getId())) {
+      throw new IllegalArgumentException("You cannot block your own account");
+    }
+    if (isAdmin(targetUser)) {
+      throw new IllegalArgumentException("Admin accounts cannot be blocked");
+    }
+
+    if (targetUser.isBlocked() == blocked) {
+      return targetUser;
+    }
+
+    targetUser.setBlocked(blocked);
+    User updatedUser = userRepository.save(targetUser);
+    log.info("Updated blocked status for user {}: {}", updatedUser.getUsername(), blocked);
+    return updatedUser;
+  }
+
+  public enum UserStatusFilter {
+    ALL("all"),
+    ACTIVE("active"),
+    BLOCKED("blocked");
+
+    private final String value;
+
+    UserStatusFilter(String value) {
+      this.value = value;
+    }
+
+    public static UserStatusFilter fromValue(String rawValue) {
+      if (rawValue == null || rawValue.isBlank()) {
+        return ALL;
+      }
+      for (UserStatusFilter statusFilter : values()) {
+        if (statusFilter.value.equalsIgnoreCase(rawValue.trim())) {
+          return statusFilter;
+        }
+      }
+      return ALL;
+    }
+
+    public String value() {
+      return value;
+    }
   }
 }
