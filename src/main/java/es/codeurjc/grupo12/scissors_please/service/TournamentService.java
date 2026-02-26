@@ -8,6 +8,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.Comparator;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,7 +27,26 @@ public class TournamentService {
   private static final DateTimeFormatter TOURNAMENT_DATE_FORMATTER =
       DateTimeFormatter.ofPattern("MMM dd, yyyy", Locale.ENGLISH);
 
+  private static final Pattern SLOT_PATTERN =
+      Pattern.compile("(\\d+)\\s+slots", Pattern.CASE_INSENSITIVE);
   private final TournamentRepository tournamentRepository;
+
+  public Tournament createTournament(
+      String title,
+      String description,
+      int maxPlayers,
+      LocalDate registrationStart,
+      LocalDate startDate,
+      String format,
+      String prize) {
+    Tournament tournament = new Tournament();
+    tournament.setName(title);
+    tournament.setStartDate(startDate);
+    tournament.setStatus(startDate.isAfter(LocalDate.now()) ? "Upcoming" : "In Progress");
+    tournament.setDescription(
+        buildDescription(description, maxPlayers, registrationStart, format, prize));
+    return tournamentRepository.save(tournament);
+  }
 
   public TournamentPage getTournamentPage(Pageable pageable) {
     int safePage = Math.max(pageable.getPageNumber(), 0);
@@ -186,10 +210,82 @@ public class TournamentService {
             : tournament.getDescription();
 
     return new TournamentListItem(
-        tournament.getName(), summary, label, badgeClass, actionLabel, actionHref, actionDisabled);
+        tournament.getId(),
+        tournament.getName(),
+        summary,
+        label,
+        badgeClass,
+        actionLabel,
+        actionHref,
+        actionDisabled);
+  }
+
+  public AdminTournamentDetail getAdminTournamentDetail(Long id) {
+    Tournament tournament =
+        id == null
+            ? tournamentRepository.findAll().stream()
+                .min(Comparator.comparing(Tournament::getStartDate))
+                .orElseThrow()
+            : tournamentRepository.findById(id).orElseThrow();
+
+    String status = normalizeStatus(tournament.getStatus());
+    int slots = extractSlots(tournament.getDescription());
+    int participants =
+        tournament.getParticipants() == null ? 0 : tournament.getParticipants().size();
+    return new AdminTournamentDetail(
+        tournament.getId(),
+        tournament.getName(),
+        tournament.getDescription(),
+        status,
+        tournament.getStartDate(),
+        slots,
+        participants,
+        "Upcoming".equalsIgnoreCase(status));
+  }
+
+  private String normalizeStatus(String status) {
+    if (status == null || status.isBlank()) {
+      return "Unknown";
+    }
+    return status.trim();
+  }
+
+  private int extractSlots(String description) {
+    if (description == null || description.isBlank()) {
+      return 0;
+    }
+    Matcher matcher = SLOT_PATTERN.matcher(description);
+    if (!matcher.find()) {
+      return 0;
+    }
+    try {
+      return Integer.parseInt(matcher.group(1));
+    } catch (NumberFormatException ex) {
+      return 0;
+    }
+  }
+
+  private String buildDescription(
+      String description,
+      int maxPlayers,
+      LocalDate registrationStart,
+      String format,
+      String prize) {
+    List<String> sections = new ArrayList<>();
+    if (description != null && !description.isBlank()) {
+      sections.add(description);
+    }
+    sections.add("Format: " + format);
+    sections.add("Max players: " + maxPlayers);
+    sections.add("Registration opens: " + registrationStart);
+    if (prize != null && !prize.isBlank()) {
+      sections.add("Prize: " + prize);
+    }
+    return String.join(" - ", sections);
   }
 
   public record TournamentListItem(
+      Long id,
       String name,
       String summary,
       String status,
@@ -217,6 +313,15 @@ public class TournamentService {
       boolean selectedAll,
       boolean selectedRegistered,
       boolean selectedNotRegistered) {}
+  public record AdminTournamentDetail(
+      Long id,
+      String name,
+      String description,
+      String status,
+      LocalDate startDate,
+      int slots,
+      int participants,
+      boolean canRunNow) {}
 
   public record TournamentPage(
       List<TournamentListItem> tournaments,

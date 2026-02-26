@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,9 +47,16 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                   newUser.setUsername(name != null ? name : email.split("@")[0]);
                   newUser.setOauthProvider(provider);
                   newUser.setPassword(null);
+                  newUser.setBlocked(false);
                   newUser.setRoles(List.of("USER"));
                   return userRepository.save(newUser);
                 });
+
+    if (user.isBlocked()) {
+      log.warn("Blocked user attempted OAuth2 login: {}", email);
+      throw new OAuth2AuthenticationException(
+          new OAuth2Error("blocked_user"), "User account is blocked");
+    }
 
     if (user.getOauthProvider() == null || !user.getOauthProvider().equals(provider)) {
       log.info("Updating OAuth provider for user: {} to {}", email, provider);
