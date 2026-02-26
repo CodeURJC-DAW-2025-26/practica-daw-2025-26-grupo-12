@@ -119,7 +119,8 @@ public class UserController {
     if (isOwnProfile(currentUser, targetUser)) {
       return "/bots/my-bots";
     }
-    String encodedUsername = UriUtils.encodeQueryParam(targetUser.getUsername(), StandardCharsets.UTF_8);
+    String encodedUsername =
+        UriUtils.encodeQueryParam(targetUser.getUsername(), StandardCharsets.UTF_8);
     return "/bots/my-bots?user=" + encodedUsername;
   }
 
