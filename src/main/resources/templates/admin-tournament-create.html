@@ -22,41 +22,61 @@
             <div class="col-12">
                 <div class="card p-4">
                     <h2 class="h5 fw-bold mb-3">Tournament Details</h2>
-                    <form action="/admin/panel" method="get">
+                    {{#errorMessages}}
+                    <div class="alert alert-danger px-3 py-2 small mb-3" role="alert">
+                        {{.}}
+                    </div>
+                    {{/errorMessages}}
+                    {{#successMessage}}
+                    <div class="alert alert-success px-3 py-2 small mb-3" role="alert">
+                        {{successMessage}}
+                    </div>
+                    {{/successMessage}}
+                    <form action="/admin/tournament/create" method="post">
+                        <input type="hidden" name="_csrf" value="{{_csrf.token}}">
                         <div class="row g-3">
                             <div class="col-md-7">
                                 <label for="adminTitle" class="form-label text-uppercase small">Title</label>
                                 <input type="text" class="form-control form-control-lg" id="adminTitle"
-                                    name="adminTitle" placeholder="Winter Cup 2026" required>
+                                    name="adminTitle" value="{{adminTitle}}" placeholder="Winter Cup 2026"
+                                    required maxlength="80">
                             </div>
                             <div class="col-md-5">
                                 <label for="adminMaxPlayers" class="form-label text-uppercase small">Max Players</label>
                                 <input type="number" class="form-control form-control-lg" id="adminMaxPlayers"
-                                    name="adminMaxPlayers" placeholder="32" min="4" max="128" required>
+                                    name="adminMaxPlayers" value="{{adminMaxPlayers}}" placeholder="32" min="4"
+                                    max="128" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="adminRegistrationStart" class="form-label text-uppercase small">Registration
                                     Opens</label>
                                 <input type="date" class="form-control form-control-lg" id="adminRegistrationStart"
-                                    name="adminRegistrationStart" required>
+                                    name="adminRegistrationStart" value="{{adminRegistrationStart}}" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="adminStartDate" class="form-label text-uppercase small">Start Date</label>
                                 <input type="date" class="form-control form-control-lg" id="adminStartDate"
-                                    name="adminStartDate" required>
+                                    name="adminStartDate" value="{{adminStartDate}}" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="adminFormat" class="form-label text-uppercase small">Format</label>
                                 <select class="form-select form-control-lg" id="adminFormat" name="adminFormat" required>
-                                    <option selected>Single Elimination</option>
-                                    <option>Double Elimination</option>
-                                    <option>Round Robin</option>
+                                    <option value="Single Elimination"
+                                        {{#formatSingleSelected}}selected{{/formatSingleSelected}}>Single Elimination
+                                    </option>
+                                    <option value="Double Elimination"
+                                        {{#formatDoubleSelected}}selected{{/formatDoubleSelected}}>Double Elimination
+                                    </option>
+                                    <option value="Round Robin"
+                                        {{#formatRoundRobinSelected}}selected{{/formatRoundRobinSelected}}>Round Robin
+                                    </option>
                                 </select>
                             </div>
                             <div class="col-12">
                                 <label for="adminDescription" class="form-label text-uppercase small">Description</label>
                                 <textarea class="form-control form-control-lg" id="adminDescription" name="adminDescription"
-                                    rows="4" placeholder="Explain the rules, prizes, or special conditions."></textarea>
+                                    rows="4" placeholder="Explain the rules, prizes, or special conditions."
+                                    maxlength="500">{{adminDescription}}</textarea>
                             </div>
                             <div class="col-12">
                                 <label for="adminTournamentImage" class="form-label text-uppercase small">Tournament Image</label>
@@ -69,7 +89,7 @@
                             <div class="col-md-6">
                                 <label for="adminPrize" class="form-label text-uppercase small">Prize</label>
                                 <input type="text" class="form-control form-control-lg" id="adminPrize" name="adminPrize"
-                                    placeholder="Optional: Prize or reward">
+                                    value="{{adminPrize}}" placeholder="Optional: Prize or reward" maxlength="120">
                             </div>
                             <div class="col-12 d-flex flex-wrap gap-2 mt-2">
                                 <button type="submit" class="btn btn-primary">Create Tournament</button>

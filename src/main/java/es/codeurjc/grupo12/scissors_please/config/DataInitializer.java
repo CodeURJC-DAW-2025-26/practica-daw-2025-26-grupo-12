@@ -45,6 +45,7 @@ public class DataInitializer {
         adminUser.setUsername("admin");
         adminUser.setEmail("admin@scissors-please.com");
         adminUser.setPassword(passwordEncoder.encode("admin123"));
+        adminUser.setBlocked(false);
         adminUser.setRoles(List.of("ADMIN", "USER"));
         users.add(adminUser);
 
@@ -52,6 +53,7 @@ public class DataInitializer {
         regularUser.setUsername("user");
         regularUser.setEmail("user@scissors-please.com");
         regularUser.setPassword(passwordEncoder.encode("user123"));
+        regularUser.setBlocked(false);
         regularUser.setRoles(List.of("USER"));
         users.add(regularUser);
 

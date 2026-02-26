@@ -1,0 +1,48 @@
+{{#users}}
+<tr>
+    <td class="ps-3 fw-semibold">{{username}}</td>
+    <td>{{email}}</td>
+    <td>{{provider}}</td>
+    <td>
+        {{#blocked}}
+        <span class="badge badge-soft-danger">Blocked</span>
+        {{/blocked}}
+        {{^blocked}}
+        <span class="badge badge-soft-success">Active</span>
+        {{/blocked}}
+    </td>
+    <td class="text-end pe-3">
+        {{#manageable}}
+        {{#blocked}}
+        <button type="button" class="btn btn-outline-muted btn-sm user-lock-toggle-btn" data-bs-toggle="modal"
+            data-bs-target="#toggleUserLockModal" data-user-id="{{id}}" data-user-name="{{username}}"
+            data-user-blocked="{{blocked}}" data-search-query="{{searchQuery}}" data-status-filter="{{statusFilter}}">
+            Unblock
+        </button>
+        {{/blocked}}
+        {{^blocked}}
+        <button type="button" class="btn btn-outline-danger btn-sm user-lock-toggle-btn" data-bs-toggle="modal"
+            data-bs-target="#toggleUserLockModal" data-user-id="{{id}}" data-user-name="{{username}}"
+            data-user-blocked="{{blocked}}" data-search-query="{{searchQuery}}" data-status-filter="{{statusFilter}}">
+            Block
+        </button>
+        {{/blocked}}
+        {{/manageable}}
+        {{^manageable}}
+        <span class="badge bg-secondary">
+            {{#adminRole}}Admin{{/adminRole}}
+            {{^adminRole}}Current user{{/adminRole}}
+        </span>
+        {{/manageable}}
+    </td>
+</tr>
+{{/users}}
+{{^users}}
+<tr>
+    <td class="ps-3 text-secondary" colspan="5">
+        No users found. Try another search term.
+    </td>
+</tr>
+{{/users}}
+<tr class="admin-user-meta-row d-none" data-result-count="{{resultCount}}" data-search-query="{{searchQuery}}"
+    data-status-filter="{{statusFilter}}"></tr>

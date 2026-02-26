@@ -4,6 +4,7 @@ import es.codeurjc.grupo12.scissors_please.model.Tournament;
 import es.codeurjc.grupo12.scissors_please.repository.TournamentRepository;
 import java.time.LocalDate;
 import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,6 +22,23 @@ public class TournamentService {
   private static final Pattern SLOT_PATTERN =
       Pattern.compile("(\\d+)\\s+slots", Pattern.CASE_INSENSITIVE);
   private final TournamentRepository tournamentRepository;
+
+  public Tournament createTournament(
+      String title,
+      String description,
+      int maxPlayers,
+      LocalDate registrationStart,
+      LocalDate startDate,
+      String format,
+      String prize) {
+    Tournament tournament = new Tournament();
+    tournament.setName(title);
+    tournament.setStartDate(startDate);
+    tournament.setStatus(startDate.isAfter(LocalDate.now()) ? "Upcoming" : "In Progress");
+    tournament.setDescription(
+        buildDescription(description, maxPlayers, registrationStart, format, prize));
+    return tournamentRepository.save(tournament);
+  }
 
   public TournamentPage getTournamentPage(Pageable pageable) {
     int safePage = Math.max(pageable.getPageNumber(), 0);
@@ -121,6 +139,25 @@ public class TournamentService {
     } catch (NumberFormatException ex) {
       return 0;
     }
+  }
+
+  private String buildDescription(
+      String description,
+      int maxPlayers,
+      LocalDate registrationStart,
+      String format,
+      String prize) {
+    List<String> sections = new ArrayList<>();
+    if (description != null && !description.isBlank()) {
+      sections.add(description);
+    }
+    sections.add("Format: " + format);
+    sections.add("Max players: " + maxPlayers);
+    sections.add("Registration opens: " + registrationStart);
+    if (prize != null && !prize.isBlank()) {
+      sections.add("Prize: " + prize);
+    }
+    return String.join(" - ", sections);
   }
 
   public record TournamentListItem(

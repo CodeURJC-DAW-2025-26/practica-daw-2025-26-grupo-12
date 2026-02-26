@@ -5,9 +5,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
 
 @Configuration
 @EnableWebSecurity
@@ -15,10 +18,21 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
   private final CustomOAuth2UserService customOAuth2UserService;
+  private final LoginFailureHandler loginFailureHandler;
 
   @Bean
   PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
+  }
+
+  @Bean
+  SessionRegistry sessionRegistry() {
+    return new SessionRegistryImpl();
+  }
+
+  @Bean
+  HttpSessionEventPublisher httpSessionEventPublisher() {
+    return new HttpSessionEventPublisher();
   }
 
   @Bean
@@ -49,7 +63,7 @@ public class SecurityConfig {
                 form.loginPage("/login")
                     .loginProcessingUrl("/login")
                     .defaultSuccessUrl("/home", true)
-                    .failureUrl("/login?error")
+                    .failureHandler(loginFailureHandler)
                     .permitAll())
         .oauth2Login(
             oauth2 ->
@@ -57,7 +71,13 @@ public class SecurityConfig {
                     .loginPage("/login")
                     .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                     .defaultSuccessUrl("/home", true)
-                    .failureUrl("/login?error"))
+                    .failureHandler(loginFailureHandler))
+        .sessionManagement(
+            session ->
+                session
+                    .maximumSessions(-1)
+                    .sessionRegistry(sessionRegistry())
+                    .expiredUrl("/login?blocked"))
         .logout(logout -> logout.logoutUrl("/logout").logoutSuccessUrl("/").permitAll())
         .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()));
 
