@@ -40,6 +40,17 @@ public class MainController {
           matchService.getUserHomeMatches(currentUser.getId(), 3);
       List<TournamentService.UserTournamentItem> myTournaments =
           tournamentService.getUserHomeTournaments(currentUser.getId(), 3);
+      BotService.UserGlobalRanking userGlobalRanking = botService.getUserGlobalRanking(currentUser);
+      List<Bot> allUserBots = botService.getBotsForUser(currentUser, true);
+
+      model.addAttribute("currentUsername", currentUser.getUsername());
+      model.addAttribute("currentUserInitial", resolveInitial(currentUser.getUsername()));
+      model.addAttribute("totalBotCount", allUserBots.size());
+      model.addAttribute("hasRanking", userGlobalRanking.ranked());
+      model.addAttribute("globalRank", userGlobalRanking.rank());
+      model.addAttribute("globalRankingTotal", userGlobalRanking.totalUsers());
+      model.addAttribute("currentBestElo", userGlobalRanking.bestElo());
+
       model.addAttribute("topBots", topBots);
       model.addAttribute("hasBots", !topBots.isEmpty());
       model.addAttribute("recentMatches", recentMatches);
@@ -78,6 +89,13 @@ public class MainController {
       return HomeMode.USER;
     }
     return HomeMode.GUEST;
+  }
+
+  private String resolveInitial(String value) {
+    if (value == null || value.isBlank()) {
+      return "?";
+    }
+    return value.substring(0, 1).toUpperCase();
   }
 
   private enum HomeMode {

@@ -8,26 +8,34 @@
     {{> components/navbar}}
 
     <div class="container py-5">
-        <div class="row mb-5 align-items-center">
+        <div class="row mb-5 align-items-center g-3">
             <div class="col-md-auto text-center">
                 <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white display-4 fw-bold mx-auto"
-                    style="width: 96px; height: 96px;">J</div>
+                    style="width: 96px; height: 96px;">{{profileInitial}}</div>
+                {{#showPhotoActions}}
                 <button class="btn btn-outline-muted btn-sm mt-3" data-bs-toggle="modal"
                     data-bs-target="#profilePhotoModal">Edit Photo</button>
+                {{/showPhotoActions}}
             </div>
             <div class="col">
-                <h1 class="h2 fw-bold mb-1">Jorge Cimadevilla</h1>
-                <p class="text-secondary mb-0">Joined: Sep 2025 • Total Bots: 3</p>
+                <p class="text-secondary mb-1 small text-uppercase">{{profileHeading}}</p>
+                <h1 class="h2 fw-bold mb-1">{{profileName}}</h1>
+                <p class="text-secondary mb-0">{{profileEmail}} • Provider: {{providerLabel}} • Roles: {{rolesLabel}}</p>
+            </div>
+            <div class="col-md-auto d-flex gap-2">
+                {{#showBackToMyProfile}}
+                <a href="{{myProfileHref}}" class="btn btn-outline-muted btn-sm">My Profile</a>
+                {{/showBackToMyProfile}}
+                <a href="{{botsPageHref}}" class="btn btn-primary btn-sm">View Bots</a>
             </div>
         </div>
 
         <div class="row g-4 mb-5">
             <div class="col-md-4">
                 <div class="card p-3 stat-card h-100">
-                    <h6 class="text-secondary text-uppercase small fw-bold mb-2">Global Rank</h6>
+                    <h6 class="text-secondary text-uppercase small fw-bold mb-2">Total Bots</h6>
                     <div class="d-flex align-items-baseline">
-                        <span class="h2 fw-bold mb-0 text-white">#18</span>
-                        <span class="text-success small ms-2">↑ 2</span>
+                        <span class="h2 fw-bold mb-0 text-white">{{totalBots}}</span>
                     </div>
                 </div>
             </div>
@@ -35,7 +43,7 @@
                 <div class="card p-3 stat-card h-100">
                     <h6 class="text-secondary text-uppercase small fw-bold mb-2">Total Matches</h6>
                     <div class="d-flex align-items-baseline">
-                        <span class="h2 fw-bold mb-0 text-white">1,248</span>
+                        <span class="h2 fw-bold mb-0 text-white">{{totalMatches}}</span>
                     </div>
                 </div>
             </div>
@@ -43,7 +51,8 @@
                 <div class="card p-3 stat-card h-100">
                     <h6 class="text-secondary text-uppercase small fw-bold mb-2">Win Rate</h6>
                     <div class="d-flex align-items-baseline">
-                        <span class="h2 fw-bold mb-0 text-success">63%</span>
+                        <span class="h2 fw-bold mb-0 text-success">{{winRate}}%</span>
+                        <span class="text-secondary small ms-2">{{wins}} wins</span>
                     </div>
                 </div>
             </div>
@@ -60,34 +69,30 @@
                                     <th scope="col" class="ps-3">Bot</th>
                                     <th scope="col">Strategy</th>
                                     <th scope="col">ELO</th>
-                                    <th scope="col" class="text-end pe-3">Action</th>
+                                    <th scope="col" class="text-end pe-3">Visibility</th>
                                 </tr>
                             </thead>
                             <tbody>
+                                {{#topBots}}
                                 <tr>
-                                    <td class="ps-3">AlphaBot</td>
-                                    <td class="text-secondary">Pattern</td>
-                                    <td class="text-secondary">1824</td>
+                                    <td class="ps-3">{{name}}</td>
+                                    <td class="text-secondary">{{strategy}}</td>
+                                    <td class="text-secondary">{{elo}}</td>
                                     <td class="text-end pe-3">
-                                        <a href="/bots/detail" class="btn btn-outline-muted btn-sm">View</a>
+                                        {{#publicBot}}
+                                        <span class="badge bg-secondary">Public</span>
+                                        {{/publicBot}}
+                                        {{^publicBot}}
+                                        <span class="badge bg-dark border border-secondary text-secondary">Private</span>
+                                        {{/publicBot}}
                                     </td>
                                 </tr>
+                                {{/topBots}}
+                                {{^topBots}}
                                 <tr>
-                                    <td class="ps-3">PaperMaster</td>
-                                    <td class="text-secondary">Probability</td>
-                                    <td class="text-secondary">1720</td>
-                                    <td class="text-end pe-3">
-                                        <a href="/bots/detail" class="btn btn-outline-muted btn-sm">View</a>
-                                    </td>
+                                    <td class="ps-3 text-secondary" colspan="4">No bots available yet.</td>
                                 </tr>
-                                <tr>
-                                    <td class="ps-3">HiddenBlade</td>
-                                    <td class="text-secondary">Private</td>
-                                    <td class="text-secondary">1688</td>
-                                    <td class="text-end pe-3">
-                                        <button class="btn btn-outline-muted btn-sm" disabled>Private</button>
-                                    </td>
-                                </tr>
+                                {{/topBots}}
                             </tbody>
                         </table>
                     </div>
@@ -95,20 +100,23 @@
             </div>
             <div class="col-lg-5">
                 <div class="card p-4">
-                    <h2 class="h5 fw-bold mb-3">Recent Activity</h2>
+                    <h2 class="h5 fw-bold mb-3">Recent Matches</h2>
                     <ul class="list-group list-group-flush">
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Latest match
-                            <span class="badge bg-secondary rounded-pill">2 mins ago</span>
+                        {{#recentMatches}}
+                        <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
+                            <div>
+                                <div class="fw-semibold">{{myBotName}} vs {{opponentName}}</div>
+                                <small class="text-secondary">Match #{{id}}</small>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge {{resultBadgeClass}} rounded-pill">{{result}}</span>
+                                <div><small class="text-secondary">{{date}}</small></div>
+                            </div>
                         </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Last tournament
-                            <span class="badge bg-secondary rounded-pill">Winter Cup 2026</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Best streak
-                            <span class="badge bg-secondary rounded-pill">7 wins</span>
-                        </li>
+                        {{/recentMatches}}
+                        {{^recentMatches}}
+                        <li class="list-group-item text-secondary">No recent matches.</li>
+                        {{/recentMatches}}
                     </ul>
                 </div>
             </div>
@@ -117,6 +125,7 @@
 
     {{> components/scripts}}
 
+    {{#showPhotoActions}}
     <div class="modal fade" id="profilePhotoModal" tabindex="-1" aria-labelledby="profilePhotoModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -138,6 +147,7 @@
             </div>
         </div>
     </div>
+    {{/showPhotoActions}}
 </body>
 
 </html>

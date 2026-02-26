@@ -5,7 +5,9 @@ import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.repository.BotRepository;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -62,6 +64,31 @@ public class BotService {
     return new ArrayList<>(bots.subList(0, end));
   }
 
+  @Transactional(readOnly = true)
+  public UserGlobalRanking getUserGlobalRanking(User user) {
+    Long ownerId = requireOwnerId(user);
+    List<Bot> allBots = botRepository.findAll();
+    Map<Long, Integer> bestEloByOwner = new HashMap<>();
+
+    for (Bot bot : allBots) {
+      Long botOwnerId = bot.getOwnerId();
+      if (botOwnerId == null) {
+        continue;
+      }
+      bestEloByOwner.merge(botOwnerId, bot.getElo(), Math::max);
+    }
+
+    Integer userBestElo = bestEloByOwner.get(ownerId);
+    if (userBestElo == null) {
+      return new UserGlobalRanking(false, 0, bestEloByOwner.size(), 0);
+    }
+
+    long usersWithHigherElo =
+        bestEloByOwner.values().stream().filter(elo -> elo > userBestElo).count();
+    int rank = (int) usersWithHigherElo + 1;
+    return new UserGlobalRanking(true, rank, bestEloByOwner.size(), userBestElo);
+  }
+
   public Bot createBot(Bot bot, User owner) {
     if (owner.getRoles() != null && owner.getRoles().contains("ADMIN")) {
       throw new IllegalArgumentException("Admin users cannot own bots");
@@ -93,4 +120,6 @@ public class BotService {
       long totalElements,
       int fromItem,
       int toItem) {}
+
+  public record UserGlobalRanking(boolean ranked, int rank, int totalUsers, int bestElo) {}
 }
