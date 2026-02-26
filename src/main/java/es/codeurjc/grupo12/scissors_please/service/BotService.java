@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,24 +17,37 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 public class BotService {
+  private static final int MAX_PAGE_SIZE = 20;
   private final BotRepository botRepository;
 
   @Transactional(readOnly = true)
-  public List<Bot> getBotsWithinRange(User user, boolean includePrivate, int from, int to) {
-    if (includePrivate) {
-      return sliceByRange(botRepository.findByOwner(user), from, to);
-    }
+  public BotPage getBotPage(User user, boolean includePrivate, Pageable pageable) {
+    Long ownerId = requireOwnerId(user);
+    int safePage = Math.max(pageable.getPageNumber(), 0);
+    int safeSize = Math.min(Math.max(pageable.getPageSize(), 1), MAX_PAGE_SIZE);
+    Pageable safePageable = PageRequest.of(safePage, safeSize);
 
-    return sliceByRange(botRepository.findByOwnerAndIsPublicTrue(user), from, to);
+    Page<Bot> pageResult =
+        includePrivate
+            ? botRepository.findByOwnerIdOrderByIdDesc(ownerId, safePageable)
+            : botRepository.findByOwnerIdAndIsPublicTrueOrderByIdDesc(ownerId, safePageable);
+
+    List<Bot> bots = pageResult.getContent();
+    long totalElements = pageResult.getTotalElements();
+    int fromItem = bots.isEmpty() ? 0 : (safePage * safeSize) + 1;
+    int toItem = bots.isEmpty() ? 0 : fromItem + bots.size() - 1;
+
+    return new BotPage(bots, safePage + 1, pageResult.hasNext(), totalElements, fromItem, toItem);
   }
 
   @Transactional(readOnly = true)
   public List<Bot> getBotsForUser(User user, boolean includePrivate) {
+    Long ownerId = requireOwnerId(user);
     if (includePrivate) {
-      return new ArrayList<>(botRepository.findByOwner(user));
+      return new ArrayList<>(botRepository.findByOwnerId(ownerId));
     }
 
-    return new ArrayList<>(botRepository.findByOwnerAndIsPublicTrue(user));
+    return new ArrayList<>(botRepository.findByOwnerIdAndIsPublicTrue(ownerId));
   }
 
   @Transactional(readOnly = true)
@@ -46,19 +62,11 @@ public class BotService {
     return new ArrayList<>(bots.subList(0, end));
   }
 
-  private List<Bot> sliceByRange(List<Bot> bots, int from, int to) {
-    int normalizedFrom = Math.max(0, from);
-    int normalizedTo = Math.max(0, to);
-    if (normalizedFrom >= bots.size() || normalizedFrom >= normalizedTo) {
-      return new ArrayList<>();
-    }
-
-    int end = Math.min(normalizedTo, bots.size());
-    return new ArrayList<>(bots.subList(normalizedFrom, end));
-  }
-
   public Bot createBot(Bot bot, User owner) {
-    bot.setOwner(owner);
+    if (owner.getRoles() != null && owner.getRoles().contains("ADMIN")) {
+      throw new IllegalArgumentException("Admin users cannot own bots");
+    }
+    bot.setOwnerId(requireOwnerId(owner));
     return botRepository.save(bot);
   }
 
@@ -70,4 +78,19 @@ public class BotService {
   public java.util.Optional<Bot> getBotById(Long id) {
     return botRepository.findById(id);
   }
+
+  private Long requireOwnerId(User user) {
+    if (user.getId() == null) {
+      throw new IllegalArgumentException("User ID is required");
+    }
+    return user.getId();
+  }
+
+  public record BotPage(
+      List<Bot> bots,
+      int nextPage,
+      boolean hasMore,
+      long totalElements,
+      int fromItem,
+      int toItem) {}
 }

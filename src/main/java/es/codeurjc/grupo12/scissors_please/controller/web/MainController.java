@@ -6,6 +6,7 @@ import es.codeurjc.grupo12.scissors_please.service.BotService;
 import es.codeurjc.grupo12.scissors_please.service.UserService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,15 +21,58 @@ public class MainController {
 
   @GetMapping("/")
   public String index() {
-    return "index";
+    return "redirect:/home";
   }
 
   @GetMapping("/home")
   public String home(Authentication authentication, Model model) {
-    User currentUser = userService.getCurrentUser(authentication);
-    List<Bot> topBots = botService.getTopBotsForUser(currentUser, true, 3);
-    model.addAttribute("topBots", topBots);
-    model.addAttribute("hasBots", !topBots.isEmpty());
-    return "home-auth";
+    User currentUser =
+        isAuthenticated(authentication) ? userService.getCurrentUser(authentication) : null;
+    HomeMode homeMode = resolveHomeMode(currentUser);
+
+    if (homeMode == HomeMode.USER) {
+      List<Bot> topBots = botService.getTopBotsForUser(currentUser, true, 3);
+      model.addAttribute("topBots", topBots);
+      model.addAttribute("hasBots", !topBots.isEmpty());
+    }
+
+    model.addAttribute(
+        "homeMode",
+        new HomeModeView(
+            homeMode == HomeMode.GUEST, homeMode == HomeMode.USER, homeMode == HomeMode.ADMIN));
+    model.addAttribute("logged", homeMode != HomeMode.GUEST);
+    model.addAttribute("admin", homeMode == HomeMode.ADMIN);
+    return "home";
   }
+
+  private boolean isAuthenticated(Authentication authentication) {
+    return authentication != null
+        && authentication.isAuthenticated()
+        && !(authentication instanceof AnonymousAuthenticationToken);
+  }
+
+  private boolean hasRole(User user, String role) {
+    return user.getRoles() != null && user.getRoles().contains(role);
+  }
+
+  private HomeMode resolveHomeMode(User user) {
+    if (user == null) {
+      return HomeMode.GUEST;
+    }
+    if (hasRole(user, "ADMIN")) {
+      return HomeMode.ADMIN;
+    }
+    if (hasRole(user, "USER")) {
+      return HomeMode.USER;
+    }
+    return HomeMode.GUEST;
+  }
+
+  private enum HomeMode {
+    GUEST,
+    USER,
+    ADMIN
+  }
+
+  public record HomeModeView(boolean guest, boolean user, boolean admin) {}
 }

@@ -29,6 +29,7 @@ public class SecurityConfig {
                 authz
                     .requestMatchers(
                         "/",
+                        "/home",
                         "/login",
                         "/sign-up",
                         "/register",
