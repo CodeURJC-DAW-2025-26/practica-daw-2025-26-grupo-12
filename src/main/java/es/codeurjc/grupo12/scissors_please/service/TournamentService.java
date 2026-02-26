@@ -2,6 +2,8 @@ package es.codeurjc.grupo12.scissors_please.service;
 
 import es.codeurjc.grupo12.scissors_please.model.Tournament;
 import es.codeurjc.grupo12.scissors_please.repository.TournamentRepository;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -15,6 +17,23 @@ public class TournamentService {
 
   private static final int MAX_PAGE_SIZE = 20;
   private final TournamentRepository tournamentRepository;
+
+  public Tournament createTournament(
+      String title,
+      String description,
+      int maxPlayers,
+      LocalDate registrationStart,
+      LocalDate startDate,
+      String format,
+      String prize) {
+    Tournament tournament = new Tournament();
+    tournament.setName(title);
+    tournament.setStartDate(startDate);
+    tournament.setStatus(startDate.isAfter(LocalDate.now()) ? "Upcoming" : "In Progress");
+    tournament.setDescription(
+        buildDescription(description, maxPlayers, registrationStart, format, prize));
+    return tournamentRepository.save(tournament);
+  }
 
   public TournamentPage getTournamentPage(Pageable pageable) {
     int safePage = Math.max(pageable.getPageNumber(), 0);
@@ -63,6 +82,25 @@ public class TournamentService {
 
     return new TournamentListItem(
         tournament.getName(), summary, label, badgeClass, actionLabel, actionHref, actionDisabled);
+  }
+
+  private String buildDescription(
+      String description,
+      int maxPlayers,
+      LocalDate registrationStart,
+      String format,
+      String prize) {
+    List<String> sections = new ArrayList<>();
+    if (description != null && !description.isBlank()) {
+      sections.add(description);
+    }
+    sections.add("Format: " + format);
+    sections.add("Max players: " + maxPlayers);
+    sections.add("Registration opens: " + registrationStart);
+    if (prize != null && !prize.isBlank()) {
+      sections.add("Prize: " + prize);
+    }
+    return String.join(" - ", sections);
   }
 
   public record TournamentListItem(
