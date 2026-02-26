@@ -1,12 +1,15 @@
 package es.codeurjc.grupo12.scissors_please.controller.web;
 
 import es.codeurjc.grupo12.scissors_please.service.TournamentService;
+import es.codeurjc.grupo12.scissors_please.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class TournamentController {
 
   private final TournamentService tournamentService;
+  private final UserService userService;
 
   @GetMapping
   public String tournamentList(@PageableDefault(size = 5) Pageable pageable, Model model) {
@@ -58,5 +62,24 @@ public class TournamentController {
   @GetMapping("/results")
   public String tournamentResults() {
     return "tournament-results";
+  }
+
+  @GetMapping("/my")
+  public String myTournaments(
+      Authentication authentication,
+      @RequestParam(name = "registration", required = false) String registrationFilter,
+      @RequestParam(name = "q", required = false) String search,
+      Model model) {
+    Long userId = userService.getCurrentUser(authentication).getId();
+    TournamentService.UserTournamentSection section =
+        tournamentService.getUserTournamentSection(userId, registrationFilter, search);
+
+    model.addAttribute("tournaments", section.tournaments());
+    model.addAttribute("hasTournaments", !section.tournaments().isEmpty());
+    model.addAttribute("search", section.search());
+    model.addAttribute("selectedAll", section.selectedAll());
+    model.addAttribute("selectedRegistered", section.selectedRegistered());
+    model.addAttribute("selectedNotRegistered", section.selectedNotRegistered());
+    return "my-tournaments-auth";
   }
 }

@@ -7,6 +7,9 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -36,6 +39,110 @@ public class MatchService {
 
     return new MatchPage(
         matches, safePage + 1, pageResult.hasNext(), totalElements, fromItem, toItem);
+  }
+
+  public List<UserMatchItem> getUserHomeMatches(Long userId, int limit) {
+    int safeLimit = Math.max(limit, 0);
+    if (safeLimit == 0) {
+      return List.of();
+    }
+
+    return matchRepository
+        .findDistinctByBot1OwnerIdOrBot2OwnerIdOrderByTimestampDesc(userId, userId)
+        .stream()
+        .limit(safeLimit)
+        .map(match -> toUserMatchItem(match, userId, true))
+        .toList();
+  }
+
+  public UserRecentMatchSection getUserRecentMatchSection(Long userId, String participationFilterParam) {
+    ParticipationFilter participationFilter = ParticipationFilter.fromParam(participationFilterParam);
+
+    List<Match> allMatches = matchRepository.findAllByOrderByTimestampDesc();
+    Set<Long> playedMatchIds =
+        matchRepository
+            .findDistinctByBot1OwnerIdOrBot2OwnerIdOrderByTimestampDesc(userId, userId)
+            .stream()
+            .map(Match::getId)
+            .collect(Collectors.toSet());
+
+    List<UserMatchItem> matches =
+        allMatches.stream()
+            .filter(match -> matchesParticipationFilter(match.getId(), playedMatchIds, participationFilter))
+            .map(match -> toUserMatchItem(match, userId, playedMatchIds.contains(match.getId())))
+            .toList();
+
+    return new UserRecentMatchSection(
+        matches,
+        participationFilter == ParticipationFilter.ALL,
+        participationFilter == ParticipationFilter.PLAYED,
+        participationFilter == ParticipationFilter.NOT_PLAYED);
+  }
+
+  private boolean matchesParticipationFilter(
+      Long matchId, Set<Long> playedMatchIds, ParticipationFilter participationFilter) {
+    boolean played = playedMatchIds.contains(matchId);
+    if (participationFilter == ParticipationFilter.PLAYED) {
+      return played;
+    }
+    if (participationFilter == ParticipationFilter.NOT_PLAYED) {
+      return !played;
+    }
+    return true;
+  }
+
+  private UserMatchItem toUserMatchItem(Match match, Long userId, boolean played) {
+    Bot bot1 = match.getBot1();
+    Bot bot2 = match.getBot2();
+
+    String myBotName = "-";
+    String opponentName = resolveBotName(bot1) + " vs " + resolveBotName(bot2);
+    String result = resolveResult(match);
+
+    if (played) {
+      boolean bot1Owned = isOwnedByUser(bot1, userId);
+      boolean bot2Owned = isOwnedByUser(bot2, userId);
+      if (bot1Owned && !bot2Owned) {
+        myBotName = resolveBotName(bot1);
+        opponentName = resolveBotName(bot2);
+        result = resolveResultFromScores(match.getBot1Score(), match.getBot2Score());
+      } else if (!bot1Owned && bot2Owned) {
+        myBotName = resolveBotName(bot2);
+        opponentName = resolveBotName(bot1);
+        result = resolveResultFromScores(match.getBot2Score(), match.getBot1Score());
+      } else if (bot1Owned) {
+        myBotName = resolveBotName(bot1);
+        opponentName = resolveBotName(bot2);
+        result = resolveResult(match);
+      }
+    }
+
+    String participationLabel = played ? "Played" : "Not Played";
+    String participationBadgeClass =
+        played ? "bg-secondary" : "bg-dark border border-secondary text-secondary";
+
+    return new UserMatchItem(
+        match.getId(),
+        myBotName,
+        opponentName,
+        result,
+        resolveBadgeClass(result),
+        formatDate(match.getTimestamp()),
+        played,
+        participationLabel,
+        participationBadgeClass,
+        "/matches/stats");
+  }
+
+  private boolean isOwnedByUser(Bot bot, Long userId) {
+    return bot != null && bot.getOwnerId() != null && bot.getOwnerId().equals(userId);
+  }
+
+  private String resolveResultFromScores(int myScore, int opponentScore) {
+    if (myScore == opponentScore) {
+      return "Draw";
+    }
+    return myScore > opponentScore ? "Win" : "Loss";
   }
 
   private MatchListItem toListItem(Match match) {
@@ -89,7 +196,7 @@ public class MatchService {
   }
 
   private String resolveBadgeClass(String result) {
-    String normalized = result == null ? "" : result.toLowerCase();
+    String normalized = result == null ? "" : result.toLowerCase(Locale.ROOT);
     if (normalized.contains("draw") || normalized.contains("tie")) {
       return "bg-secondary";
     }
@@ -149,4 +256,43 @@ public class MatchService {
       long totalElements,
       int fromItem,
       int toItem) {}
+
+  public record UserMatchItem(
+      Long id,
+      String myBotName,
+      String opponentName,
+      String result,
+      String resultBadgeClass,
+      String date,
+      boolean played,
+      String participationLabel,
+      String participationBadgeClass,
+      String actionHref) {}
+
+  public record UserRecentMatchSection(
+      List<UserMatchItem> matches,
+      boolean selectedAll,
+      boolean selectedPlayed,
+      boolean selectedNotPlayed) {}
+
+  private enum ParticipationFilter {
+    ALL,
+    PLAYED,
+    NOT_PLAYED;
+
+    static ParticipationFilter fromParam(String value) {
+      if (value == null) {
+        return ALL;
+      }
+
+      String normalizedValue = value.trim().toLowerCase(Locale.ROOT);
+      if ("played".equals(normalizedValue)) {
+        return PLAYED;
+      }
+      if ("not-played".equals(normalizedValue) || "not_played".equals(normalizedValue)) {
+        return NOT_PLAYED;
+      }
+      return ALL;
+    }
+  }
 }

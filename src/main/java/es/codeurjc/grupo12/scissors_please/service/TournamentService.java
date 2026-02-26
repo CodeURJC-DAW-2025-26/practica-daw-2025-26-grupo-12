@@ -2,7 +2,12 @@ package es.codeurjc.grupo12.scissors_please.service;
 
 import es.codeurjc.grupo12.scissors_please.model.Tournament;
 import es.codeurjc.grupo12.scissors_please.repository.TournamentRepository;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,6 +19,9 @@ import org.springframework.stereotype.Service;
 public class TournamentService {
 
   private static final int MAX_PAGE_SIZE = 20;
+  private static final DateTimeFormatter TOURNAMENT_DATE_FORMATTER =
+      DateTimeFormatter.ofPattern("MMM dd, yyyy", Locale.ENGLISH);
+
   private final TournamentRepository tournamentRepository;
 
   public TournamentPage getTournamentPage(Pageable pageable) {
@@ -30,6 +38,122 @@ public class TournamentService {
 
     return new TournamentPage(
         tournaments, safePage + 1, pageResult.hasNext(), totalElements, fromItem, toItem);
+  }
+
+  public List<UserTournamentItem> getUserHomeTournaments(Long userId, int limit) {
+    int safeLimit = Math.max(limit, 0);
+    if (safeLimit == 0) {
+      return List.of();
+    }
+
+    return tournamentRepository.findDistinctByParticipantsOwnerIdOrderByStartDateAsc(userId).stream()
+        .limit(safeLimit)
+        .map(tournament -> toUserTournamentItem(tournament, true))
+        .toList();
+  }
+
+  public UserTournamentSection getUserTournamentSection(
+      Long userId, String registrationFilterParam, String query) {
+    RegistrationFilter registrationFilter = RegistrationFilter.fromParam(registrationFilterParam);
+    String normalizedQuery = normalizeQuery(query);
+
+    List<Tournament> allTournaments = tournamentRepository.findAllByOrderByStartDateAsc();
+    Set<Long> registeredTournamentIds =
+        tournamentRepository.findDistinctByParticipantsOwnerIdOrderByStartDateAsc(userId).stream()
+            .map(Tournament::getId)
+            .collect(Collectors.toSet());
+
+    List<UserTournamentItem> tournaments =
+        allTournaments.stream()
+            .filter(
+                tournament ->
+                    matchesRegistrationFilter(
+                        tournament.getId(), registeredTournamentIds, registrationFilter))
+            .filter(tournament -> matchesQuery(tournament, normalizedQuery))
+            .map(
+                tournament ->
+                    toUserTournamentItem(
+                        tournament, registeredTournamentIds.contains(tournament.getId())))
+            .toList();
+
+    String search = query == null ? "" : query.trim();
+    return new UserTournamentSection(
+        tournaments,
+        search,
+        registrationFilter == RegistrationFilter.ALL,
+        registrationFilter == RegistrationFilter.REGISTERED,
+        registrationFilter == RegistrationFilter.NOT_REGISTERED);
+  }
+
+  private boolean matchesRegistrationFilter(
+      Long tournamentId, Set<Long> registeredTournamentIds, RegistrationFilter registrationFilter) {
+    boolean isRegistered = registeredTournamentIds.contains(tournamentId);
+    if (registrationFilter == RegistrationFilter.REGISTERED) {
+      return isRegistered;
+    }
+    if (registrationFilter == RegistrationFilter.NOT_REGISTERED) {
+      return !isRegistered;
+    }
+    return true;
+  }
+
+  private boolean matchesQuery(Tournament tournament, String normalizedQuery) {
+    if (normalizedQuery.isBlank()) {
+      return true;
+    }
+    String tournamentName = tournament.getName() == null ? "" : tournament.getName().toLowerCase();
+    return tournamentName.contains(normalizedQuery);
+  }
+
+  private String normalizeQuery(String query) {
+    return query == null ? "" : query.trim().toLowerCase();
+  }
+
+  private UserTournamentItem toUserTournamentItem(Tournament tournament, boolean isRegistered) {
+    TournamentListItem listItem = toListItem(tournament);
+
+    String registrationLabel = isRegistered ? "Registered" : "Not Registered";
+    String registrationBadgeClass =
+        isRegistered ? "bg-secondary" : "bg-dark border border-secondary text-secondary";
+
+    return new UserTournamentItem(
+        listItem.name(),
+        formatDate(tournament.getStartDate()),
+        extractFormat(tournament.getDescription()),
+        listItem.status(),
+        listItem.badgeClass(),
+        listItem.actionLabel(),
+        listItem.actionHref(),
+        listItem.actionDisabled(),
+        isRegistered,
+        registrationLabel,
+        registrationBadgeClass);
+  }
+
+  private String formatDate(LocalDate startDate) {
+    if (startDate == null) {
+      return "Unknown";
+    }
+    return startDate.format(TOURNAMENT_DATE_FORMATTER);
+  }
+
+  private String extractFormat(String description) {
+    if (description == null || description.isBlank()) {
+      return "Unknown";
+    }
+
+    String descriptionLower = description.toLowerCase();
+    int markerIndex = descriptionLower.indexOf("format:");
+    if (markerIndex < 0) {
+      return "Unknown";
+    }
+
+    int formatStart = markerIndex + "format:".length();
+    int formatEnd = description.indexOf(" - ", formatStart);
+    String rawFormat =
+        formatEnd >= 0 ? description.substring(formatStart, formatEnd) : description.substring(formatStart);
+    String format = rawFormat.trim();
+    return format.isBlank() ? "Unknown" : format;
   }
 
   private TournamentListItem toListItem(Tournament tournament) {
@@ -74,6 +198,26 @@ public class TournamentService {
       String actionHref,
       boolean actionDisabled) {}
 
+  public record UserTournamentItem(
+      String name,
+      String date,
+      String format,
+      String status,
+      String statusBadgeClass,
+      String actionLabel,
+      String actionHref,
+      boolean actionDisabled,
+      boolean registered,
+      String registrationLabel,
+      String registrationBadgeClass) {}
+
+  public record UserTournamentSection(
+      List<UserTournamentItem> tournaments,
+      String search,
+      boolean selectedAll,
+      boolean selectedRegistered,
+      boolean selectedNotRegistered) {}
+
   public record TournamentPage(
       List<TournamentListItem> tournaments,
       int nextPage,
@@ -81,4 +225,25 @@ public class TournamentService {
       long totalElements,
       int fromItem,
       int toItem) {}
+
+  private enum RegistrationFilter {
+    ALL,
+    REGISTERED,
+    NOT_REGISTERED;
+
+    static RegistrationFilter fromParam(String value) {
+      if (value == null) {
+        return ALL;
+      }
+
+      String normalizedValue = value.trim().toLowerCase();
+      if ("registered".equals(normalizedValue)) {
+        return REGISTERED;
+      }
+      if ("not-registered".equals(normalizedValue) || "not_registered".equals(normalizedValue)) {
+        return NOT_REGISTERED;
+      }
+      return ALL;
+    }
+  }
 }

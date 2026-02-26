@@ -3,6 +3,8 @@ package es.codeurjc.grupo12.scissors_please.controller.web;
 import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.service.BotService;
+import es.codeurjc.grupo12.scissors_please.service.MatchService;
+import es.codeurjc.grupo12.scissors_please.service.TournamentService;
 import es.codeurjc.grupo12.scissors_please.service.UserService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class MainController {
 
   private final BotService botService;
+  private final MatchService matchService;
+  private final TournamentService tournamentService;
   private final UserService userService;
 
   @GetMapping("/")
@@ -32,8 +36,16 @@ public class MainController {
 
     if (homeMode == HomeMode.USER) {
       List<Bot> topBots = botService.getTopBotsForUser(currentUser, true, 3);
+      List<MatchService.UserMatchItem> recentMatches =
+          matchService.getUserHomeMatches(currentUser.getId(), 3);
+      List<TournamentService.UserTournamentItem> myTournaments =
+          tournamentService.getUserHomeTournaments(currentUser.getId(), 3);
       model.addAttribute("topBots", topBots);
       model.addAttribute("hasBots", !topBots.isEmpty());
+      model.addAttribute("recentMatches", recentMatches);
+      model.addAttribute("hasRecentMatches", !recentMatches.isEmpty());
+      model.addAttribute("myTournaments", myTournaments);
+      model.addAttribute("hasMyTournaments", !myTournaments.isEmpty());
     }
 
     model.addAttribute(

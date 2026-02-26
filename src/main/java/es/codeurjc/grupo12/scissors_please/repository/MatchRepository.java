@@ -1,6 +1,7 @@
 package es.codeurjc.grupo12.scissors_please.repository;
 
 import es.codeurjc.grupo12.scissors_please.model.Match;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,4 +26,8 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
         m.id desc
       """)
   Page<Match> findBestMatches(Pageable pageable);
+
+  List<Match> findDistinctByBot1OwnerIdOrBot2OwnerIdOrderByTimestampDesc(Long bot1OwnerId, Long bot2OwnerId);
+
+  List<Match> findAllByOrderByTimestampDesc();
 }
