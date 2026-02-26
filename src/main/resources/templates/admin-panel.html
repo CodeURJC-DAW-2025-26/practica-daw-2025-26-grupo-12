@@ -13,7 +13,17 @@
                 <p class="text-secondary mb-1 small text-uppercase">Administration</p>
                 <h1 class="h3 fw-bold mb-0">Tournament Admin</h1>
             </div>
+            <form action="/admin/tournaments/process-due" method="post" class="d-flex">
+                <input type="hidden" name="_csrf" value="{{_csrf.token}}" />
+                <button type="submit" class="btn btn-outline-muted btn-sm">Run Daily Job Now</button>
+            </form>
         </div>
+
+        {{#successMessage}}
+        <div class="alert alert-success px-3 py-2 small mb-4" role="alert">
+            {{successMessage}}
+        </div>
+        {{/successMessage}}
 
         <div class="row g-4">
             <div class="col-12">

@@ -1,5 +1,6 @@
 package es.codeurjc.grupo12.scissors_please.controller.web;
 
+import es.codeurjc.grupo12.scissors_please.service.TournamentAutomationService;
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.security.ActiveSessionService;
 import es.codeurjc.grupo12.scissors_please.service.TournamentService;
@@ -43,15 +44,26 @@ public class AdminController {
       Set.of("Single Elimination", "Double Elimination", "Round Robin");
 
   private final TournamentService tournamentService;
+  private final TournamentAutomationService tournamentAutomationService;
   private final UserService userService;
   private final ActiveSessionService activeSessionService;
 
   @GetMapping("/panel")
-  public String adminPanel(@PageableDefault(size = 5) Pageable pageable, Model model) {
+  public String adminPanel(
+      @PageableDefault(size = 5) Pageable pageable,
+      @RequestParam(required = false) Integer processed,
+      Model model) {
     model.addAttribute("size", Math.max(pageable.getPageSize(), 1));
     model.addAttribute("fromItem", 0);
     model.addAttribute("toItem", 0);
     model.addAttribute("totalElements", 0);
+    if (processed != null) {
+      if (processed > 0) {
+        model.addAttribute("successMessage", "Processed " + processed + " tournament(s).");
+      } else {
+        model.addAttribute("successMessage", "No upcoming tournaments to process.");
+      }
+    }
     return "admin-panel";
   }
 
@@ -148,10 +160,44 @@ public class AdminController {
   }
 
   @GetMapping("/tournament/detail")
-  public String adminTournamentDetail() {
+  public String adminTournamentDetail(
+      @RequestParam(required = false) Long id,
+      @RequestParam(required = false) String runResult,
+      Model model) {
+    TournamentService.AdminTournamentDetail tournament =
+        tournamentService.getAdminTournamentDetail(id);
+    model.addAttribute("tournament", tournament);
+    if (runResult != null) {
+      switch (runResult) {
+        case "executed" ->
+            model.addAttribute("successMessage", "Tournament executed successfully.");
+        case "not-upcoming" ->
+            model.addAttribute("errorMessage", "Only upcoming tournaments can be executed now.");
+        case "not-found" -> model.addAttribute("errorMessage", "Tournament not found.");
+        default -> {
+          // no-op
+        }
+      }
+    }
     return "admin-tournament-detail";
   }
 
+  @PostMapping("/tournaments/process-due")
+  public String processDueTournamentsManually() {
+    int processed = tournamentAutomationService.processDueUpcomingTournamentsNow();
+    return "redirect:/admin/panel?processed=" + processed;
+  }
+
+  @PostMapping("/tournament/{id}/run-now")
+  public String runTournamentNow(@org.springframework.web.bind.annotation.PathVariable Long id) {
+    TournamentAutomationService.RunNowResult result =
+        tournamentAutomationService.runTournamentNow(id);
+    return switch (result) {
+      case EXECUTED -> "redirect:/admin/tournament/detail?id=" + id + "&runResult=executed";
+      case NOT_UPCOMING -> "redirect:/admin/tournament/detail?id=" + id + "&runResult=not-upcoming";
+      case NOT_FOUND -> "redirect:/admin/tournament/detail?runResult=not-found";
+    };
+  }
   private Integer parseMaxPlayers(String value, List<String> errors) {
     if (value.isBlank()) {
       errors.add("Max players is required.");

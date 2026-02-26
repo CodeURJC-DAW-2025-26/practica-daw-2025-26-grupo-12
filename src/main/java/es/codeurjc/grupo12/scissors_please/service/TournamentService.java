@@ -3,8 +3,11 @@ package es.codeurjc.grupo12.scissors_please.service;
 import es.codeurjc.grupo12.scissors_please.model.Tournament;
 import es.codeurjc.grupo12.scissors_please.repository.TournamentRepository;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,6 +19,8 @@ import org.springframework.stereotype.Service;
 public class TournamentService {
 
   private static final int MAX_PAGE_SIZE = 20;
+  private static final Pattern SLOT_PATTERN =
+      Pattern.compile("(\\d+)\\s+slots", Pattern.CASE_INSENSITIVE);
   private final TournamentRepository tournamentRepository;
 
   public Tournament createTournament(
@@ -81,7 +86,59 @@ public class TournamentService {
             : tournament.getDescription();
 
     return new TournamentListItem(
-        tournament.getName(), summary, label, badgeClass, actionLabel, actionHref, actionDisabled);
+        tournament.getId(),
+        tournament.getName(),
+        summary,
+        label,
+        badgeClass,
+        actionLabel,
+        actionHref,
+        actionDisabled);
+  }
+
+  public AdminTournamentDetail getAdminTournamentDetail(Long id) {
+    Tournament tournament =
+        id == null
+            ? tournamentRepository.findAll().stream()
+                .min(Comparator.comparing(Tournament::getStartDate))
+                .orElseThrow()
+            : tournamentRepository.findById(id).orElseThrow();
+
+    String status = normalizeStatus(tournament.getStatus());
+    int slots = extractSlots(tournament.getDescription());
+    int participants =
+        tournament.getParticipants() == null ? 0 : tournament.getParticipants().size();
+    return new AdminTournamentDetail(
+        tournament.getId(),
+        tournament.getName(),
+        tournament.getDescription(),
+        status,
+        tournament.getStartDate(),
+        slots,
+        participants,
+        "Upcoming".equalsIgnoreCase(status));
+  }
+
+  private String normalizeStatus(String status) {
+    if (status == null || status.isBlank()) {
+      return "Unknown";
+    }
+    return status.trim();
+  }
+
+  private int extractSlots(String description) {
+    if (description == null || description.isBlank()) {
+      return 0;
+    }
+    Matcher matcher = SLOT_PATTERN.matcher(description);
+    if (!matcher.find()) {
+      return 0;
+    }
+    try {
+      return Integer.parseInt(matcher.group(1));
+    } catch (NumberFormatException ex) {
+      return 0;
+    }
   }
 
   private String buildDescription(
@@ -104,6 +161,7 @@ public class TournamentService {
   }
 
   public record TournamentListItem(
+      Long id,
       String name,
       String summary,
       String status,
@@ -111,6 +169,16 @@ public class TournamentService {
       String actionLabel,
       String actionHref,
       boolean actionDisabled) {}
+
+  public record AdminTournamentDetail(
+      Long id,
+      String name,
+      String description,
+      String status,
+      LocalDate startDate,
+      int slots,
+      int participants,
+      boolean canRunNow) {}
 
   public record TournamentPage(
       List<TournamentListItem> tournaments,
