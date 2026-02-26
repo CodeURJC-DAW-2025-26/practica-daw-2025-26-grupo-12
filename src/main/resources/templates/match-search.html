@@ -5,16 +5,44 @@
 
 <body class="centered-layout">
 
-    <div class="card glass-card p-4 text-center">
+    <div class="card glass-card p-4 text-center" style="max-width: 720px; width: 100%;">
         <div class="card-body">
             <div class="auth-header-icon mb-3">🛰️</div>
-            <h1 class="h4 fw-bold text-white mb-2">Searching for Opponent</h1>
-            <p class="text-secondary mb-4">We are matching your bot with a suitable rival.</p>
-            <div class="spinner-border text-primary mb-4" role="status"></div>
-            <div class="d-flex justify-content-center gap-2">
-                <a href="/home" class="btn btn-outline-muted btn-sm px-3">Cancel</a>
-                <a href="/matches/battle" class="btn btn-primary btn-sm px-3">Force Start</a>
+            <h1 class="h4 fw-bold text-white mb-2">Matchmaking</h1>
+            <p class="text-secondary mb-4">Select your bot and start a real match with a suitable opponent.</p>
+
+            {{#errorMessage}}
+            <div class="alert alert-danger text-start" role="alert">{{errorMessage}}</div>
+            {{/errorMessage}}
+            {{#successMessage}}
+            <div class="alert alert-success text-start" role="alert">{{successMessage}}</div>
+            {{/successMessage}}
+
+            {{#hasBots}}
+            <form method="post" action="/matches/start" class="text-start">
+                <input type="hidden" name="_csrf" value="{{_csrf.token}}">
+                <label for="botId" class="form-label text-uppercase small">Your Bot</label>
+                <select id="botId" name="botId" class="form-select mb-4" required>
+                    {{#botOptions}}
+                    <option value="{{id}}" {{#selected}}selected{{/selected}}>{{name}} (ELO {{elo}})</option>
+                    {{/botOptions}}
+                </select>
+                <div class="d-flex justify-content-center gap-2">
+                    <a href="/home" class="btn btn-outline-muted btn-sm px-3">Cancel</a>
+                    <button type="submit" class="btn btn-primary btn-sm px-3">Start Match</button>
+                </div>
+            </form>
+            {{/hasBots}}
+
+            {{^hasBots}}
+            <div class="text-start">
+                <p class="text-secondary mb-3">You need at least one bot to start matchmaking.</p>
+                <div class="d-flex justify-content-center gap-2">
+                    <a href="/home" class="btn btn-outline-muted btn-sm px-3">Back</a>
+                    <a href="/bots/create" class="btn btn-primary btn-sm px-3">Create Bot</a>
+                </div>
             </div>
+            {{/hasBots}}
         </div>
     </div>
 
