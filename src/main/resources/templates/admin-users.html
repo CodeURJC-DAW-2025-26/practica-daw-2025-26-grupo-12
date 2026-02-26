@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+
+{{> components/head}}
+
+<body class="d-flex flex-column min-vh-100">
+
+    {{> components/navbar}}
+
+    <div class="container py-5">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+            <div>
+                <p class="text-secondary mb-1 small text-uppercase">Administration</p>
+                <h1 class="h3 fw-bold mb-0">User Management</h1>
+            </div>
+        </div>
+
+        {{#successMessage}}
+        <div class="alert alert-success px-3 py-2 small" role="alert">
+            {{successMessage}}
+        </div>
+        {{/successMessage}}
+
+        {{#errorMessage}}
+        <div class="alert alert-danger px-3 py-2 small" role="alert">
+            {{errorMessage}}
+        </div>
+        {{/errorMessage}}
+
+        <div class="card p-4 mb-4">
+            <form id="admin-user-search-form" method="get" action="/admin/users" class="row g-3 align-items-center">
+                <div class="col-lg-7">
+                    <label for="admin-user-search" class="form-label text-uppercase small mb-1">Search users</label>
+                    <input id="admin-user-search" type="search" name="q" class="form-control"
+                        placeholder="Search by username or email" value="{{searchQuery}}">
+                </div>
+                <div class="col-lg-2">
+                    <label for="admin-user-status-filter" class="form-label text-uppercase small mb-1">Status</label>
+                    <select id="admin-user-status-filter" name="status" class="form-select">
+                        <option value="all" {{#statusAll}}selected{{/statusAll}}>All</option>
+                        <option value="active" {{#statusActive}}selected{{/statusActive}}>Active</option>
+                        <option value="blocked" {{#statusBlocked}}selected{{/statusBlocked}}>Blocked</option>
+                    </select>
+                </div>
+                <div class="col-lg-3 d-grid d-lg-flex justify-content-lg-end gap-2">
+                    <button type="submit" class="btn btn-primary btn-sm px-3 mt-lg-4">Search</button>
+                    <a href="/admin/users" class="btn btn-outline-muted btn-sm px-3 mt-lg-4">Clear</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="card p-4">
+            <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap mb-3">
+                <h2 class="h5 fw-bold mb-0">Matching Users</h2>
+                <span id="admin-users-result-counter" class="badge bg-secondary">{{resultCount}} results</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table mb-0 align-middle text-nowrap">
+                    <thead>
+                        <tr class="text-secondary small text-uppercase">
+                            <th scope="col" class="ps-3">Username</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Provider</th>
+                            <th scope="col">Status</th>
+                            <th scope="col" class="text-end pe-3">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-users-table-body">{{> components/admin-user-rows}}</tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="toggleUserLockModal" tabindex="-1" aria-labelledby="toggleUserLockModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-secondary-bg border border-secondary">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="toggleUserLockModalLabel">Confirm account change</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="toggle-user-lock-message" class="mb-0 text-secondary"></p>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-outline-muted" data-bs-dismiss="modal">Cancel</button>
+                    <form id="toggle-user-lock-form" method="post">
+                        <input type="hidden" name="_csrf" value="{{_csrf.token}}">
+                        <input id="toggle-user-lock-query" type="hidden" name="q" value="">
+                        <input id="toggle-user-lock-status" type="hidden" name="status" value="{{statusFilter}}">
+                        <button id="toggle-user-lock-submit" type="submit" class="btn btn-danger">Block</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{> components/scripts}}
+    <script src="/js/admin-users.js"></script>
+</body>
+
+</html>
