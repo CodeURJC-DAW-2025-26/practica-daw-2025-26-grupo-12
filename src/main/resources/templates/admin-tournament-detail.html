@@ -11,7 +11,7 @@
         <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
             <div>
                 <p class="text-secondary mb-1 small text-uppercase">Tournament Admin</p>
-                <h1 class="h3 fw-bold mb-0">Quantum Open</h1>
+                <h1 class="h3 fw-bold mb-0">{{tournament.name}}</h1>
             </div>
             <div class="d-flex flex-wrap gap-2">
                 <a href="/admin/panel" class="btn btn-outline-muted btn-sm">Back to Admin</a>
@@ -19,36 +19,46 @@
             </div>
         </div>
 
+        {{#successMessage}}
+        <div class="alert alert-success px-3 py-2 small mb-4" role="alert">
+            {{successMessage}}
+        </div>
+        {{/successMessage}}
+        {{#errorMessage}}
+        <div class="alert alert-danger px-3 py-2 small mb-4" role="alert">
+            {{errorMessage}}
+        </div>
+        {{/errorMessage}}
+
         <div class="row g-4 mb-4">
             <div class="col-lg-7">
                 <div class="card p-4 h-100">
                     <h2 class="h5 fw-bold mb-3">Overview</h2>
-                    <p class="text-secondary mb-3">Single elimination tournament with 64 slots. Registration opens one week
-                        before the bracket is published.</p>
+                    <p class="text-secondary mb-3">{{tournament.description}}</p>
                     <div class="row g-3">
                         <div class="col-md-4">
                             <div class="card p-3 stat-card h-100">
                                 <h6 class="text-secondary text-uppercase small fw-bold mb-2">Status</h6>
                                 <div class="d-flex align-items-baseline">
-                                    <span class="h4 fw-bold mb-0 text-white">Scheduled</span>
+                                    <span class="h4 fw-bold mb-0 text-white">{{tournament.status}}</span>
                                 </div>
-                                <p class="text-secondary small mb-0">Opens Feb 20, 2026</p>
+                                <p class="text-secondary small mb-0">Auto-managed by scheduler</p>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="card p-3 stat-card h-100">
                                 <h6 class="text-secondary text-uppercase small fw-bold mb-2">Start Date</h6>
                                 <div class="d-flex align-items-baseline">
-                                    <span class="h4 fw-bold mb-0 text-white">Feb 28</span>
+                                    <span class="h4 fw-bold mb-0 text-white">{{tournament.startDate}}</span>
                                 </div>
-                                <p class="text-secondary small mb-0">2026</p>
+                                <p class="text-secondary small mb-0">Configured date</p>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="card p-3 stat-card h-100">
                                 <h6 class="text-secondary text-uppercase small fw-bold mb-2">Participants</h6>
                                 <div class="d-flex align-items-baseline">
-                                    <span class="h4 fw-bold mb-0 text-white">48 / 64</span>
+                                    <span class="h4 fw-bold mb-0 text-white">{{tournament.participants}} / {{tournament.slots}}</span>
                                 </div>
                                 <p class="text-secondary small mb-0">Slots filled</p>
                             </div>
@@ -66,9 +76,18 @@
                 <div class="card p-4 mb-4">
                     <h2 class="h5 fw-bold mb-3">Admin Actions</h2>
                     <div class="d-grid gap-2">
-                        <a href="/admin/tournament/edit" class="btn btn-outline-muted btn-sm">Publish Bracket</a>
-                        <a href="/admin/tournament/detail" class="btn btn-outline-muted btn-sm">Notify Participants</a>
-                        <a href="/admin/tournament/detail" class="btn btn-outline-muted btn-sm">Export Participants</a>
+                        {{#tournament.canRunNow}}
+                        <form action="/admin/tournament/{{tournament.id}}/run-now" method="post" class="d-grid">
+                            <input type="hidden" name="_csrf" value="{{_csrf.token}}" />
+                            <button type="submit" class="btn btn-primary btn-sm">Execute Tournament Now</button>
+                        </form>
+                        {{/tournament.canRunNow}}
+                        {{^tournament.canRunNow}}
+                        <button class="btn btn-outline-muted btn-sm" disabled>Tournament Not Runnable</button>
+                        {{/tournament.canRunNow}}
+                        <a href="/admin/tournament/edit?id={{tournament.id}}" class="btn btn-outline-muted btn-sm">Publish Bracket</a>
+                        <a href="/admin/tournament/detail?id={{tournament.id}}" class="btn btn-outline-muted btn-sm">Notify Participants</a>
+                        <a href="/admin/tournament/detail?id={{tournament.id}}" class="btn btn-outline-muted btn-sm">Export Participants</a>
                     </div>
                 </div>
                 <div class="card p-4">
