@@ -8,13 +8,16 @@
     {{> components/navbar}}
 
     <div class="container py-5">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
             <h1 class="h3 fw-bold mb-0">My Recent Matches</h1>
-            <div class="btn-group">
-                <button type="button" class="btn btn-outline-muted btn-sm active">All</button>
-                <button type="button" class="btn btn-outline-muted btn-sm">Wins</button>
-                <button type="button" class="btn btn-outline-muted btn-sm">Losses</button>
-            </div>
+            <form method="get" action="/matches/recent" class="d-flex gap-2 align-items-center">
+                <select class="form-select form-select-sm" name="participation">
+                    <option value="all" {{#selectedAll}}selected{{/selectedAll}}>Participation: All</option>
+                    <option value="played" {{#selectedPlayed}}selected{{/selectedPlayed}}>Played</option>
+                    <option value="not-played" {{#selectedNotPlayed}}selected{{/selectedNotPlayed}}>Not Played</option>
+                </select>
+                <button type="submit" class="btn btn-outline-muted btn-sm">Apply</button>
+            </form>
         </div>
 
         <div class="card border-secondary shadow-sm">
@@ -25,42 +28,33 @@
                             <th scope="col" class="ps-4">Match ID</th>
                             <th scope="col">My Bot</th>
                             <th scope="col">Opponent</th>
+                            <th scope="col">Participation</th>
                             <th scope="col">Result</th>
                             <th scope="col">Date</th>
                             <th scope="col" class="text-end pe-4">Action</th>
                         </tr>
                     </thead>
                     <tbody>
+                        {{#hasMatches}}
+                        {{#matches}}
                         <tr>
-                            <td class="ps-4 text-secondary">#4021</td>
-                            <td>AlphaBot</td>
-                            <td class="text-secondary">BetaMaster</td>
-                            <td><span class="badge badge-soft-success rounded-pill px-3">Win</span></td>
-                            <td class="text-secondary">2 mins ago</td>
+                            <td class="ps-4 text-secondary">#{{id}}</td>
+                            <td>{{myBotName}}</td>
+                            <td class="text-secondary">{{opponentName}}</td>
+                            <td><span class="badge {{participationBadgeClass}} rounded-pill px-3">{{participationLabel}}</span></td>
+                            <td><span class="badge {{resultBadgeClass}} rounded-pill px-3">{{result}}</span></td>
+                            <td class="text-secondary">{{date}}</td>
                             <td class="text-end pe-4">
-                                <a href="/matches/stats" class="btn btn-sm btn-outline-muted">View</a>
+                                <a href="{{actionHref}}" class="btn btn-sm btn-outline-muted">View</a>
                             </td>
                         </tr>
+                        {{/matches}}
+                        {{/hasMatches}}
+                        {{^hasMatches}}
                         <tr>
-                            <td class="ps-4 text-secondary">#4018</td>
-                            <td>Randomizer</td>
-                            <td class="text-secondary">AlphaBot</td>
-                            <td><span class="badge badge-soft-danger rounded-pill px-3">Loss</span></td>
-                            <td class="text-secondary">45 mins ago</td>
-                            <td class="text-end pe-4">
-                                <a href="/matches/stats" class="btn btn-sm btn-outline-muted">View</a>
-                            </td>
+                            <td class="ps-4 text-secondary" colspan="7">No matches found with the selected filter.</td>
                         </tr>
-                        <tr>
-                            <td class="ps-4 text-secondary">#4014</td>
-                            <td>PaperMaster</td>
-                            <td class="text-secondary">Roshambo_X</td>
-                            <td><span class="badge bg-secondary rounded-pill px-3">Draw</span></td>
-                            <td class="text-secondary">Yesterday</td>
-                            <td class="text-end pe-4">
-                                <a href="/matches/stats" class="btn btn-sm btn-outline-muted">View</a>
-                            </td>
-                        </tr>
+                        {{/hasMatches}}
                     </tbody>
                 </table>
             </div>

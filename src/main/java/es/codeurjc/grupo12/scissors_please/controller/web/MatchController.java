@@ -1,12 +1,15 @@
 package es.codeurjc.grupo12.scissors_please.controller.web;
 
 import es.codeurjc.grupo12.scissors_please.service.MatchService;
+import es.codeurjc.grupo12.scissors_please.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class MatchController {
 
   private final MatchService matchService;
+  private final UserService userService;
 
   @GetMapping("/list")
   public String matchList(@PageableDefault(size = 5) Pageable pageable, Model model) {
@@ -54,7 +58,19 @@ public class MatchController {
   }
 
   @GetMapping("/recent")
-  public String recentMatches() {
+  public String recentMatches(
+      Authentication authentication,
+      @RequestParam(name = "participation", required = false) String participationFilter,
+      Model model) {
+    Long userId = userService.getCurrentUser(authentication).getId();
+    MatchService.UserRecentMatchSection section =
+        matchService.getUserRecentMatchSection(userId, participationFilter);
+
+    model.addAttribute("matches", section.matches());
+    model.addAttribute("hasMatches", !section.matches().isEmpty());
+    model.addAttribute("selectedAll", section.selectedAll());
+    model.addAttribute("selectedPlayed", section.selectedPlayed());
+    model.addAttribute("selectedNotPlayed", section.selectedNotPlayed());
     return "recent-matches";
   }
 }
