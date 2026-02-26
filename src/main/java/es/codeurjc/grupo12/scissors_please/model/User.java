@@ -41,6 +41,9 @@ public class User {
   @Column(name = "oauth_provider")
   private String oauthProvider;
 
+  @Column(nullable = false, columnDefinition = "boolean default false")
+  private boolean blocked = false;
+
   @ElementCollection(fetch = jakarta.persistence.FetchType.EAGER)
   @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
   @Column(name = "role")
