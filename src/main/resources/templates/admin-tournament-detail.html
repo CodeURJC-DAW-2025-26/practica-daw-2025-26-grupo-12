@@ -85,9 +85,55 @@
                         {{^tournament.canRunNow}}
                         <button class="btn btn-outline-muted btn-sm" disabled>Tournament Not Runnable</button>
                         {{/tournament.canRunNow}}
-                        <a href="/admin/tournaments/edit/{{tournament.id}}" class="btn btn-outline-muted btn-sm">Publish Bracket</a>
-                        <a href="/admin/tournaments/detail/{{tournament.id}}" class="btn btn-outline-muted btn-sm">Notify Participants</a>
-                        <a href="/admin/tournaments/detail/{{tournament.id}}" class="btn btn-outline-muted btn-sm">Export Participants</a>
+                        <a href="/admin/tournament/edit?id={{tournament.id}}"
+                            class="btn btn-outline-muted btn-sm">Publish Bracket</a>
+                        <a href="/admin/tournament/detail?id={{tournament.id}}"
+                            class="btn btn-outline-muted btn-sm">Notify Participants</a>
+                        <a href="/admin/tournament/detail?id={{tournament.id}}"
+                            class="btn btn-outline-muted btn-sm">Export Participants</a>
+                        <button type="button" class="btn btn-outline-danger btn-sm mt-2" data-bs-toggle="modal"
+                            data-bs-target="#deleteTournamentModal">
+                            Delete Tournament
+                        </button>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="deleteTournamentModal" tabindex="-1"
+                    aria-labelledby="deleteTournamentModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content glass-card shadow-2xl border-0 overflow-hidden">
+                            <div class="modal-body p-0">
+                                <div class="text-center p-5">
+                                    <div class="mb-4">
+                                        <div class="d-inline-flex align-items-center justify-content-center bg-danger bg-opacity-10 rounded-circle"
+                                            style="width: 80px; height: 80px;">
+                                            <i class="bi bi-trash3-fill text-danger fs-1"></i>
+                                        </div>
+                                    </div>
+                                    <h4 class="fw-bold mb-2 text-white">Delete <span
+                                            class="text-primary italic">{{tournament.name}}</span>?
+                                    </h4>
+                                    <p class="text-secondary px-3">This will permanently remove the tournament. All
+                                        matches, rankings, and historical data associated with it will be gone forever.
+                                    </p>
+                                </div>
+                                <div class="bg-black bg-opacity-25 p-4">
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <button type="button" class="btn btn-outline-muted w-100 py-2 fw-medium"
+                                                data-bs-dismiss="modal">Keep Tournament</button>
+                                        </div>
+                                        <div class="col-6">
+                                            <form method="post" action="/admin/tournament/{{tournament.id}}/delete">
+                                                <input type="hidden" name="_csrf" value="{{_csrf.token}}">
+                                                <button type="submit" class="btn btn-danger w-100 py-2 fw-medium">Delete
+                                                    Forever</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="card p-4">

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -30,6 +31,14 @@ public class TournamentService {
       Pattern.compile("(\\d+)\\s+slots", Pattern.CASE_INSENSITIVE);
 
   @Autowired private TournamentRepository tournamentRepository;
+
+  public void deleteTournament(Long id) {
+    Tournament tournament =
+        tournamentRepository
+            .findById(id)
+            .orElseThrow(() -> new NoSuchElementException("Tournament not found with id: " + id));
+    tournamentRepository.delete(tournament);
+  }
 
   public Tournament createTournament(
       String title,
