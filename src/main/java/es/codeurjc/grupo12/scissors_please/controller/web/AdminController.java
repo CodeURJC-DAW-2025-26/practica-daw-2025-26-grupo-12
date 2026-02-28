@@ -149,8 +149,8 @@ public class AdminController {
     return "redirect:/admin/tournament/create?success";
   }
 
-  @GetMapping("/tournament/edit")
-  public String adminTournamentEdit() {
+  @GetMapping("/tournament/edit/{id}")
+  public String adminTournamentEdit(@PathVariable Long id) {
     return "admin-tournament-edit";
   }
 

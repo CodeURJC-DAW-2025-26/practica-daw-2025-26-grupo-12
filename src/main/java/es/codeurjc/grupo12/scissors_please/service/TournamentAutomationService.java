@@ -82,11 +82,13 @@ public class TournamentAutomationService {
     List<Bot> participants = resolveParticipants(tournament);
 
     tournament.setStatus(STATUS_IN_PROGRESS);
+    tournament.setSlots(64);
     tournamentRepository.saveAndFlush(tournament);
 
     if (participants.size() < 2) {
       tournament.setMatches(new ArrayList<>());
       tournament.setStatus(STATUS_COMPLETED);
+      tournament.setSlots(16);
       tournamentRepository.save(tournament);
       log.info("Tournament {} completed with less than 2 participants", tournament.getId());
       return;
@@ -94,6 +96,7 @@ public class TournamentAutomationService {
 
     TournamentSimulationResult simulationResult = simulateTournament(participants);
     tournament.setMatches(simulationResult.matches());
+    tournament.setSlots(32);
     tournament.setStatus(STATUS_COMPLETED);
     tournament.setDescription(
         appendWinnerToDescription(tournament.getDescription(), simulationResult.winnerName()));

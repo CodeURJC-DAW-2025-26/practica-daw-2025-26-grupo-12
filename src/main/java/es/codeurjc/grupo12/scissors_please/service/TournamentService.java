@@ -42,6 +42,7 @@ public class TournamentService {
     Tournament tournament = new Tournament();
     tournament.setName(title);
     tournament.setStartDate(startDate);
+    tournament.setSlots(maxPlayers);
     tournament.setStatus(startDate.isAfter(LocalDate.now()) ? "Upcoming" : "In Progress");
     tournament.setDescription(
         buildDescription(description, maxPlayers, registrationStart, format, prize));
