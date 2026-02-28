@@ -97,6 +97,16 @@ public class BotService {
     return botRepository.save(bot);
   }
 
+  // This methods are identical but conceptually they might be different in a near
+  // future
+  public Bot updateBot(Bot bot, User owner) {
+    if (owner.getRoles() != null && owner.getRoles().contains("ADMIN")) {
+      throw new IllegalArgumentException("Admin users cannot own bots");
+    }
+    bot.setOwnerId(requireOwnerId(owner));
+    return botRepository.save(bot);
+  }
+
   public void deleteBot(Long id) {
     botRepository.deleteById(id);
   }
@@ -113,6 +123,7 @@ public class BotService {
     return user.getId();
   }
 
+  @Transactional(readOnly = true)
   public record BotPage(
       List<Bot> bots,
       int nextPage,

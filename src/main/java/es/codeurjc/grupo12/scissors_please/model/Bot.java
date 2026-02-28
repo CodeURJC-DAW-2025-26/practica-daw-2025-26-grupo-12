@@ -9,14 +9,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -24,7 +24,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Table(name = "bots")
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Data
+// As we don't need all the methods of Data we can use this for making lighter
+@Getter
+@Setter
 public class Bot {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,9 +40,8 @@ public class Bot {
   private boolean isPublic;
   private int elo;
 
-  @ManyToOne
-  @JoinColumn(name = "owner_id")
-  private User owner;
+  @Column(name = "owner_id", nullable = false)
+  private Long ownerId;
 
   @CreationTimestamp private LocalDateTime createdAt;
 

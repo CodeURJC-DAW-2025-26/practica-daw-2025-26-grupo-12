@@ -6,6 +6,7 @@ import es.codeurjc.grupo12.scissors_please.service.BotService;
 import es.codeurjc.grupo12.scissors_please.service.UserService;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -119,9 +120,13 @@ public class BotController {
 
   @GetMapping("/edit/{id}")
   public String editBot(@PathVariable Long id, Model model) {
-    Bot bot = botService.getBotById(id);
-    model.addAttribute("bot", bot);
-    return "bot-edit";
+    Optional<Bot> opBot = botService.getBotById(id);
+    if (opBot.isPresent()) {
+      Bot bot = opBot.get();
+      model.addAttribute("bot", bot);
+      return "bot-edit";
+    }
+    return "error";
   }
 
   @PostMapping("/edit/{id}")
@@ -136,25 +141,36 @@ public class BotController {
       @RequestParam(required = false) String tags,
       Authentication authentication) {
 
-    Bot bot = botService.getBotById(id);
-    bot.setName(botName);
-    bot.setDescription(description != null ? description : "");
-    bot.setLanguage(language != null ? language : "");
-    bot.setCode(code != null ? code : "");
-    bot.setImage(image != null ? image : "");
-    bot.setPublic(visibility);
-    bot.setTags(parseTags(tags));
+    Optional<Bot> opBot = botService.getBotById(id);
+    if (opBot.isPresent()) {
+      Bot bot = opBot.get();
+      bot.setName(botName);
+      bot.setDescription(description != null ? description : "");
+      bot.setLanguage(language != null ? language : "");
+      bot.setCode(code != null ? code : "");
+      bot.setImage(image != null ? image : "");
+      bot.setPublic(visibility);
+      bot.setTags(parseTags(tags));
+      User currentUser = userService.getCurrentUser(authentication);
+      botService.updateBot(bot, currentUser);
 
-    botService.updateBot(bot);
-
-    return "redirect:/bots/my-bots";
+      return "redirect:/bots/my-bots";
+    }
+    return "error";
   }
 
   @GetMapping("/detail/{id}")
   public String botDetail(@PathVariable Long id, Model model) {
-    Bot bot = botService.getBotById(id);
-    model.addAttribute("bot", bot);
-    return "bot-detail";
+    Optional<Bot> opBot = botService.getBotById(id);
+    if (opBot.isPresent()) {
+
+      Bot bot = opBot.get();
+      String username = userService.getUserById(bot.getOwnerId()).getUsername();
+      model.addAttribute("bot", bot);
+      model.addAttribute("username", username);
+      return "bot-detail";
+    }
+    return "error";
   }
 
   private List<String> parseTags(String tags) {
