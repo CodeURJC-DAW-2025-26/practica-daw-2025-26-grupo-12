@@ -11,125 +11,121 @@
         <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
             <div>
                 <p class="text-secondary mb-1 small text-uppercase">My Bots</p>
-                <h1 class="h3 fw-bold mb-0">Create Bot</h1>
+                <h1 class="h3 fw-bold mb-0">Edit Bot</h1>
             </div>
             <div class="d-flex flex-wrap gap-2">
-                <a href="/bots/my-bots" class="btn btn-outline-muted btn-sm">Back to My Bots</a>
+                <a href="/bots/detail/{{bot.id}}" class="btn btn-outline-muted btn-sm">Back to Bot</a>
             </div>
         </div>
 
         <div class="row g-4">
             <div class="col-lg-8">
                 <div class="card p-4">
-                    <h2 class="h5 fw-bold mb-3">Bot Details</h2>
-                    <form id="botCreateForm" method="post" action="/bots/create">
+                    <h2 class="h5 fw-bold mb-3">Bot Settings</h2>
+                    <form method="post" action="/bots/edit/{{bot.id}}" enctype="multipart/form-data">
                         <input type="hidden" name="_csrf" value="{{_csrf.token}}">
+                        
+                        <input type="file" id="realBotImage" name="imageFile" accept="image/*" class="d-none">
+
                         <div class="row g-3">
                             <div class="col-md-7">
                                 <label for="botName" class="form-label text-uppercase small">Bot Name</label>
                                 <input type="text" class="form-control form-control-lg" id="botName" name="name"
-                                    placeholder="New challenger" required maxlength="60">
+                                    value="{{bot.name}}" required>
                             </div>
                             <div class="col-md-5">
                                 <label for="visibility" class="form-label text-uppercase small">Visibility</label>
-                                <select class="form-select form-control-lg" id="visibility" name="isPublic" required>
-                                    <option value="true" selected>Public</option>
-                                    <option value="false">Private</option>
+                                <select class="form-select form-control-lg" id="visibility" name="isPublic">
+                                    <option value="true" {{#bot.isPublic}} selected {{/bot.isPublic}}>Public</option>
+                                    <option value="false" {{^bot.isPublic}} selected {{/bot.isPublic}}>Private</option>
                                 </select>
                             </div>
                             <div class="col-12">
                                 <label for="tags" class="form-label text-uppercase small">Tags</label>
                                 <input type="text" class="form-control form-control-lg" id="tags" name="tags"
-                                    placeholder="Add multiple tags separated by commas" maxlength="300">
-                                <div class="form-text text-secondary">Example: aggressive, random, counter</div>
+                                    value="{{#bot.tags}}{{.}},{{/bot.tags}}"
+                                    placeholder="Add multiple tags separated by commas">
                             </div>
                             <div class="col-12">
                                 <label for="description" class="form-label text-uppercase small">Description</label>
                                 <textarea class="form-control form-control-lg" id="description" name="description"
-                                    rows="4" placeholder="Describe your bot strategy." maxlength="500"></textarea>
+                                    rows="4">{{bot.description}}</textarea>
                             </div>
                             <div class="col-12">
-                                <label for="botImage" class="form-label text-uppercase small">Bot Image</label>
-                                <div class="d-flex flex-wrap gap-2">
-                                    <button type="button" class="btn btn-outline-muted" data-bs-toggle="modal"
-                                        data-bs-target="#botImageModal">Upload Image</button>
-                                    <span class="text-secondary small align-self-center">PNG, JPG up to 2MB.</span>
-                                </div>
+                                <label for="code" class="form-label text-uppercase small">Bot Code</label>
+                                <textarea class="form-control form-control-lg font-monospace" id="code" name="code"
+                                    rows="8">{{bot.code}}</textarea>
                             </div>
                             <div class="col-12 d-flex flex-wrap gap-2 mt-2">
-                                <button type="submit" class="btn btn-primary">Create and Edit</button>
-                                <button type="reset" class="btn btn-outline-muted">Clear</button>
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                                <button type="reset" class="btn btn-outline-muted">Discard</button>
                             </div>
                         </div>
                     </form>
                 </div>
             </div>
+
             <div class="col-lg-4">
-                <div class="card p-4 mb-4">
-                    <h2 class="h5 fw-bold mb-3">Guidelines</h2>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item">Keep code deterministic and safe.</li>
-                        <li class="list-group-item">Avoid external network calls.</li>
-                        <li class="list-group-item">Test locally before uploading.</li>
-                    </ul>
-                </div>
-                <div class="card p-4">
-                    <h2 class="h5 fw-bold mb-3">Import</h2>
-                    <p class="text-secondary mb-2">Upload a ready bot file.</p>
-                    <div class="d-grid gap-2">
-                        <button class="btn btn-outline-muted btn-sm" data-bs-toggle="modal"
-                            data-bs-target="#botFileModal">Upload .py</button>
-                        <button class="btn btn-outline-muted btn-sm" data-bs-toggle="modal"
-                            data-bs-target="#botFileModal">Upload .js</button>
+                <div class="card p-4 mb-4 text-center">
+                    <h2 class="h5 fw-bold mb-3">Bot Image</h2>
+                    <div class="mx-auto" style="width: 96px; height: 96px;">
+                        {{#bot.image}}
+                            <img src="/bot-images/{{bot.id}}" class="rounded-circle border border-primary w-100 h-100" style="object-fit: cover;">
+                        {{/bot.image}}
+                        {{^bot.image}}
+                            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white display-6 fw-bold w-100 h-100">
+                                {{initial}}
+                            </div>
+                        {{/bot.image}}
                     </div>
+                    <div id="fileNameDisplay" class="text-info small mt-2"></div>
+                    <button class="btn btn-outline-muted btn-sm mt-3" data-bs-toggle="modal"
+                        data-bs-target="#botImageModal">
+                        <span id="btnText">Change Image</span>
+                    </button>
                 </div>
-            </div>
+                </div>
         </div>
     </div>
 
     {{> components/scripts}}
 
-    <div class="modal fade" id="botImageModal" tabindex="-1" aria-labelledby="botImageModalLabel" aria-hidden="true">
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const modalInput = document.getElementById('modalFileInput');
+            const realInput = document.getElementById('realBotImage');
+            const confirmBtn = document.getElementById('confirmImageBtn');
+            const fileNameDisplay = document.getElementById('fileNameDisplay');
+            const btnText = document.getElementById('btnText');
+
+            confirmBtn.addEventListener('click', function () {
+                if (modalInput.files.length > 0) {
+                    realInput.files = modalInput.files;
+                    const fileName = modalInput.files[0].name;
+                    fileNameDisplay.textContent = "Selected: " + fileName;
+                    btnText.textContent = "Change Image";
+                }
+            });
+        });
+    </script>
+
+    <div class="modal fade" id="botImageModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content bg-secondary-bg border border-secondary">
                 <div class="modal-header border-secondary">
-                    <h5 class="modal-title" id="botImageModalLabel">Upload Bot Image</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
+                    <h5 class="modal-title">Edit Bot Image</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="text-secondary small mb-3">Upload a new bot image.</p>
-                    <input class="form-control" type="file" accept="image/*">
+                    <input class="form-control" type="file" id="modalFileInput" accept="image/*">
                     <div class="form-text text-secondary">PNG, JPG up to 2MB.</div>
                 </div>
                 <div class="modal-footer border-secondary">
                     <button type="button" class="btn btn-outline-muted" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary">Upload</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="botFileModal" tabindex="-1" aria-labelledby="botFileModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content bg-secondary-bg border border-secondary">
-                <div class="modal-header border-secondary">
-                    <h5 class="modal-title" id="botFileModalLabel">Upload Bot File</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p class="text-secondary small mb-3">Import a ready bot script.</p>
-                    <input class="form-control" type="file" accept=".py,.js">
-                    <div class="form-text text-secondary">Accepted: .py, .js</div>
-                </div>
-                <div class="modal-footer border-secondary">
-                    <button type="button" class="btn btn-outline-muted" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary">Upload</button>
+                    <button type="button" id="confirmImageBtn" class="btn btn-primary" data-bs-dismiss="modal">Confirm</button>
                 </div>
             </div>
         </div>
     </div>
 </body>
-
 </html>

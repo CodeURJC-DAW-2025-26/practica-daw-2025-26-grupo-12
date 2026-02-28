@@ -22,6 +22,9 @@ public class Tournament {
   private Long id;
 
   private String name;
+
+  private String filename;
+
   private String description;
   private String status;
   private LocalDate startDate;
