@@ -12,7 +12,7 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.Authentication;
@@ -28,7 +28,6 @@ import org.springframework.web.util.UriUtils;
 
 @Controller
 @RequestMapping("/admin")
-@RequiredArgsConstructor
 public class AdminController {
 
   private static final int MIN_PLAYERS = 4;
@@ -39,10 +38,10 @@ public class AdminController {
   private static final Set<String> ALLOWED_FORMATS =
       Set.of("Single Elimination", "Double Elimination", "Round Robin");
 
-  private final TournamentService tournamentService;
-  private final TournamentAutomationService tournamentAutomationService;
-  private final UserService userService;
-  private final ActiveSessionService activeSessionService;
+  @Autowired private TournamentService tournamentService;
+  @Autowired private TournamentAutomationService tournamentAutomationService;
+  @Autowired private UserService userService;
+  @Autowired private ActiveSessionService activeSessionService;
 
   @GetMapping("/panel")
   public String adminPanel(

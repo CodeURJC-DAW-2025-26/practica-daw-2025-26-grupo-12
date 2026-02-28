@@ -7,7 +7,7 @@ import es.codeurjc.grupo12.scissors_please.service.UserService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.Authentication;
@@ -21,13 +21,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/bots")
-@RequiredArgsConstructor
 public class BotController {
 
   private static final String REDIRECT_MY_BOTS = "redirect:/bots/my-bots";
 
-  private final BotService botService;
-  private final UserService userService;
+  @Autowired private BotService botService;
+  @Autowired private UserService userService;
 
   @GetMapping("/my-bots")
   public String myBotsPage(

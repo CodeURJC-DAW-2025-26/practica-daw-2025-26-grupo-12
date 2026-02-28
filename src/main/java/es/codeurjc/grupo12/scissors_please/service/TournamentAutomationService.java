@@ -13,14 +13,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class TournamentAutomationService {
 
@@ -28,8 +27,8 @@ public class TournamentAutomationService {
   private static final String STATUS_IN_PROGRESS = "In Progress";
   private static final String STATUS_COMPLETED = "Completed";
 
-  private final TournamentRepository tournamentRepository;
-  private final BotRepository botRepository;
+  @Autowired private TournamentRepository tournamentRepository;
+  @Autowired private BotRepository botRepository;
 
   public enum RunNowResult {
     EXECUTED,
