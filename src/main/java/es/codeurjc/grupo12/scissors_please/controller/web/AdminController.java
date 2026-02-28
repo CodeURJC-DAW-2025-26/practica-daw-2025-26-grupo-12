@@ -187,6 +187,7 @@ public class AdminController {
         try {
           tournament.setStartDate(LocalDate.parse(startDate));
         } catch (Exception e) {
+          return "error";
         }
       }
 
