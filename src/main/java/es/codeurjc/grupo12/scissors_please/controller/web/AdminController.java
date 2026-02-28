@@ -1,5 +1,6 @@
 package es.codeurjc.grupo12.scissors_please.controller.web;
 
+import es.codeurjc.grupo12.scissors_please.model.Tournament;
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.security.ActiveSessionService;
 import es.codeurjc.grupo12.scissors_please.service.TournamentAutomationService;
@@ -11,6 +12,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -149,9 +151,51 @@ public class AdminController {
     return "redirect:/admin/tournament/create?success";
   }
 
-  @GetMapping("/tournament/edit/{id}")
-  public String adminTournamentEdit(@PathVariable Long id) {
-    return "admin-tournament-edit";
+  @GetMapping("/tournaments/edit/{id}")
+  public String editTournament(@PathVariable Long id, Model model) {
+    Optional<Tournament> opTournament = tournamentService.getTournamentById(id);
+
+    if (opTournament.isPresent()) {
+      Tournament tournament = opTournament.get();
+      model.addAttribute("tournament", tournament);
+      return "admin-tournament-edit";
+    }
+    return "error";
+  }
+
+  @PostMapping("/tournaments/edit/{id}")
+  public String editTournament(
+      @PathVariable Long id,
+      @RequestParam String name,
+      @RequestParam(required = false) String description,
+      @RequestParam(required = false) String startDate,
+      @RequestParam int slots,
+      @RequestParam String status,
+      Authentication authentication) {
+
+    Optional<Tournament> opTournament = tournamentService.getTournamentById(id);
+
+    if (opTournament.isPresent()) {
+      Tournament tournament = opTournament.get();
+
+      tournament.setName(name);
+      tournament.setDescription(description != null ? description : "");
+      tournament.setSlots(slots);
+      tournament.setStatus(status);
+
+      if (startDate != null && !startDate.isBlank()) {
+        try {
+          tournament.setStartDate(LocalDate.parse(startDate));
+        } catch (Exception e) {
+        }
+      }
+
+      tournamentService.save(tournament);
+
+      return "redirect:/admin/panel";
+    }
+
+    return "error";
   }
 
   @GetMapping("/tournament/detail")

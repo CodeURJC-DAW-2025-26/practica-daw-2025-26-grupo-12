@@ -49,6 +49,10 @@ public class TournamentService {
     return tournamentRepository.save(tournament);
   }
 
+  public Tournament save(Tournament tournament) {
+    return tournamentRepository.save(tournament);
+  }
+
   public TournamentPage getTournamentPage(Pageable pageable) {
     int safePage = Math.max(pageable.getPageNumber(), 0);
     int safeSize = Math.min(Math.max(pageable.getPageSize(), 1), MAX_PAGE_SIZE);
