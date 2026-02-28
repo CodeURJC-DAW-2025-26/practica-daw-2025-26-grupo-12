@@ -6,6 +6,7 @@ import es.codeurjc.grupo12.scissors_please.service.BotService;
 import es.codeurjc.grupo12.scissors_please.service.UserService;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -100,7 +101,6 @@ public class BotController {
     bot.setName(name);
     bot.setDescription(description);
     bot.setLanguage(language);
-    bot.setCode(code);
     bot.setImage(image);
     bot.setPublic(isPublic);
     bot.setTags(parseTags(tags));
@@ -118,14 +118,59 @@ public class BotController {
     return REDIRECT_MY_BOTS;
   }
 
-  @GetMapping("/edit")
-  public String editBot() {
-    return "bot-edit";
+  @GetMapping("/edit/{id}")
+  public String editBot(@PathVariable Long id, Model model) {
+    Optional<Bot> opBot = botService.getBotById(id);
+    if (opBot.isPresent()) {
+      Bot bot = opBot.get();
+      model.addAttribute("bot", bot);
+      return "bot-edit";
+    }
+    return "error";
   }
 
-  @GetMapping("/detail")
-  public String botDetail() {
-    return "bot-detail";
+  @PostMapping("/edit/{id}")
+  public String editBot(
+      @PathVariable Long id,
+      @RequestParam String botName,
+      @RequestParam(required = false) String description,
+      @RequestParam(required = false) String language,
+      @RequestParam(required = false) String code,
+      @RequestParam(required = false) String image,
+      @RequestParam boolean visibility,
+      @RequestParam(required = false) String tags,
+      Authentication authentication) {
+
+    Optional<Bot> opBot = botService.getBotById(id);
+    if (opBot.isPresent()) {
+      Bot bot = opBot.get();
+      bot.setName(botName);
+      bot.setDescription(description != null ? description : "");
+      bot.setLanguage(language != null ? language : "");
+      bot.setCode(code != null ? code : "");
+      bot.setImage(image != null ? image : "");
+      bot.setPublic(visibility);
+      bot.setTags(parseTags(tags));
+      User currentUser = userService.getCurrentUser(authentication);
+      botService.updateBot(bot, currentUser);
+
+      return "redirect:/bots/my-bots";
+    }
+    return "error";
+  }
+
+  @GetMapping("/detail/{id}")
+  public String botDetail(@PathVariable Long id, Model model) {
+    Optional<Bot> opBot = botService.getBotById(id);
+    if (opBot.isPresent()) {
+
+      Bot bot = opBot.get();
+      String username = userService.getUserById(bot.getOwnerId()).getUsername();
+      model.addAttribute("bot", bot);
+      model.addAttribute("username", username);
+      return "bot-detail";
+    }
+    return "error";
   }
 
   private List<String> parseTags(String tags) {

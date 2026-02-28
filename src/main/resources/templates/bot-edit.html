@@ -22,39 +22,37 @@
             <div class="col-lg-8">
                 <div class="card p-4">
                     <h2 class="h5 fw-bold mb-3">Bot Settings</h2>
-                    <form action="#" method="get">
+                    <form method="post" action="/bots/edit/{{bot.id}}">
+                        <input type="hidden" name="_csrf" value="{{_csrf.token}}">
                         <div class="row g-3">
                             <div class="col-md-7">
                                 <label for="botName" class="form-label text-uppercase small">Bot Name</label>
                                 <input type="text" class="form-control form-control-lg" id="botName" name="botName"
-                                    value="AlphaBot" required>
+                                    value="{{bot.name}}" required>
                             </div>
                             <div class="col-md-5">
                                 <label for="visibility" class="form-label text-uppercase small">Visibility</label>
                                 <select class="form-select form-control-lg" id="visibility" name="visibility">
-                                    <option selected>Public</option>
-                                    <option>Private</option>
+                                    <option value="true" {{#bot.isPublic}} selected {{/bot.isPublic}}>Public</option>
+                                    <option value="false" {{^bot.isPublic}} selected {{/bot.isPublic}}>Private</option>
                                 </select>
                             </div>
                             <div class="col-12">
                                 <label for="tags" class="form-label text-uppercase small">Tags</label>
                                 <input type="text" class="form-control form-control-lg" id="tags" name="tags"
-                                    value="pattern, adaptive, meta" placeholder="Add multiple tags separated by commas">
+                                    value="{{#bot.tags}},{{/bot.tags}}"
+                                    placeholder="Add multiple tags separated by commas">
                                 <div class="form-text text-secondary">Example: aggressive, random, counter</div>
                             </div>
                             <div class="col-12">
                                 <label for="description" class="form-label text-uppercase small">Description</label>
                                 <textarea class="form-control form-control-lg" id="description" name="description"
-                                    rows="4">Learns opponent tendencies and counters them.</textarea>
+                                    rows="4">{{bot.description}}</textarea>
                             </div>
                             <div class="col-12">
                                 <label for="code" class="form-label text-uppercase small">Bot Code</label>
                                 <textarea class="form-control form-control-lg font-monospace" id="code" name="code"
-                                    rows="8">def next_move(history):
-    if not history:
-        return "rock"
-    last = history[-1]
-    return counter_move(last)</textarea>
+                                    rows="8">{{bot.code}}</textarea>
                             </div>
                             <div class="col-12 d-flex flex-wrap gap-2 mt-2">
                                 <button type="submit" class="btn btn-primary">Save Changes</button>
@@ -71,11 +69,11 @@
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             Last Updated
-                            <span class="badge bg-secondary rounded-pill">Feb 01, 2026</span>
+                            <span class="badge bg-secondary rounded-pill">{{bot.updatedAt}}</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             Current ELO
-                            <span class="badge bg-primary rounded-pill">1824</span>
+                            <span class="badge bg-primary rounded-pill">{{bot.elo}}</span>
                         </li>
                     </ul>
                 </div>

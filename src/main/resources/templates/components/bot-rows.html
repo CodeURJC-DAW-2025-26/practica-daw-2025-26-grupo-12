@@ -16,9 +16,9 @@
     <td class="text-secondary">{{elo}}</td>
     <td class="text-end pe-3">
         <div class="d-flex flex-wrap gap-2 justify-content-end">
-            <a href="/bots/detail" class="btn btn-primary btn-sm">View</a>
+            <a href="/bots/detail/{{id}}" class="btn btn-primary btn-sm">View</a>
             {{#canManage}}
-            <a href="/bots/edit" class="btn btn-outline-muted btn-sm">Edit</a>
+            <a href="/bots/edit/{{id}}" class="btn btn-outline-muted btn-sm">Edit</a>
             <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal"
                 data-bs-target="#deleteBotModal" data-bot-id="{{id}}" data-bot-name="{{name}}">
                 Delete
