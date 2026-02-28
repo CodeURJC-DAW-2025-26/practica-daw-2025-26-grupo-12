@@ -101,11 +101,75 @@
             </div>
         </div>
 
+        <div class="row g-4 mt-1">
+            <div class="col-12">
+                <div class="card p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2 class="h5 fw-bold mb-0">Real-Time Notifications (Admin Testing)</h2>
+                        <span class="badge bg-primary">Live</span>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-5">
+                            <label for="notification-target" class="form-label text-secondary small">Target Username
+                                (Leave empty for ALL users)</label>
+                            <input type="text" class="form-control" id="notification-target" placeholder="e.g. user1" />
+                        </div>
+                        <div class="col-md-5">
+                            <label for="notification-message" class="form-label text-secondary small">Message</label>
+                            <input type="text" class="form-control" id="notification-message"
+                                placeholder="Hello World!" />
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button id="btn-send-notification" class="btn btn-primary w-100">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     {{> components/scripts}}
     <script src="/js/paginated-tournaments.js"></script>
     <script>
+        document.getElementById('btn-send-notification').addEventListener('click', function () {
+            const target = document.getElementById('notification-target').value.trim();
+            const message = document.getElementById('notification-message').value.trim();
+
+            if (!message) {
+                alert('Please enter a message to send.');
+                return;
+            }
+
+            const payload = {
+                message: message,
+                usernames: target ? [target] : []
+            };
+
+            fetch('/api/admin/notifications', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('input[name="_csrf"]')?.value || ''
+                },
+                body: JSON.stringify(payload)
+            })
+                .then(response => {
+                    if (response.ok) {
+                        const inputMsg = document.getElementById('notification-message');
+                        inputMsg.value = '';
+                        inputMsg.placeholder = 'Sent successfully!';
+                        setTimeout(() => inputMsg.placeholder = 'Hello World!', 2000);
+                    } else {
+                        alert('Failed to send notification. Check console for details.');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error sending notification:', err);
+                    alert('Error sending notification.');
+                });
+        });
+
         document.addEventListener("DOMContentLoaded", () => {
             const deleteModal = document.getElementById('deleteTournamentModal');
             if (deleteModal) {
