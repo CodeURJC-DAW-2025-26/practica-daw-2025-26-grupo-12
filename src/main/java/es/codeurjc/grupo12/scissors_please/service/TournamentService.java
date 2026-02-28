@@ -1,7 +1,5 @@
 package es.codeurjc.grupo12.scissors_please.service;
 
-import es.codeurjc.grupo12.scissors_please.model.Tournament;
-import es.codeurjc.grupo12.scissors_please.repository.TournamentRepository;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -12,14 +10,18 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import es.codeurjc.grupo12.scissors_please.model.Tournament;
+import es.codeurjc.grupo12.scissors_please.repository.TournamentRepository;
+
 @Service
-@RequiredArgsConstructor
+
 public class TournamentService {
 
   private static final int MAX_PAGE_SIZE = 20;
@@ -28,7 +30,9 @@ public class TournamentService {
 
   private static final Pattern SLOT_PATTERN =
       Pattern.compile("(\\d+)\\s+slots", Pattern.CASE_INSENSITIVE);
-  private final TournamentRepository tournamentRepository;
+
+  @Autowired    
+  private TournamentRepository tournamentRepository;
 
   public Tournament createTournament(
       String title,

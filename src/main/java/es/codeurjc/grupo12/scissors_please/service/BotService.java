@@ -8,7 +8,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,11 +16,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@RequiredArgsConstructor
 @Transactional
 public class BotService {
   private static final int MAX_PAGE_SIZE = 20;
-  private final BotRepository botRepository;
+  @Autowired private BotRepository botRepository;
 
   @Transactional(readOnly = true)
   public BotPage getBotPage(User user, boolean includePrivate, Pageable pageable) {

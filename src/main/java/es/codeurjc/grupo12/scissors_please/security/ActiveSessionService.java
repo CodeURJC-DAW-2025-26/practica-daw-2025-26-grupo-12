@@ -3,6 +3,8 @@ package es.codeurjc.grupo12.scissors_please.security;
 import es.codeurjc.grupo12.scissors_please.model.User;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,10 +12,11 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
+
 public class ActiveSessionService {
 
-  private final SessionRegistry sessionRegistry;
+  @Autowired
+  private SessionRegistry sessionRegistry;
 
   public void expireSessions(User user) {
     List<Object> principals = sessionRegistry.getAllPrincipals();

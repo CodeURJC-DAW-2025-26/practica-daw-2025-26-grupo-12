@@ -1,11 +1,13 @@
 package es.codeurjc.grupo12.scissors_please.repository;
 
-import es.codeurjc.grupo12.scissors_please.model.Bot;
 import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import es.codeurjc.grupo12.scissors_please.model.Bot;
 
 @Repository
 public interface BotRepository extends JpaRepository<Bot, Long> {

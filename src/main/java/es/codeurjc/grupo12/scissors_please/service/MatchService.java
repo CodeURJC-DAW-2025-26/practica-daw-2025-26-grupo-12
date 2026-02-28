@@ -1,10 +1,5 @@
 package es.codeurjc.grupo12.scissors_please.service;
 
-import es.codeurjc.grupo12.scissors_please.model.Bot;
-import es.codeurjc.grupo12.scissors_please.model.Match;
-import es.codeurjc.grupo12.scissors_please.model.Round;
-import es.codeurjc.grupo12.scissors_please.repository.BotRepository;
-import es.codeurjc.grupo12.scissors_please.repository.MatchRepository;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -16,14 +11,21 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import es.codeurjc.grupo12.scissors_please.model.Bot;
+import es.codeurjc.grupo12.scissors_please.model.Match;
+import es.codeurjc.grupo12.scissors_please.model.Round;
+import es.codeurjc.grupo12.scissors_please.repository.BotRepository;
+import es.codeurjc.grupo12.scissors_please.repository.MatchRepository;
+
 @Service
-@RequiredArgsConstructor
+
 public class MatchService {
 
   private static final int MAX_PAGE_SIZE = 20;
@@ -31,8 +33,10 @@ public class MatchService {
       DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
   private static final List<String> MOVES = List.of("Rock", "Paper", "Scissors");
 
-  private final MatchRepository matchRepository;
-  private final BotRepository botRepository;
+  @Autowired
+  private  MatchRepository matchRepository;
+  @Autowired
+  private  BotRepository botRepository;
 
   public MatchStartResult startMatchmaking(Long userId, Long selectedBotId) {
     Bot myBot = resolveMyBot(userId, selectedBotId);
