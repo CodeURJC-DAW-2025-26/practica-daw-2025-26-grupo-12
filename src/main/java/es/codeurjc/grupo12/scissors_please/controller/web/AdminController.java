@@ -1,12 +1,17 @@
 package es.codeurjc.grupo12.scissors_please.controller.web;
 
+import es.codeurjc.grupo12.scissors_please.model.User;
+import es.codeurjc.grupo12.scissors_please.security.ActiveSessionService;
+import es.codeurjc.grupo12.scissors_please.service.TournamentAutomationService;
+import es.codeurjc.grupo12.scissors_please.service.TournamentService;
+import es.codeurjc.grupo12.scissors_please.service.UserService;
+import es.codeurjc.grupo12.scissors_please.service.UserService.UserStatusFilter;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -21,16 +26,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.util.UriUtils;
 
-import es.codeurjc.grupo12.scissors_please.model.User;
-import es.codeurjc.grupo12.scissors_please.security.ActiveSessionService;
-import es.codeurjc.grupo12.scissors_please.service.TournamentAutomationService;
-import es.codeurjc.grupo12.scissors_please.service.TournamentService;
-import es.codeurjc.grupo12.scissors_please.service.UserService;
-import es.codeurjc.grupo12.scissors_please.service.UserService.UserStatusFilter;
-
 @Controller
 @RequestMapping("/admin")
-
 public class AdminController {
 
   private static final int MIN_PLAYERS = 4;
@@ -41,14 +38,10 @@ public class AdminController {
   private static final Set<String> ALLOWED_FORMATS =
       Set.of("Single Elimination", "Double Elimination", "Round Robin");
 
-  @Autowired
-  private  TournamentService tournamentService;
-  @Autowired
-  private TournamentAutomationService tournamentAutomationService;
-  @Autowired
-  private UserService userService;
-  @Autowired
-  private ActiveSessionService activeSessionService;
+  @Autowired private TournamentService tournamentService;
+  @Autowired private TournamentAutomationService tournamentAutomationService;
+  @Autowired private UserService userService;
+  @Autowired private ActiveSessionService activeSessionService;
 
   @GetMapping("/panel")
   public String adminPanel(
