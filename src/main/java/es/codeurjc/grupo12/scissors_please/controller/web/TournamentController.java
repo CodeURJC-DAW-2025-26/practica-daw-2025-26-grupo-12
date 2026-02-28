@@ -52,7 +52,7 @@ public class TournamentController {
 
     UserType type = resolveUser(userService.getCurrentUser(authentication));
 
-    if (type == UserType.NOT_FOUND) {
+    if (type == null) {
       return "error";
     }
     Optional<Tournament> tournamentOp = tournamentService.getTournamentById(id);
@@ -105,7 +105,7 @@ public class TournamentController {
   private enum UserType {
     USER,
     ADMIN,
-    NOT_FOUND
+
   }
 
   private UserType resolveUser(User user) {
@@ -115,7 +115,7 @@ public class TournamentController {
     if (hasRole(user, "USER")) {
       return UserType.USER;
     }
-    return UserType.NOT_FOUND;
+    return null;
   }
 
   private boolean hasRole(User user, String role) {
