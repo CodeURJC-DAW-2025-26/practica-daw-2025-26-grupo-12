@@ -3,6 +3,8 @@ package es.codeurjc.grupo12.scissors_please.controller.web;
 import es.codeurjc.grupo12.scissors_please.service.TournamentService;
 import es.codeurjc.grupo12.scissors_please.service.UserService;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.Authentication;
@@ -14,11 +16,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/tournaments")
-@RequiredArgsConstructor
+
 public class TournamentController {
 
-  private final TournamentService tournamentService;
-  private final UserService userService;
+  @Autowired
+  private TournamentService tournamentService;
+  @Autowired
+  private  UserService userService;
 
   @GetMapping
   public String tournamentList(@PageableDefault(size = 5) Pageable pageable, Model model) {

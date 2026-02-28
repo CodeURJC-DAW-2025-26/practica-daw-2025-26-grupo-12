@@ -7,6 +7,8 @@ import es.codeurjc.grupo12.scissors_please.service.MatchService;
 import es.codeurjc.grupo12.scissors_please.service.UserService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.Authentication;
@@ -20,12 +22,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/matches")
-@RequiredArgsConstructor
 public class MatchController {
 
-  private final BotService botService;
-  private final MatchService matchService;
-  private final UserService userService;
+  @Autowired
+  private  BotService botService;
+  @Autowired
+  private MatchService matchService;
+  @Autowired
+  private UserService userService;
 
   @GetMapping("/list")
   public String matchList(@PageableDefault(size = 5) Pageable pageable, Model model) {

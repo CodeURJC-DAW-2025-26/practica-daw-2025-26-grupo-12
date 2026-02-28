@@ -8,6 +8,8 @@ import es.codeurjc.grupo12.scissors_please.service.TournamentService;
 import es.codeurjc.grupo12.scissors_please.service.UserService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -15,13 +17,16 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
-@RequiredArgsConstructor
 public class MainController {
 
-  private final BotService botService;
-  private final MatchService matchService;
-  private final TournamentService tournamentService;
-  private final UserService userService;
+  @Autowired
+  private  BotService botService;
+  @Autowired
+  private  MatchService matchService;
+  @Autowired
+  private  TournamentService tournamentService;
+  @Autowired
+  private  UserService userService;
 
   @GetMapping("/")
   public String index() {

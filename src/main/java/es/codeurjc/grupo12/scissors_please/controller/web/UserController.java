@@ -1,13 +1,9 @@
 package es.codeurjc.grupo12.scissors_please.controller.web;
 
-import es.codeurjc.grupo12.scissors_please.model.Bot;
-import es.codeurjc.grupo12.scissors_please.model.User;
-import es.codeurjc.grupo12.scissors_please.service.BotService;
-import es.codeurjc.grupo12.scissors_please.service.MatchService;
-import es.codeurjc.grupo12.scissors_please.service.UserService;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,17 +12,26 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.util.UriUtils;
 
+import es.codeurjc.grupo12.scissors_please.model.Bot;
+import es.codeurjc.grupo12.scissors_please.model.User;
+import es.codeurjc.grupo12.scissors_please.service.BotService;
+import es.codeurjc.grupo12.scissors_please.service.MatchService;
+import es.codeurjc.grupo12.scissors_please.service.UserService;
+
 @Controller
 @RequestMapping("/user")
-@RequiredArgsConstructor
+
 public class UserController {
 
   private static final int TOP_BOTS_LIMIT = 5;
   private static final int RECENT_MATCHES_LIMIT = 5;
 
-  private final UserService userService;
-  private final BotService botService;
-  private final MatchService matchService;
+  @Autowired
+  private  UserService userService;
+  @Autowired
+  private  BotService botService;
+  @Autowired
+  private  MatchService matchService;
 
   @GetMapping("/profile")
   public String userProfile(
