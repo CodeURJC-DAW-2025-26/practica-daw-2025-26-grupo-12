@@ -1,6 +1,7 @@
 package es.codeurjc.grupo12.scissors_please.controller.web;
 
 import es.codeurjc.grupo12.scissors_please.model.Tournament;
+import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.service.TournamentService;
 import es.codeurjc.grupo12.scissors_please.service.UserService;
 import java.util.Optional;
@@ -46,14 +47,24 @@ public class TournamentController {
   }
 
   @GetMapping("/detail/{id}")
-  public String tournamentDetail(Model model, @PathVariable Long id) {
+  public String tournamentDetail(
+      Model model, @PathVariable Long id, Authentication authentication) {
+
+    UserType type = resolveUser(userService.getCurrentUser(authentication));
+
+    if (type == UserType.NOT_FOUND) {
+      return "error";
+    }
     Optional<Tournament> tournamentOp = tournamentService.getTournamentById(id);
     if (tournamentOp.isPresent()) {
       Tournament tournament = tournamentOp.get();
-      model.addAttribute("tournament", tournament);
+      model.addAttribute("isAdmin", type == UserType.ADMIN);
       model.addAttribute("open", true);
+      model.addAttribute("participants",tournament.getParticipants().size());
+      model.addAttribute("tournament", tournamentOp.get());
       return "tournament-detail";
     }
+
     return "error";
   }
 
@@ -89,5 +100,25 @@ public class TournamentController {
     model.addAttribute("selectedRegistered", section.selectedRegistered());
     model.addAttribute("selectedNotRegistered", section.selectedNotRegistered());
     return "my-tournaments-auth";
+  }
+
+  private enum UserType {
+    USER,
+    ADMIN,
+    NOT_FOUND
+  }
+
+  private UserType resolveUser(User user) {
+    if (hasRole(user, "ADMIN")) {
+      return UserType.ADMIN;
+    }
+    if (hasRole(user, "USER")) {
+      return UserType.USER;
+    }
+    return UserType.NOT_FOUND;
+  }
+
+  private boolean hasRole(User user, String role) {
+    return user.getRoles() != null && user.getRoles().contains(role);
   }
 }
