@@ -1,7 +1,5 @@
 package es.codeurjc.grupo12.scissors_please.security;
 
-import lombok.RequiredArgsConstructor;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,10 +16,8 @@ import org.springframework.security.web.session.HttpSessionEventPublisher;
 @EnableWebSecurity
 public class SecurityConfig {
 
-  @Autowired
-  private  CustomOAuth2UserService customOAuth2UserService;
-  @Autowired
-  private LoginFailureHandler loginFailureHandler;
+  @Autowired private CustomOAuth2UserService customOAuth2UserService;
+  @Autowired private LoginFailureHandler loginFailureHandler;
 
   @Bean
   PasswordEncoder passwordEncoder() {

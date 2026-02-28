@@ -1,12 +1,10 @@
 package es.codeurjc.grupo12.scissors_please.repository;
 
+import es.codeurjc.grupo12.scissors_please.model.User;
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
-import es.codeurjc.grupo12.scissors_please.model.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {

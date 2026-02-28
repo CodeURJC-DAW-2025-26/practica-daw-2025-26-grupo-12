@@ -1,5 +1,10 @@
 package es.codeurjc.grupo12.scissors_please.service;
 
+import es.codeurjc.grupo12.scissors_please.model.Bot;
+import es.codeurjc.grupo12.scissors_please.model.Match;
+import es.codeurjc.grupo12.scissors_please.model.Tournament;
+import es.codeurjc.grupo12.scissors_please.repository.BotRepository;
+import es.codeurjc.grupo12.scissors_please.repository.TournamentRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -8,18 +13,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import es.codeurjc.grupo12.scissors_please.model.Bot;
-import es.codeurjc.grupo12.scissors_please.model.Match;
-import es.codeurjc.grupo12.scissors_please.model.Tournament;
-import es.codeurjc.grupo12.scissors_please.repository.BotRepository;
-import es.codeurjc.grupo12.scissors_please.repository.TournamentRepository;
-import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
@@ -29,10 +27,8 @@ public class TournamentAutomationService {
   private static final String STATUS_IN_PROGRESS = "In Progress";
   private static final String STATUS_COMPLETED = "Completed";
 
-  @Autowired
-  private  TournamentRepository tournamentRepository;
-  @Autowired
-  private  BotRepository botRepository;
+  @Autowired private TournamentRepository tournamentRepository;
+  @Autowired private BotRepository botRepository;
 
   public enum RunNowResult {
     EXECUTED,

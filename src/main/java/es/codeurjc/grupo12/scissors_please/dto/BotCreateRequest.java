@@ -1,10 +1,9 @@
 package es.codeurjc.grupo12.scissors_please.dto;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Data;
 
 @Data
