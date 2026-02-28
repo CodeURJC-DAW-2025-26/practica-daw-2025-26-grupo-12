@@ -11,11 +11,11 @@
         <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
             <div>
                 <p class="text-secondary mb-1 small text-uppercase">Tournament Admin</p>
-                <h1 class="h3 fw-bold mb-0">Edit Tournament</h1>
+                <h1 class="h3 fw-bold mb-0">Edit: {{tournament.name}}</h1>
             </div>
             <div class="d-flex flex-wrap gap-2">
-                <a href="/admin/panel" class="btn btn-outline-muted btn-sm">Back to Admin</a>
-                <a href="/admin/tournament/detail" class="btn btn-primary btn-sm">View Details</a>
+                <a href="/tournaments" class="btn btn-outline-muted btn-sm">Back to List</a>
+                <a href="/tournaments/detail/{{tournament.id}}" class="btn btn-primary btn-sm">View Details</a>
             </div>
         </div>
 
@@ -23,50 +23,54 @@
             <div class="col-12">
                 <div class="card p-4">
                     <h2 class="h5 fw-bold mb-3">Edit Scheduled Tournament</h2>
-                    <form action="/admin/tournament/detail" method="get">
+                    
+                    <form action="/admin/tournaments/edit/{{tournament.id}}" method="post">
                         <div class="row g-3">
+                            
                             <div class="col-md-6">
-                                <label for="editTournament" class="form-label text-uppercase small">Tournament</label>
-                                <select class="form-select form-control-lg" id="editTournament">
-                                    <option selected>Quantum Open</option>
-                                    <option>Night Owl League</option>
-                                    <option>Winter Cup 2026</option>
+                                <label for="name" class="form-label text-uppercase small">Tournament Name</label>
+                                <input type="text" class="form-control form-control-lg" id="name" name="name" 
+                                       value="{{tournament.name}}" required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="startDate" class="form-label text-uppercase small">Start Date</label>
+                                <input type="date" class="form-control form-control-lg" id="startDate" name="startDate" 
+                                       value="{{tournament.startDate}}">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="slots" class="form-label text-uppercase small">Max Players</label>
+                                <input type="number" class="form-control form-control-lg" id="slots" name="slots" 
+                                       value="{{tournament.slots}}">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="status" class="form-label text-uppercase small">Status</label>
+                                <select class="form-select form-control-lg" id="status" name="status">
+                                    <option value="Scheduled" {{#tournament.status}}selected{{/tournament.status}}>Scheduled</option>
+                                    <option value="Registration Open">Registration Open</option>
+                                    <option value="Completed">Completed</option>
                                 </select>
                             </div>
-                            <div class="col-md-6">
-                                <label for="editStartDate" class="form-label text-uppercase small">Start Date</label>
-                                <input type="date" class="form-control form-control-lg" id="editStartDate">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="editSlots" class="form-label text-uppercase small">Max Players</label>
-                                <input type="number" class="form-control form-control-lg" id="editSlots" placeholder="64">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="editStatus" class="form-label text-uppercase small">Status</label>
-                                <select class="form-select form-control-lg" id="editStatus">
-                                    <option selected>Scheduled</option>
-                                    <option>Registration Open</option>
-                                    <option>Completed</option>
-                                </select>
-                            </div>
+
                             <div class="col-12">
-                                <label for="editNotes" class="form-label text-uppercase small">Admin Notes</label>
-                                <textarea class="form-control form-control-lg" id="editNotes" rows="3"
-                                    placeholder="Internal notes for scheduling or seeding."></textarea>
+                                <label for="description" class="form-label text-uppercase small">Description</label>
+                                <textarea class="form-control form-control-lg" id="description" name="description" rows="3">{{tournament.description}}</textarea>
                             </div>
+
                             <div class="col-12 d-flex flex-wrap gap-2 mt-2">
                                 <button type="submit" class="btn btn-primary">Save Changes</button>
                                 <button type="reset" class="btn btn-outline-muted">Reset</button>
                             </div>
                         </div>
+                        <input type="hidden" name="_csrf" value="{{_csrf.token}}"/>
                     </form>
                 </div>
             </div>
-
         </div>
     </div>
 
     {{> components/scripts}}
 </body>
-
 </html>

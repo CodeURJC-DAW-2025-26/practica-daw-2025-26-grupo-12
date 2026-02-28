@@ -25,7 +25,7 @@ public class Tournament {
   private String description;
   private String status;
   private LocalDate startDate;
-
+  private int slots;
   @OneToMany private List<Bot> participants;
 
   @OneToMany(cascade = CascadeType.ALL)

@@ -1,7 +1,10 @@
 package es.codeurjc.grupo12.scissors_please.controller.web;
 
+import es.codeurjc.grupo12.scissors_please.model.Tournament;
+import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.service.TournamentService;
 import es.codeurjc.grupo12.scissors_please.service.UserService;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -9,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -42,10 +46,26 @@ public class TournamentController {
     return "components/tournament-page-chunk";
   }
 
-  @GetMapping("/detail")
-  public String tournamentDetail(org.springframework.ui.Model model) {
-    model.addAttribute("open", true);
-    return "tournament-detail";
+  @GetMapping("/detail/{id}")
+  public String tournamentDetail(
+      Model model, @PathVariable Long id, Authentication authentication) {
+
+    UserType type = resolveUser(userService.getCurrentUser(authentication));
+
+    if (type == null) {
+      return "error";
+    }
+    Optional<Tournament> tournamentOp = tournamentService.getTournamentById(id);
+    if (tournamentOp.isPresent()) {
+      Tournament tournament = tournamentOp.get();
+      model.addAttribute("isAdmin", type == UserType.ADMIN);
+      model.addAttribute("open", true);
+      model.addAttribute("participants", tournament.getParticipants().size());
+      model.addAttribute("tournament", tournamentOp.get());
+      return "tournament-detail";
+    }
+
+    return "error";
   }
 
   @GetMapping("/create")
@@ -63,7 +83,7 @@ public class TournamentController {
     return "tournament-results";
   }
 
-  @GetMapping("/my")
+  @GetMapping("/my-tournaments")
   public String myTournaments(
       Authentication authentication,
       @RequestParam(name = "registration", required = false) String registrationFilter,
@@ -80,5 +100,24 @@ public class TournamentController {
     model.addAttribute("selectedRegistered", section.selectedRegistered());
     model.addAttribute("selectedNotRegistered", section.selectedNotRegistered());
     return "my-tournaments-auth";
+  }
+
+  private enum UserType {
+    USER,
+    ADMIN,
+  }
+
+  private UserType resolveUser(User user) {
+    if (hasRole(user, "ADMIN")) {
+      return UserType.ADMIN;
+    }
+    if (hasRole(user, "USER")) {
+      return UserType.USER;
+    }
+    return null;
+  }
+
+  private boolean hasRole(User user, String role) {
+    return user.getRoles() != null && user.getRoles().contains(role);
   }
 }

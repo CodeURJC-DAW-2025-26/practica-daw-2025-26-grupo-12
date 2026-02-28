@@ -8,6 +8,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -111,7 +112,7 @@ public class BotService {
   }
 
   @Transactional(readOnly = true)
-  public java.util.Optional<Bot> getBotById(Long id) {
+  public Optional<Bot> getBotById(Long id) {
     return botRepository.findById(id);
   }
 
