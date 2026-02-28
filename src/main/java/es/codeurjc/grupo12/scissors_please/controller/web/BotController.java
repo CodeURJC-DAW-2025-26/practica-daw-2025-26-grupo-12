@@ -3,8 +3,10 @@ package es.codeurjc.grupo12.scissors_please.controller.web;
 import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.service.BotService;
+import es.codeurjc.grupo12.scissors_please.service.ChartService;
 import es.codeurjc.grupo12.scissors_please.service.UserService;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,7 @@ public class BotController {
 
   @Autowired private BotService botService;
   @Autowired private UserService userService;
+  @Autowired private ChartService chartService;
 
   @GetMapping("/my-bots")
   public String myBotsPage(
@@ -161,15 +164,39 @@ public class BotController {
   @GetMapping("/detail/{id}")
   public String botDetail(@PathVariable Long id, Model model) {
     Optional<Bot> opBot = botService.getBotById(id);
-    if (opBot.isPresent()) {
-
-      Bot bot = opBot.get();
-      String username = userService.getUserById(bot.getOwnerId()).getUsername();
-      model.addAttribute("bot", bot);
-      model.addAttribute("username", username);
-      return "bot-detail";
+    if (opBot.isEmpty()) {
+      return "error";
     }
-    return "error";
+    Bot bot = opBot.get();
+
+    byte[] pieChartBytes =
+        chartService.generateResultsPieChart(bot.getWins(), bot.getLosses(), bot.getDraws());
+    String base64PieChart = Base64.getEncoder().encodeToString(pieChartBytes);
+
+    byte[] eloChartBytes = chartService.generateEloLineChart(bot.getEloHistory());
+    String base64EloChart = Base64.getEncoder().encodeToString(eloChartBytes);
+
+    int total = bot.getWins() + bot.getLosses() + bot.getDraws();
+    double winRate = (total > 0) ? (bot.getWins() * 100.0 / total) : 0;
+    String username = userService.getUserById(bot.getOwnerId()).getUsername();
+
+    int startElo = bot.getEloHistory().isEmpty() ? bot.getElo() : bot.getEloHistory().get(0);
+    int currentElo = bot.getElo();
+    int trend = currentElo - startElo;
+
+    model.addAttribute("bot", bot);
+    model.addAttribute("username", username);
+    model.addAttribute("totalMatches", total);
+    model.addAttribute("winRateFormatted", String.format("%.1f", winRate));
+
+    model.addAttribute("pieChart", base64PieChart);
+    model.addAttribute("eloChart", base64EloChart);
+
+    model.addAttribute("startElo", startElo);
+    model.addAttribute("eloTrend", (trend >= 0 ? "+" : "") + trend);
+    model.addAttribute("trendClass", trend >= 0 ? "bg-success" : "bg-danger");
+
+    return "bot-detail";
   }
 
   private List<String> parseTags(String tags) {

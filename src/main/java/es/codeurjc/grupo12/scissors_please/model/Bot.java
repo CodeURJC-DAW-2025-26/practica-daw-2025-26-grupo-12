@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OrderColumn;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -43,6 +44,11 @@ public class Bot {
   @Column(name = "owner_id", nullable = false)
   private Long ownerId;
 
+  // Just for testing
+  private int wins;
+  private int losses;
+  private int draws;
+
   @CreationTimestamp private LocalDateTime createdAt;
 
   @LastModifiedDate private LocalDateTime updatedAt;
@@ -52,8 +58,17 @@ public class Bot {
   @Column(name = "tag")
   private List<String> tags = new ArrayList<>();
 
+  @ElementCollection
+  @CollectionTable(name = "bot_elo_history", joinColumns = @JoinColumn(name = "bot_id"))
+  @Column(name = "elo_value")
+  @OrderColumn(name = "match_order")
+  private List<Integer> eloHistory = new ArrayList<>();
+
   @PrePersist
   public void onCreate() {
+    wins = 0;
+    losses = 0;
+    draws = 0;
     createdAt = LocalDateTime.now();
     updatedAt = LocalDateTime.now();
   }
@@ -61,5 +76,10 @@ public class Bot {
   @PreUpdate
   public void onUpdate() {
     updatedAt = LocalDateTime.now();
+  }
+
+  public void updateElo(int newElo) {
+    this.elo = newElo;
+    this.eloHistory.add(newElo);
   }
 }

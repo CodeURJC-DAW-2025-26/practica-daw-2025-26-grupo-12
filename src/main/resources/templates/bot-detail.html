@@ -74,149 +74,104 @@
                 <div class="card p-4 h-100">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h3 class="h6 fw-bold mb-0">Results Breakdown</h3>
-                        <span class="badge bg-secondary">Pie Chart</span>
+                        <span class="badge bg-secondary">Total: {{totalMatches}}</span>
                     </div>
                     <div class="bg-secondary-bg border border-secondary rounded p-4 text-center">
-                        <svg viewBox="0 0 120 120" width="160" height="160" class="mb-3">
-                            <circle cx="60" cy="60" r="52" fill="none" stroke="#1e293b" stroke-width="16"></circle>
-                            <circle cx="60" cy="60" r="52" fill="none" stroke="#22c55e" stroke-width="16"
-                                stroke-dasharray="196 130" stroke-dashoffset="0"></circle>
-                            <circle cx="60" cy="60" r="52" fill="none" stroke="#ef4444" stroke-width="16"
-                                stroke-dasharray="98 228" stroke-dashoffset="-196"></circle>
-                            <circle cx="60" cy="60" r="52" fill="none" stroke="#94a3b8" stroke-width="16"
-                                stroke-dasharray="33 293" stroke-dashoffset="-294"></circle>
-                        </svg>
+                        <img src="data:image/png;base64,{{pieChart}}" class="img-fluid mb-3" style="max-height: 180px;">
+
                         <div class="d-flex flex-wrap justify-content-center gap-2">
-                            <span class="badge bg-success">Win 60%</span>
-                            <span class="badge bg-danger">Loss 30%</span>
-                            <span class="badge bg-secondary">Draw 10%</span>
+                            <span class="badge bg-success">Wins: {{bot.wins}}</span>
+                            <span class="badge bg-danger">Losses: {{bot.losses}}</span>
+                            <span class="badge bg-secondary">Draws: {{bot.draws}}</span>
                         </div>
                     </div>
                 </div>
             </div>
+
             <div class="col-lg-6">
                 <div class="card p-4 h-100">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h3 class="h6 fw-bold mb-0">ELO Progression</h3>
-                        <span class="badge bg-secondary">Line Chart</span>
+                        <span class="badge bg-secondary">Live History</span>
                     </div>
                     <div class="bg-secondary-bg border border-secondary rounded p-4 text-center">
-                        <svg viewBox="0 0 280 140" width="100%" height="160" class="mb-3">
-                            <line x1="20" y1="20" x2="20" y2="120" stroke="#334155" stroke-width="1"></line>
-                            <line x1="20" y1="120" x2="260" y2="120" stroke="#334155" stroke-width="1"></line>
-                            <line x1="20" y1="90" x2="260" y2="90" stroke="#1f2937" stroke-width="1"></line>
-                            <line x1="20" y1="60" x2="260" y2="60" stroke="#1f2937" stroke-width="1"></line>
-                            <line x1="20" y1="30" x2="260" y2="30" stroke="#1f2937" stroke-width="1"></line>
-                            <polyline fill="none" stroke="#8b5cf6" stroke-width="3"
-                                points="30,95 70,80 110,85 150,60 190,65 230,45 260,35">
-                                <title>Match 1: 1760 → Match 7: 1824</title>
-                            </polyline>
-                            <circle cx="30" cy="95" r="4" fill="#94a3b8">
-                                <title>Match 1: ELO 1760</title>
-                            </circle>
-                            <circle cx="70" cy="80" r="4" fill="#94a3b8">
-                                <title>Match 2: ELO 1778</title>
-                            </circle>
-                            <circle cx="110" cy="85" r="4" fill="#94a3b8">
-                                <title>Match 3: ELO 1772</title>
-                            </circle>
-                            <circle cx="150" cy="60" r="4" fill="#94a3b8">
-                                <title>Match 4: ELO 1796</title>
-                            </circle>
-                            <circle cx="190" cy="65" r="4" fill="#94a3b8">
-                                <title>Match 5: ELO 1790</title>
-                            </circle>
-                            <circle cx="230" cy="45" r="4" fill="#94a3b8">
-                                <title>Match 6: ELO 1810</title>
-                            </circle>
-                            <circle cx="260" cy="35" r="5" fill="#22c55e">
-                                <title>Match 7: ELO 1824 (Current)</title>
-                            </circle>
-                            <text x="22" y="18" fill="#94a3b8" font-size="9">ELO</text>
-                            <text x="30" y="135" fill="#94a3b8" font-size="9">M1</text>
-                            <text x="70" y="135" fill="#94a3b8" font-size="9">M2</text>
-                            <text x="110" y="135" fill="#94a3b8" font-size="9">M3</text>
-                            <text x="150" y="135" fill="#94a3b8" font-size="9">M4</text>
-                            <text x="190" y="135" fill="#94a3b8" font-size="9">M5</text>
-                            <text x="230" y="135" fill="#94a3b8" font-size="9">M6</text>
-                            <text x="256" y="135" fill="#94a3b8" font-size="9">M7</text>
-                        </svg>
+                        <img src="data:image/png;base64,{{eloChart}}" class="img-fluid mb-3" style="max-height: 180px;">
+
                         <div class="d-flex flex-wrap justify-content-center gap-2">
-                            <span class="badge bg-secondary">Start 1760</span>
-                            <span class="badge bg-primary">Current 1824</span>
-                            <span class="badge bg-success">Trend +64</span>
+                            <span class="badge bg-secondary">Start: {{startElo}}</span>
+                            <span class="badge bg-primary">Current: {{bot.elo}}</span>
+                            <span class="badge {{trendClass}}">Trend: {{eloTrend}}</span>
                         </div>
-                        <div class="d-flex flex-wrap justify-content-center gap-3 mt-2 text-secondary small">
+
+                        <div class="d-flex flex-wrap justify-content-center gap-3 mt-3 text-secondary small">
                             <span class="d-inline-flex align-items-center gap-2">
-                                <span class="badge bg-primary"> </span> Line
+                                <span class="rounded-circle"
+                                    style="width:10px; height:10px; background-color:#8b5cf6;"></span> ELO Line
                             </span>
                             <span class="d-inline-flex align-items-center gap-2">
-                                <span class="badge bg-success"> </span> Current
-                            </span>
-                            <span class="d-inline-flex align-items-center gap-2">
-                                <span class="badge bg-secondary"> </span> Past Matches
+                                <span class="rounded-circle"
+                                    style="width:10px; height:10px; background-color:#22c55e;"></span> Current
                             </span>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="card border-0 bg-transparent">
-            <div class="card p-4">
-                <h3 class="h5 fw-bold mb-3">Match History</h3>
-                <div class="table-responsive">
-                    <table class="table mb-0 align-middle text-nowrap">
-                        <thead>
-                            <tr class="text-secondary small text-uppercase">
-                                <th scope="col" class="ps-3">Match ID</th>
-                                <th scope="col">Opponent</th>
-                                <th scope="col">Result</th>
-                                <th scope="col">Score</th>
-                                <th scope="col">Date</th>
-                                <th scope="col" class="text-end pe-3">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="ps-3 text-secondary">#4021</td>
-                                <td>BetaMaster</td>
-                                <td><span class="badge badge-soft-success rounded-pill px-3">Win</span></td>
-                                <td class="text-secondary">12 - 8</td>
-                                <td class="text-secondary">2 mins ago</td>
-                                <td class="text-end pe-3">
-                                    <a href="/matches/stats" class="btn btn-outline-muted btn-sm">View</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="ps-3 text-secondary">#4018</td>
-                                <td>Randomizer</td>
-                                <td><span class="badge badge-soft-danger rounded-pill px-3">Loss</span></td>
-                                <td class="text-secondary">9 - 11</td>
-                                <td class="text-secondary">45 mins ago</td>
-                                <td class="text-end pe-3">
-                                    <a href="/matches/stats" class="btn btn-outline-muted btn-sm">View</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="ps-3 text-secondary">#4014</td>
-                                <td>Roshambo_X</td>
-                                <td><span class="badge bg-secondary rounded-pill px-3">Draw</span></td>
-                                <td class="text-secondary">10 - 10</td>
-                                <td class="text-secondary">Yesterday</td>
-                                <td class="text-end pe-3">
-                                    <a href="/matches/stats" class="btn btn-outline-muted btn-sm">View</a>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <div class="card border-0 bg-transparent">
+                <div class="card p-4">
+                    <h3 class="h5 fw-bold mb-3">Match History</h3>
+                    <div class="table-responsive">
+                        <table class="table mb-0 align-middle text-nowrap">
+                            <thead>
+                                <tr class="text-secondary small text-uppercase">
+                                    <th scope="col" class="ps-3">Match ID</th>
+                                    <th scope="col">Opponent</th>
+                                    <th scope="col">Result</th>
+                                    <th scope="col">Score</th>
+                                    <th scope="col">Date</th>
+                                    <th scope="col" class="text-end pe-3">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="ps-3 text-secondary">#4021</td>
+                                    <td>BetaMaster</td>
+                                    <td><span class="badge badge-soft-success rounded-pill px-3">Win</span></td>
+                                    <td class="text-secondary">12 - 8</td>
+                                    <td class="text-secondary">2 mins ago</td>
+                                    <td class="text-end pe-3">
+                                        <a href="/matches/stats" class="btn btn-outline-muted btn-sm">View</a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="ps-3 text-secondary">#4018</td>
+                                    <td>Randomizer</td>
+                                    <td><span class="badge badge-soft-danger rounded-pill px-3">Loss</span></td>
+                                    <td class="text-secondary">9 - 11</td>
+                                    <td class="text-secondary">45 mins ago</td>
+                                    <td class="text-end pe-3">
+                                        <a href="/matches/stats" class="btn btn-outline-muted btn-sm">View</a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="ps-3 text-secondary">#4014</td>
+                                    <td>Roshambo_X</td>
+                                    <td><span class="badge bg-secondary rounded-pill px-3">Draw</span></td>
+                                    <td class="text-secondary">10 - 10</td>
+                                    <td class="text-secondary">Yesterday</td>
+                                    <td class="text-end pe-3">
+                                        <a href="/matches/stats" class="btn btn-outline-muted btn-sm">View</a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
+
         </div>
 
-    </div>
-
-    {{> components/scripts}}
+        {{> components/scripts}}
 </body>
 
 </html>
