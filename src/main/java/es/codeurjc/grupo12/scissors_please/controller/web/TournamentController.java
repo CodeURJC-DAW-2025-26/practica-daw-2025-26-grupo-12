@@ -105,7 +105,6 @@ public class TournamentController {
   private enum UserType {
     USER,
     ADMIN,
-
   }
 
   private UserType resolveUser(User user) {
