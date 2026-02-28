@@ -86,7 +86,7 @@ public class ChartService {
 
       return baos.toByteArray();
     } catch (IOException e) {
-      throw new RuntimeException("Error al generar imagen", e);
+      throw new RuntimeException("The image couldn't be generated", e);
     }
   }
 }
