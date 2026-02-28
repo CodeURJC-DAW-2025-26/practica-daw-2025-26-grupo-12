@@ -13,7 +13,7 @@
                 <p class="text-secondary mb-1 small text-uppercase">Season 2026</p>
                 <h1 class="h3 fw-bold mb-0">My Tournaments</h1>
             </div>
-            <form class="d-flex flex-column flex-md-row gap-2" method="get" action="/tournaments/my">
+            <form class="d-flex flex-column flex-md-row gap-2" method="get" action="/tournaments/my-tournaments">
                 <div class="input-group input-group-sm">
                     <span class="input-group-text">Search</span>
                     <input type="text" class="form-control" name="q" value="{{search}}" placeholder="Tournament name">
@@ -58,7 +58,7 @@
                                         <button class="btn btn-outline-muted btn-sm" disabled>{{actionLabel}}</button>
                                         {{/actionDisabled}}
                                         {{^actionDisabled}}
-                                        <a href="{{actionHref}}" class="btn btn-outline-muted btn-sm">{{actionLabel}}</a>
+                                        <a href="/tournaments/detail/{{id}}" class="btn btn-outline-muted btn-sm">{{actionLabel}}</a>
                                         {{/actionDisabled}}
                                     </td>
                                 </tr>

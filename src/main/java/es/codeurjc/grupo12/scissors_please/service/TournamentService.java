@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -142,6 +143,7 @@ public class TournamentService {
         isRegistered ? "bg-secondary" : "bg-dark border border-secondary text-secondary";
 
     return new UserTournamentItem(
+        listItem.id(),
         listItem.name(),
         formatDate(tournament.getStartDate()),
         extractFormat(tournament.getDescription()),
@@ -184,6 +186,7 @@ public class TournamentService {
   }
 
   private TournamentListItem toListItem(Tournament tournament) {
+
     String rawStatus = tournament.getStatus() == null ? "" : tournament.getStatus().trim();
     String statusLower = rawStatus.toLowerCase();
 
@@ -287,6 +290,10 @@ public class TournamentService {
     return String.join(" - ", sections);
   }
 
+  public Optional<Tournament> getTournamentById(Long id) {
+    return tournamentRepository.findById(id);
+  }
+
   public record TournamentListItem(
       Long id,
       String name,
@@ -298,6 +305,7 @@ public class TournamentService {
       boolean actionDisabled) {}
 
   public record UserTournamentItem(
+      Long id,
       String name,
       String date,
       String format,
