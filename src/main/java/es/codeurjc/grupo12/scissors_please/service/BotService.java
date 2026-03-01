@@ -125,6 +125,10 @@ public class BotService {
     return user.getId();
   }
 
+  public Long findRankingPositionById(Long id) {
+    return botRepository.findRankingPositionById(id);
+  }
+
   @Transactional(readOnly = true)
   public record BotPage(
       List<Bot> bots,
