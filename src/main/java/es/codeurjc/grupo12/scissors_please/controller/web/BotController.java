@@ -42,10 +42,7 @@ public class BotController {
     boolean showPrivate = canViewPrivate(currentUser, targetUser);
     List<Bot> bots = botService.getBotsForUser(targetUser, showPrivate);
     int bestElo = bots.stream().mapToInt(Bot::getElo).max().orElse(0);
-    Long latestBotId = bots.stream()
-                           .map(Bot::getId)
-                           .max(Long::compare)
-                           .orElse(null);
+    Long latestBotId = bots.stream().map(Bot::getId).max(Long::compare).orElse(null);
     model.addAttribute("latestBotId", latestBotId);
     model.addAttribute("totalBots", bots.size());
     model.addAttribute("bestElo", bestElo);

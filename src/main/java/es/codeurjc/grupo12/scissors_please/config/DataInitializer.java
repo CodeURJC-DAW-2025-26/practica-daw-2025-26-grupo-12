@@ -81,6 +81,7 @@ public class DataInitializer {
           int slots = slotsPerTournament[i - 1];
           Tournament tournament = new Tournament();
           tournament.setName("Seed Tournament " + i);
+          tournament.setSlots(slots);
           tournament.setStatus("Upcoming");
           tournament.setStartDate(LocalDate.now().plusDays(i));
           tournament.setDescription(
@@ -89,6 +90,7 @@ public class DataInitializer {
                   + " - Format: Single Elimination - "
                   + slots
                   + " slots");
+
           tournament.setMatches(new ArrayList<>());
           tournament.setParticipants(new ArrayList<>());
           tournaments.add(tournament);

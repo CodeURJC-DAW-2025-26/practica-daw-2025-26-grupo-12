@@ -1,10 +1,12 @@
 package es.codeurjc.grupo12.scissors_please.controller.web;
 
 import es.codeurjc.grupo12.scissors_please.model.Bot;
+import es.codeurjc.grupo12.scissors_please.model.Image;
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.service.BotService;
 import es.codeurjc.grupo12.scissors_please.service.MatchService;
 import es.codeurjc.grupo12.scissors_please.service.UserService;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +14,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriUtils;
 
 @Controller
@@ -48,6 +52,8 @@ public class UserController {
         (int) userMatches.stream().filter(match -> "win".equalsIgnoreCase(match.result())).count();
     int winRate = userMatches.isEmpty() ? 0 : (int) Math.round((wins * 100.0) / userMatches.size());
 
+    model.addAttribute("userId", currentUser.getId());
+    model.addAttribute("hasProfilePhoto", currentUser.getImage() != null);
     model.addAttribute("profileHeading", ownProfile ? "My Profile" : "User Profile");
     model.addAttribute("profileInitial", resolveInitial(targetUser.getUsername()));
     model.addAttribute("profileName", targetUser.getUsername());
@@ -67,6 +73,22 @@ public class UserController {
     model.addAttribute("recentMatches", userMatches.stream().limit(RECENT_MATCHES_LIMIT).toList());
 
     return "user-detail";
+  }
+
+  @PostMapping("/profile/update-photo")
+  public String updatePhoto(
+      @RequestParam("image") MultipartFile image, Authentication authentication)
+      throws IOException {
+    User currentUser = userService.getCurrentUser(authentication);
+
+    if (!image.isEmpty()) {
+      if (!handleImageUpload(currentUser, image)) {
+        return "error";
+      }
+      userService.updateUser(currentUser);
+    }
+
+    return "redirect:/user/profile";
   }
 
   private User resolveTargetUser(String username, User currentUser) {
@@ -121,6 +143,30 @@ public class UserController {
     String encodedUsername =
         UriUtils.encodeQueryParam(targetUser.getUsername(), StandardCharsets.UTF_8);
     return "/bots/my-bots?user=" + encodedUsername;
+  }
+
+  private boolean handleImageUpload(User user, MultipartFile imageFile) {
+    if (imageFile == null || imageFile.isEmpty()) {
+      return true;
+    }
+
+    String contentType = imageFile.getContentType();
+    if (contentType == null || !contentType.startsWith("image/")) {
+      return false;
+    }
+
+    try {
+      Image img = new Image();
+      img.setFilename(imageFile.getOriginalFilename());
+      img.setContentType(contentType);
+      img.setData(imageFile.getBytes());
+
+      user.setImage(img);
+      return true;
+
+    } catch (IOException e) {
+      return false;
+    }
   }
 
   private record ProfileBotView(String name, String strategy, int elo, boolean publicBot) {}
