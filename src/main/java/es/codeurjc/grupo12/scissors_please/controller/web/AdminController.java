@@ -3,6 +3,7 @@ package es.codeurjc.grupo12.scissors_please.controller.web;
 import es.codeurjc.grupo12.scissors_please.config.ErrorConstants;
 import es.codeurjc.grupo12.scissors_please.model.Image;
 import es.codeurjc.grupo12.scissors_please.model.Tournament;
+import es.codeurjc.grupo12.scissors_please.model.TournamentStatus;
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.repository.UserRepository.MonthlyUserCount;
 import es.codeurjc.grupo12.scissors_please.security.ActiveSessionService;
@@ -20,7 +21,6 @@ import java.util.Base64;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -45,9 +45,6 @@ public class AdminController {
   private static final int MAX_TITLE_LENGTH = 80;
   private static final int MAX_DESCRIPTION_LENGTH = 500;
   private static final int MAX_PRIZE_LENGTH = 120;
-  private static final Set<String> ALLOWED_FORMATS =
-      Set.of("Single Elimination", "Double Elimination", "Round Robin");
-
   @Autowired private TournamentService tournamentService;
   @Autowired private ChartService chartService;
   @Autowired private TournamentAutomationService tournamentAutomationService;
@@ -207,7 +204,7 @@ public class AdminController {
       tournament.setName(name);
       tournament.setDescription(description != null ? description : "");
       tournament.setSlots(slots);
-      tournament.setStatus(status);
+      tournament.setStatus(TournamentStatus.fromDisplayName(status));
 
       if (startDate != null && !startDate.isBlank()) {
         try {

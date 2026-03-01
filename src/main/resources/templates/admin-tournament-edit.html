@@ -52,11 +52,20 @@
                             <div class="col-md-6">
                                 <label for="status" class="form-label text-uppercase small">Status</label>
                                 <select class="form-select form-control-lg" id="status" name="status">
-                                    <option value="Scheduled" {{#isScheduled}}selected{{/isScheduled}}>Scheduled
+                                    <option value="Upcoming"
+                                        {{#tournament.isUpcoming}}selected{{/tournament.isUpcoming}}>Upcoming
                                     </option>
-                                    <option value="Registration Open" {{#isOpen}}selected{{/isOpen}}>Registration Open
+                                    <option value="Scheduled"
+                                        {{#tournament.isScheduled}}selected{{/tournament.isScheduled}}>Scheduled
                                     </option>
-                                    <option value="Completed" {{#isCompleted}}selected{{/isCompleted}}>Completed
+                                    <option value="Registration Open"
+                                        {{#tournament.isOpen}}selected{{/tournament.isOpen}}>Registration Open
+                                    </option>
+                                    <option value="In Progress"
+                                        {{#tournament.isInProgress}}selected{{/tournament.isInProgress}}>In Progress
+                                    </option>
+                                    <option value="Completed"
+                                        {{#tournament.isCompleted}}selected{{/tournament.isCompleted}}>Completed
                                     </option>
                                 </select>
                             </div>
