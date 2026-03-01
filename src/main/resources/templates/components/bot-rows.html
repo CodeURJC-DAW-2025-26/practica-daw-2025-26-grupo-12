@@ -2,19 +2,33 @@
 <tr class="bot-row">
     <td class="ps-3">
         <div class="d-flex align-items-center">
-            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white me-2"
-                style="width: 32px; height: 32px;"></div>
+            <div class="me-3" style="width: 40px; height: 40px;">
+                {{#hasImage}}
+                <img src="/bot-images/{{id}}"
+                     class="rounded-circle border border-primary w-100 h-100" 
+                     style="object-fit: cover;" 
+                     alt="{{name}}">
+                {{/hasImage}}
+                
+                {{^hasImage}}
+                <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold w-100 h-100 shadow-sm"
+                     style="font-size: 0.9rem;">{{initial}}</div>
+                {{/hasImage}}
+            </div>
+
             <div>
-                <span class="fw-medium d-block">{{name}}</span>
-                {{#tags}}
-                <span class="badge bg-secondary">{{.}}</span>
-                {{/tags}}
+                <span class="fw-medium d-block text-white">{{name}}</span>
+                <div class="d-flex gap-1 flex-wrap mt-1">
+                    {{#tags}}
+                    <span class="badge bg-dark text-secondary border border-secondary" style="font-size: 0.7rem;">{{.}}</span>
+                    {{/tags}}
+                </div>
             </div>
         </div>
     </td>
-    <td class="text-secondary">{{description}}</td>
-    <td class="text-secondary">{{elo}}</td>
-    <td class="text-end pe-3">
+    <td class="text-secondary align-middle small">{{description}}</td>
+    <td class="text-secondary align-middle font-monospace">{{elo}}</td>
+    <td class="text-end pe-3 align-middle">
         <div class="d-flex flex-wrap gap-2 justify-content-end">
             <a href="/bots/detail/{{id}}" class="btn btn-primary btn-sm">View</a>
             {{#canManage}}
@@ -30,8 +44,8 @@
 {{/bots}}
 {{#showEmpty}}
 <tr>
-    <td class="ps-3" colspan="4">
-        <span class="text-secondary">No bots available.</span>
+    <td class="ps-3 py-4 text-center" colspan="4">
+        <span class="text-secondary italic">No bots available in this collection.</span>
     </td>
 </tr>
 {{/showEmpty}}
