@@ -194,6 +194,7 @@ public class BotController {
     int currentElo = bot.getElo();
     int trend = currentElo - startElo;
 
+    model.addAttribute("totalMatches", total);
     model.addAttribute("bot", bot);
     model.addAttribute("username", username);
     model.addAttribute("initial", bot.getName().charAt(0));

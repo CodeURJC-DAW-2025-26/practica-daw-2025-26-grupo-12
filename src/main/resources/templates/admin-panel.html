@@ -34,7 +34,7 @@
                             <span id="admin-tournament-counter" class="badge bg-secondary">Showing
                                 {{fromItem}}-{{toItem}}
                                 of {{totalElements}}</span>
-                            <a href="/admin/tournament/create" class="btn btn-outline-muted btn-sm">New
+                            <a href="/admin/tournaments/create" class="btn btn-outline-muted btn-sm">New
                                 Tournament</a>
                         </div>
                     </div>
@@ -167,7 +167,7 @@
                     const form = deleteModal.querySelector('#deleteTournamentForm');
                     const nameSpan = deleteModal.querySelector('#deleteTournamentName');
 
-                    form.action = `/admin/tournament/${tournamentId}/delete`;
+                    form.action = `/admin/tournaments/${tournamentId}/delete`;
                     nameSpan.textContent = tournamentName;
                 });
             }
