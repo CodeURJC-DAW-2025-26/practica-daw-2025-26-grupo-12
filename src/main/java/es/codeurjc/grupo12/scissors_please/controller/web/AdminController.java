@@ -1,7 +1,6 @@
 package es.codeurjc.grupo12.scissors_please.controller.web;
 
 import es.codeurjc.grupo12.scissors_please.config.ErrorConstants;
-import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.Image;
 import es.codeurjc.grupo12.scissors_please.model.Tournament;
 import es.codeurjc.grupo12.scissors_please.model.TournamentStatus;
@@ -382,25 +381,45 @@ public class AdminController {
 
   @GetMapping("/bots")
   public String adminBots(
+      @PageableDefault(size = 10) Pageable pageable,
       @RequestParam(name = "q", required = false) String query,
       @RequestParam(name = "visibility", required = false, defaultValue = "all") String visibility,
       Model model) {
 
     String normalizedQuery = normalizeQuery(query);
+    populateBotsSearchModel(model, normalizedQuery, visibility, pageable);
+    return "admin-bots";
+  }
 
-    List<Bot> bots = botService.searchBots(normalizedQuery, visibility);
+  @GetMapping("/bots/table")
+  public String adminBotsTable(
+      @PageableDefault(size = 10) Pageable pageable,
+      @RequestParam(name = "q", required = false) String query,
+      @RequestParam(name = "visibility", required = false, defaultValue = "all") String visibility,
+      Model model) {
+    String normalizedQuery = normalizeQuery(query);
+    populateBotsSearchModel(model, normalizedQuery, visibility, pageable);
+    return "components/admin-bot-rows";
+  }
 
-    model.addAttribute("searchQuery", normalizedQuery);
+  private void populateBotsSearchModel(
+      Model model, String searchQuery, String visibility, Pageable pageable) {
+    BotService.BotPage botPage = botService.getAdminBotPage(searchQuery, visibility, pageable);
 
+    model.addAttribute("searchQuery", searchQuery);
     model.addAttribute("visibilityFilter", visibility);
-
     model.addAttribute("visAll", visibility.equals("all"));
     model.addAttribute("visPublic", visibility.equals("public"));
     model.addAttribute("visPrivate", visibility.equals("private"));
-    model.addAttribute("resultCount", bots.size());
-    model.addAttribute("bots", bots);
 
-    return "admin-bots";
+    model.addAttribute("bots", botPage.bots());
+    model.addAttribute("nextPage", botPage.nextPage());
+    model.addAttribute("hasMore", botPage.hasMore());
+    model.addAttribute("totalElements", botPage.totalElements());
+    model.addAttribute("fromItem", botPage.fromItem());
+    model.addAttribute("toItem", botPage.toItem());
+    model.addAttribute("resultCount", botPage.totalElements());
+    model.addAttribute("size", Math.max(pageable.getPageSize(), 1));
   }
 
   private String updateBlockedStatus(

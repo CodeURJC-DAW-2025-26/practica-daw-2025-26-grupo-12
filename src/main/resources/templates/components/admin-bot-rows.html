@@ -1,0 +1,50 @@
+{{#bots}}
+<tr class="bot-row">
+    <td class="ps-3">
+        <div style="width: 40px; height: 40px;">
+            {{#hasImage}}
+            <img src="/bot-images/{{id}}" class="rounded-circle border border-primary w-100 h-100"
+                style="object-fit: cover;" alt="{{name}}">
+            {{/hasImage}}
+            {{^hasImage}}
+            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold w-100 h-100 shadow-sm"
+                style="font-size: 0.9rem;">{{initial}}</div>
+            {{/hasImage}}
+        </div>
+    </td>
+    <td>
+        <span class="fw-bold d-block text-white">{{name}}</span>
+        <span class="text-secondary small">ID: #{{id}}</span>
+    </td>
+    <td><span class="text-secondary small">Owner: #{{ownerId}}</span></td>
+    <td><span class="badge bg-primary font-monospace">{{elo}}</span></td>
+    <td>
+        {{#isPublic}}
+        <span class="badge border border-success text-success">Public</span>
+        {{/isPublic}}
+        {{^isPublic}}
+        <span class="badge border border-warning text-warning">Private</span>
+        {{/isPublic}}
+    </td>
+    <td class="text-end pe-3">
+        <div class="d-flex justify-content-end gap-2">
+            <a href="/bots/detail/{{id}}" class="btn btn-sm btn-outline-muted">View</a>
+            <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteBotModal"
+                data-bot-id="{{id}}" data-bot-name="{{name}}">
+                Delete
+            </button>
+        </div>
+    </td>
+</tr>
+{{/bots}}
+{{^bots}}
+<tr>
+    <td class="ps-3 py-4 text-center" colspan="6">
+        <span class="text-secondary italic">No bots found matching your criteria.</span>
+    </td>
+</tr>
+{{/bots}}
+<tr class="admin-bot-meta-row d-none" data-result-count="{{resultCount}}" data-search-query="{{searchQuery}}"
+    data-visibility-filter="{{visibilityFilter}}" data-next-page="{{nextPage}}" data-has-more="{{hasMore}}"
+    data-total-elements="{{totalElements}}" data-from-item="{{fromItem}}" data-to-item="{{toItem}}">
+</tr>
