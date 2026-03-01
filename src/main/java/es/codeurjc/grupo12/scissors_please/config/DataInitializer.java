@@ -249,6 +249,7 @@ public class DataInitializer {
       return 0;
     }
   }
+
   // Just for testing
   private LocalDateTime generateRandomDateIn2026() {
     long startEpochDay = LocalDate.of(2026, Month.JANUARY, 1).toEpochDay();

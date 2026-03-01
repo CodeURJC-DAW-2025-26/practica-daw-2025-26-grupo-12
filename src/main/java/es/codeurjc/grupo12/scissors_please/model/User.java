@@ -13,12 +13,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -63,10 +60,8 @@ public class User {
 
   @PrePersist
   public void onCreate() {
-    if (createdAt == null){
+    if (createdAt == null) {
       createdAt = LocalDateTime.now();
     }
   }
-
-  
 }
