@@ -99,7 +99,7 @@ public class AdminController {
     if (success != null) {
       model.addAttribute("successMessage", "Tournament created successfully.");
     }
-    setCreateFormModel(model, "", "", "", "", "Single Elimination", "", "");
+    setCreateFormModel(model, "", "", "", "", "", "");
     return "admin-tournament-create";
   }
 
@@ -109,7 +109,6 @@ public class AdminController {
       @RequestParam(required = false) String adminMaxPlayers,
       @RequestParam(required = false) String adminRegistrationStart,
       @RequestParam(required = false) String adminStartDate,
-      @RequestParam(required = false) String adminFormat,
       @RequestParam(required = false) String adminDescription,
       @RequestParam(required = false) String adminPrize,
       @RequestParam(required = false) MultipartFile image,
@@ -120,7 +119,6 @@ public class AdminController {
     String maxPlayersRaw = safeTrim(adminMaxPlayers);
     String registrationStartRaw = safeTrim(adminRegistrationStart);
     String startDateRaw = safeTrim(adminStartDate);
-    String format = safeTrim(adminFormat);
     String description = safeTrim(adminDescription);
     String prize = safeTrim(adminPrize);
 
@@ -135,9 +133,6 @@ public class AdminController {
         parseDate("Registration opens date is invalid.", registrationStartRaw, errors);
     LocalDate startDate = parseDate("Start date is invalid.", startDateRaw, errors);
 
-    if (!ALLOWED_FORMATS.contains(format)) {
-      errors.add("Format is required.");
-    }
     if (description.length() > MAX_DESCRIPTION_LENGTH) {
       errors.add("Description cannot exceed " + MAX_DESCRIPTION_LENGTH + " characters.");
     }
@@ -152,14 +147,7 @@ public class AdminController {
     if (!errors.isEmpty()) {
       model.addAttribute("errorMessages", errors);
       setCreateFormModel(
-          model,
-          title,
-          maxPlayersRaw,
-          registrationStartRaw,
-          startDateRaw,
-          format,
-          description,
-          prize);
+          model, title, maxPlayersRaw, registrationStartRaw, startDateRaw, description, prize);
       return "admin-tournament-create";
     }
     Image tournamentImage = null;
@@ -176,14 +164,7 @@ public class AdminController {
     }
 
     tournamentService.createTournament(
-        title,
-        tournamentImage,
-        description,
-        maxPlayers,
-        registrationStart,
-        startDate,
-        format,
-        prize);
+        title, tournamentImage, description, maxPlayers, registrationStart, startDate, prize);
     return "redirect:/admin/tournaments/create?success";
   }
 
@@ -334,7 +315,6 @@ public class AdminController {
       String maxPlayers,
       String registrationStart,
       String startDate,
-      String format,
       String description,
       String prize) {
     model.addAttribute("adminTitle", title);
@@ -343,9 +323,6 @@ public class AdminController {
     model.addAttribute("adminStartDate", startDate);
     model.addAttribute("adminDescription", description);
     model.addAttribute("adminPrize", prize);
-    model.addAttribute("formatSingleSelected", "Single Elimination".equals(format));
-    model.addAttribute("formatDoubleSelected", "Double Elimination".equals(format));
-    model.addAttribute("formatRoundRobinSelected", "Round Robin".equals(format));
   }
 
   @GetMapping("/users")

@@ -63,14 +63,6 @@
                                 <input type="date" class="form-control form-control-lg" id="adminStartDate"
                                     name="adminStartDate" value="{{adminStartDate}}" required>
                             </div>
-                            <div class="col-md-6">
-                                <label for="adminFormat" class="form-label text-uppercase small">Format</label>
-                                <select class="form-select form-control-lg" id="adminFormat" name="adminFormat" required>
-                                    <option value="Single Elimination" {{#formatSingleSelected}}selected{{/formatSingleSelected}}>Single Elimination</option>
-                                    <option value="Double Elimination" {{#formatDoubleSelected}}selected{{/formatDoubleSelected}}>Double Elimination</option>
-                                    <option value="Round Robin" {{#formatRoundRobinSelected}}selected{{/formatRoundRobinSelected}}>Round Robin</option>
-                                </select>
-                            </div>
                             <div class="col-12">
                                 <label for="adminDescription" class="form-label text-uppercase small">Description</label>
                                 <textarea class="form-control form-control-lg" id="adminDescription" name="adminDescription"
