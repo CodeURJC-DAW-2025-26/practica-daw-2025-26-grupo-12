@@ -309,43 +309,55 @@ public class MatchService {
         "/matches/stats?id=" + match.getId());
   }
 
-  public MatchStatsView getMatchStatsView(Long matchId) {
+  public MatchStatsView getMatchStatsView(Long matchId, Long viewerUserId) {
     Match match = resolveMatch(matchId);
     Bot bot1 = match.getBot1();
     Bot bot2 = match.getBot2();
-    String bot1Name = resolveBotName(bot1);
-    String bot2Name = resolveBotName(bot2);
+    boolean bot1Owned = isOwnedByUser(match.getBot1(), viewerUserId);
+    boolean bot2Owned = isOwnedByUser(match.getBot2(), viewerUserId);
+    boolean personalizedPerspective = viewerUserId != null && bot1Owned != bot2Owned;
+    boolean viewerBotIsSecond = personalizedPerspective && bot2Owned;
+
+    Bot displayedBot1 = viewerBotIsSecond ? bot2 : bot1;
+    Bot displayedBot2 = viewerBotIsSecond ? bot1 : bot2;
+
+    String bot1Name = resolveBotName(displayedBot1);
+    String bot2Name = resolveBotName(displayedBot2);
     String bot1OwnerName =
-        bot1 != null && bot1.getOwnerId() != null
-            ? userService.getUserById(bot1.getOwnerId()).getUsername()
+        displayedBot1 != null && displayedBot1.getOwnerId() != null
+            ? userService.getUserById(displayedBot1.getOwnerId()).getUsername()
             : "Unknown";
     String bot2OwnerName =
-        bot2 != null && bot2.getOwnerId() != null
-            ? userService.getUserById(bot2.getOwnerId()).getUsername()
+        displayedBot2 != null && displayedBot2.getOwnerId() != null
+            ? userService.getUserById(displayedBot2.getOwnerId()).getUsername()
             : "Unknown";
+    int bot1Score = viewerBotIsSecond ? match.getBot2Score() : match.getBot1Score();
+    int bot2Score = viewerBotIsSecond ? match.getBot1Score() : match.getBot2Score();
 
-    String winnerLabel = resolveWinnerLabel(match, bot1Name, bot2Name);
-    String winnerBadgeClass =
-        "Draw".equalsIgnoreCase(winnerLabel) ? "bg-secondary" : "badge-soft-success";
+    String winnerLabel =
+        personalizedPerspective
+            ? resolveResultFromScores(bot1Score, bot2Score)
+            : resolveWinnerLabel(match, bot1Name, bot2Name);
+    String winnerBadgeClass = resolveBadgeClass(winnerLabel);
 
     List<MatchRoundView> rounds =
         Optional.ofNullable(match.getRounds()).orElse(List.of()).stream()
             .sorted(Comparator.comparingInt(Round::getRoundNumber))
-            .map(this::toRoundView)
+            .map(round -> toRoundView(round, viewerBotIsSecond))
             .toList();
 
     return new MatchStatsView(
         match.getId(),
-        bot1 != null ? bot1.getId() : null,
+        displayedBot1 != null ? displayedBot1.getId() : null,
         bot1Name,
         bot1OwnerName,
-        bot2 != null ? bot2.getId() : null,
+        displayedBot2 != null ? displayedBot2.getId() : null,
         bot2Name,
         bot2OwnerName,
         winnerLabel,
         winnerBadgeClass,
-        match.getBot1Score(),
-        match.getBot2Score(),
+        bot1Score,
+        bot2Score,
         rounds.size(),
         formatDate(match.getTimestamp()),
         rounds);
@@ -809,13 +821,16 @@ public class MatchService {
     return "Draw";
   }
 
-  private MatchRoundView toRoundView(Round round) {
+  private MatchRoundView toRoundView(Round round, boolean swapPerspective) {
     String result =
         round.getResult() == null || round.getResult().isBlank() ? "Draw" : round.getResult();
+    if (swapPerspective) {
+      result = invertResult(result);
+    }
     return new MatchRoundView(
         round.getRoundNumber(),
-        round.getBot1Move(),
-        round.getBot2Move(),
+        swapPerspective ? round.getBot2Move() : round.getBot1Move(),
+        swapPerspective ? round.getBot1Move() : round.getBot2Move(),
         result,
         resolveBadgeClass(result));
   }
@@ -825,6 +840,15 @@ public class MatchService {
       return "Draw";
     }
     return myScore > opponentScore ? "Win" : "Loss";
+  }
+
+  private String invertResult(String result) {
+    String normalized = result == null ? "" : result.trim().toLowerCase(Locale.ROOT);
+    return switch (normalized) {
+      case "win", "wins" -> "Loss";
+      case "loss", "lose", "loses" -> "Win";
+      default -> result;
+    };
   }
 
   private MatchListItem toListItem(Match match) {

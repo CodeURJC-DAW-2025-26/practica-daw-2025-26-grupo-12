@@ -57,11 +57,15 @@ public class MatchController {
       Model model,
       RedirectAttributes redirectAttributes) {
     try {
-      MatchService.MatchStatsView matchStats = matchService.getMatchStatsView(matchId);
+      Long currentUserId =
+          isAuthenticated(authentication)
+              ? userService.getCurrentUser(authentication).getId()
+              : null;
+      MatchService.MatchStatsView matchStats =
+          matchService.getMatchStatsView(matchId, currentUserId);
       if (isAuthenticated(authentication)) {
-        Long userId = userService.getCurrentUser(authentication).getId();
-        matchService.acknowledgeReadyMatch(userId, matchId);
-        model.addAttribute("canRematch", matchService.canRequestRematch(matchId, userId));
+        matchService.acknowledgeReadyMatch(currentUserId, matchId);
+        model.addAttribute("canRematch", matchService.canRequestRematch(matchId, currentUserId));
       }
       model.addAttribute("stats", matchStats);
       model.addAttribute("hasRounds", !matchStats.rounds().isEmpty());
