@@ -20,8 +20,10 @@
                 </div>
                 <select class="form-select form-select-sm" name="registration">
                     <option value="all" {{#selectedAll}}selected{{/selectedAll}}>Registration: All</option>
-                    <option value="registered" {{#selectedRegistered}}selected{{/selectedRegistered}}>Registered</option>
-                    <option value="not-registered" {{#selectedNotRegistered}}selected{{/selectedNotRegistered}}>Not Registered</option>
+                    <option value="registered" {{#selectedRegistered}}selected{{/selectedRegistered}}>Registered
+                    </option>
+                    <option value="not-registered" {{#selectedNotRegistered}}selected{{/selectedNotRegistered}}>Not
+                        Registered</option>
                 </select>
                 <button class="btn btn-outline-muted btn-sm" type="submit">Apply</button>
             </form>
@@ -34,7 +36,8 @@
                         <table class="table mb-0 align-middle text-nowrap">
                             <thead>
                                 <tr class="text-secondary small text-uppercase">
-                                    <th scope="col" class="ps-3">Tournament</th>
+                                    <th scope="col" class="ps-3" style="width: 60px;">Image</th>
+                                    <th scope="col">Tournament</th>
                                     <th scope="col">Date</th>
                                     <th scope="col">Format</th>
                                     <th scope="col">Registration</th>
@@ -46,7 +49,22 @@
                                 {{#hasTournaments}}
                                 {{#tournaments}}
                                 <tr>
-                                    <td class="ps-3">
+                                    <td class="ps-3" style="width: 60px;">
+                                        {{#hasImage}}
+                                        <div class="rounded overflow-hidden bg-light d-flex align-items-center justify-content-center"
+                                            style="width: 48px; height: 48px;">
+                                            <img src="/tournament-images/{{id}}" alt="{{name}}"
+                                                class="w-100 h-100 object-fit-cover">
+                                        </div>
+                                        {{/hasImage}}
+                                        {{^hasImage}}
+                                        <div class="rounded bg-primary d-flex align-items-center justify-content-center text-white fw-bold"
+                                            style="width: 48px; height: 48px;">
+                                            T
+                                        </div>
+                                        {{/hasImage}}
+                                    </td>
+                                    <td>
                                         <div class="fw-medium">{{name}}</div>
                                     </td>
                                     <td class="text-secondary">{{date}}</td>
@@ -66,7 +84,8 @@
                                 {{/hasTournaments}}
                                 {{^hasTournaments}}
                                 <tr>
-                                    <td class="ps-3 text-secondary" colspan="6">No tournaments found with the selected filters.</td>
+                                    <td class="ps-3 text-secondary" colspan="7">No tournaments found with the selected
+                                        filters.</td>
                                 </tr>
                                 {{/hasTournaments}}
                             </tbody>
