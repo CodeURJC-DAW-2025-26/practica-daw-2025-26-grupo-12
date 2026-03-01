@@ -36,3 +36,4 @@ build/
 ### Environment Variables ###
 .env
 /.run/
+src/main/resources/keystore.p12
