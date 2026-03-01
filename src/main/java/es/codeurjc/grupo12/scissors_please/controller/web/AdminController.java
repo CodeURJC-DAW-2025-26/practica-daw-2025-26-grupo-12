@@ -327,6 +327,7 @@ public class AdminController {
 
   @GetMapping("/users")
   public String adminUsers(
+      @PageableDefault(size = 10) Pageable pageable,
       @RequestParam(name = "q", required = false) String query,
       @RequestParam(name = "status", required = false) String status,
       Authentication authentication,
@@ -341,12 +342,13 @@ public class AdminController {
     String normalizedQuery = normalizeQuery(query);
     UserStatusFilter statusFilter = UserStatusFilter.fromValue(status);
     User currentAdmin = userService.getCurrentUser(authentication);
-    populateUsersSearchModel(model, normalizedQuery, statusFilter, currentAdmin);
+    populateUsersSearchModel(model, normalizedQuery, statusFilter, currentAdmin, pageable);
     return "admin-users";
   }
 
   @GetMapping("/users/table")
   public String adminUsersTable(
+      @PageableDefault(size = 10) Pageable pageable,
       @RequestParam(name = "q", required = false) String query,
       @RequestParam(name = "status", required = false) String status,
       Authentication authentication,
@@ -354,7 +356,7 @@ public class AdminController {
     String normalizedQuery = normalizeQuery(query);
     UserStatusFilter statusFilter = UserStatusFilter.fromValue(status);
     User currentAdmin = userService.getCurrentUser(authentication);
-    populateUsersSearchModel(model, normalizedQuery, statusFilter, currentAdmin);
+    populateUsersSearchModel(model, normalizedQuery, statusFilter, currentAdmin, pageable);
     return "components/admin-user-rows";
   }
 
@@ -476,19 +478,29 @@ public class AdminController {
   }
 
   private void populateUsersSearchModel(
-      Model model, String searchQuery, UserStatusFilter statusFilter, User currentAdmin) {
+      Model model,
+      String searchQuery,
+      UserStatusFilter statusFilter,
+      User currentAdmin,
+      Pageable pageable) {
+    UserService.UserPage userPage = userService.getUserPage(searchQuery, statusFilter, pageable);
     List<AdminUserView> users =
-        userService.searchUsers(searchQuery, statusFilter).stream()
-            .map(user -> toAdminUserView(user, currentAdmin))
-            .toList();
+        userPage.users().stream().map(user -> toAdminUserView(user, currentAdmin)).toList();
 
     model.addAttribute("searchQuery", searchQuery);
     model.addAttribute("statusFilter", statusFilter.value());
     model.addAttribute("statusAll", statusFilter == UserStatusFilter.ALL);
     model.addAttribute("statusActive", statusFilter == UserStatusFilter.ACTIVE);
     model.addAttribute("statusBlocked", statusFilter == UserStatusFilter.BLOCKED);
-    model.addAttribute("resultCount", users.size());
+
     model.addAttribute("users", users);
+    model.addAttribute("nextPage", userPage.nextPage());
+    model.addAttribute("hasMore", userPage.hasMore());
+    model.addAttribute("totalElements", userPage.totalElements());
+    model.addAttribute("fromItem", userPage.fromItem());
+    model.addAttribute("toItem", userPage.toItem());
+    model.addAttribute("resultCount", userPage.totalElements());
+    model.addAttribute("size", Math.max(pageable.getPageSize(), 1));
   }
 
   private String buildUsersRedirect(String query, UserStatusFilter statusFilter) {

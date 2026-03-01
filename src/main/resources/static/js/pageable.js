@@ -54,6 +54,12 @@
 
 			try {
 				const url = new URL(endpoint, window.location.origin);
+
+				const currentParams = new URLSearchParams(window.location.search);
+				currentParams.forEach((value, key) => {
+					url.searchParams.set(key, value);
+				});
+
 				if (user) {
 					url.searchParams.set("user", user);
 				}
