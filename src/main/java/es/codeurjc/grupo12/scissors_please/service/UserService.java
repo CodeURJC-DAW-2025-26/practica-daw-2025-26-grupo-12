@@ -2,6 +2,7 @@ package es.codeurjc.grupo12.scissors_please.service;
 
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.repository.UserRepository;
+import es.codeurjc.grupo12.scissors_please.repository.UserRepository.MonthlyUserCount;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
@@ -63,6 +64,10 @@ public class UserService {
   public User updateUser(User user) {
     log.info("Updating user: {}", user.getUsername());
     return userRepository.save(user);
+  }
+
+  public List<MonthlyUserCount> getMonthlyUserCount() {
+    return userRepository.countUsersByMonth();
   }
 
   public void deleteUser(Long id) {

@@ -11,9 +11,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -43,6 +48,8 @@ public class User {
   @JsonIgnore
   private String password;
 
+  private LocalDateTime createdAt;
+
   @Column(name = "oauth_provider")
   private String oauthProvider;
 
@@ -53,4 +60,22 @@ public class User {
   @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
   @Column(name = "role")
   private List<String> roles = new ArrayList<>();
+
+  @PrePersist
+  public void onCreate() {
+    createdAt = generateRandomDateIn2026();
+  }
+
+  // Just for testing
+  private LocalDateTime generateRandomDateIn2026() {
+    long startEpochDay = LocalDate.of(2026, Month.JANUARY, 1).toEpochDay();
+    long endEpochDay = LocalDate.of(2026, Month.DECEMBER, 31).toEpochDay();
+
+    long randomDay = ThreadLocalRandom.current().nextLong(startEpochDay, endEpochDay);
+
+    int hour = ThreadLocalRandom.current().nextInt(0, 24);
+    int minute = ThreadLocalRandom.current().nextInt(0, 60);
+
+    return LocalDate.ofEpochDay(randomDay).atTime(hour, minute);
+  }
 }

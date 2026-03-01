@@ -1,14 +1,20 @@
 package es.codeurjc.grupo12.scissors_please.service;
 
+import es.codeurjc.grupo12.scissors_please.repository.UserRepository.MonthlyUserCount;
 import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.format.TextStyle;
 import java.util.List;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.CategoryLabelPositions;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.PiePlot;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.renderer.category.LineAndShapeRenderer;
+import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
 import org.springframework.stereotype.Service;
@@ -24,7 +30,7 @@ public class ChartService {
   private final Color TRANSPARENT = new Color(0, 0, 0, 0);
 
   public byte[] generateResultsPieChart(int wins, int losses, int draws) {
-    DefaultPieDataset dataset = new DefaultPieDataset();
+    DefaultPieDataset<String> dataset = new DefaultPieDataset<>();
     dataset.setValue("Wins", wins);
     dataset.setValue("Losses", losses);
     dataset.setValue("Draws", draws);
@@ -74,6 +80,53 @@ public class ChartService {
     plot.getRangeAxis().setTickLabelPaint(TEXT_COLOR);
 
     return chartToBytes(chart, 600, 300);
+  }
+
+  public byte[] generateUserHistory(List<MonthlyUserCount> monthlyData) {
+    DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+
+    for (MonthlyUserCount data : monthlyData) {
+      String monthName =
+          java.time.Month.of(data.month())
+              .getDisplayName(TextStyle.SHORT, java.util.Locale.ENGLISH);
+      String label = monthName + " " + String.valueOf(data.year()).substring(2);
+      dataset.addValue(data.count(), "Users", label);
+    }
+
+    JFreeChart chart =
+        ChartFactory.createBarChart(
+            null, null, null, dataset, PlotOrientation.VERTICAL, false, true, false);
+
+    Color LIGHT_BLUE = new Color(173, 216, 230);
+
+    chart.setBackgroundPaint(TRANSPARENT);
+    var plot = chart.getCategoryPlot();
+    plot.setBackgroundPaint(TRANSPARENT);
+    plot.setOutlineVisible(false);
+
+    var domainAxis = plot.getDomainAxis();
+    domainAxis.setTickLabelPaint(TEXT_COLOR);
+    domainAxis.setTickLabelFont(new Font("SansSerif", Font.PLAIN, 12));
+
+    domainAxis.setCategoryLabelPositions(
+        CategoryLabelPositions.createUpRotationLabelPositions(Math.PI / 4.0));
+
+    domainAxis.setLowerMargin(0.02);
+    domainAxis.setUpperMargin(0.02);
+    domainAxis.setCategoryMargin(0.1);
+
+    var rangeAxis = (NumberAxis) plot.getRangeAxis();
+    rangeAxis.setStandardTickUnits(org.jfree.chart.axis.NumberAxis.createIntegerTickUnits());
+    rangeAxis.setTickLabelPaint(TEXT_COLOR);
+    rangeAxis.setLowerBound(0.0);
+    rangeAxis.setUpperMargin(0.15);
+
+    var renderer = (BarRenderer) plot.getRenderer();
+    renderer.setSeriesPaint(0, LIGHT_BLUE);
+    renderer.setBarPainter(new StandardBarPainter());
+    renderer.setShadowVisible(false);
+
+    return chartToBytes(chart, 800, 400);
   }
 
   private byte[] chartToBytes(JFreeChart chart, int width, int height) {
