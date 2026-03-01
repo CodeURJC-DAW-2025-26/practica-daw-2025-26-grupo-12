@@ -1,18 +1,21 @@
 package es.codeurjc.grupo12.scissors_please.service;
 
+import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.Image;
 import es.codeurjc.grupo12.scissors_please.model.Tournament;
+import es.codeurjc.grupo12.scissors_please.model.User;
+import es.codeurjc.grupo12.scissors_please.repository.BotRepository;
 import es.codeurjc.grupo12.scissors_please.repository.TournamentRepository;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,18 +23,21 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class TournamentService {
 
   private static final int MAX_PAGE_SIZE = 20;
+  private static final String STATUS_UPCOMING = "Upcoming";
   private static final DateTimeFormatter TOURNAMENT_DATE_FORMATTER =
       DateTimeFormatter.ofPattern("MMM dd, yyyy", Locale.ENGLISH);
 
-  private static final Pattern SLOT_PATTERN =
-      Pattern.compile("(\\d+)\\s+slots", Pattern.CASE_INSENSITIVE);
+  private static final Pattern REGISTRATION_OPEN_PATTERN =
+      Pattern.compile("Registration opens:\\s*(\\d{4}-\\d{2}-\\d{2})", Pattern.CASE_INSENSITIVE);
 
   @Autowired private TournamentRepository tournamentRepository;
+  @Autowired private BotRepository botRepository;
 
   public void deleteTournament(Long id) {
     Tournament tournament =
@@ -63,6 +69,196 @@ public class TournamentService {
 
   public Tournament save(Tournament tournament) {
     return tournamentRepository.save(tournament);
+  }
+
+  @Transactional(readOnly = true)
+  public TournamentRegistrationState getRegistrationState(Tournament tournament, User currentUser) {
+    List<Bot> participantList = tournament.getParticipants();
+    Set<Long> participantIds = getParticipantIds(participantList);
+    int registeredParticipants = participantIds.size();
+    int slots = Math.max(tournament.getSlots(), 0);
+
+    LocalDate today = LocalDate.now();
+    LocalDate registrationOpenDate =
+        extractRegistrationOpenDate(tournament.getDescription()).orElse(null);
+    boolean registrationStarted =
+        registrationOpenDate == null || !today.isBefore(registrationOpenDate);
+    boolean startsInFuture =
+        tournament.getStartDate() != null && today.isBefore(tournament.getStartDate());
+    boolean upcoming = STATUS_UPCOMING.equalsIgnoreCase(normalizeStatus(tournament.getStatus()));
+    boolean hasAvailableSlots = slots > 0 && registeredParticipants < slots;
+
+    List<Bot> ownedBots = getOwnedBots(currentUser);
+    List<Bot> selectableBots =
+        ownedBots.stream()
+            .filter(bot -> bot.getId() != null && !participantIds.contains(bot.getId()))
+            .sorted(Comparator.comparingInt(Bot::getElo).reversed())
+            .toList();
+
+    boolean isAdmin = currentUser != null && isAdmin(currentUser);
+    boolean alreadyRegistered =
+        currentUser != null
+            && participantList != null
+            && participantList.stream()
+                .filter(bot -> bot != null)
+                .anyMatch(
+                    bot ->
+                        currentUser.getId() != null
+                            && currentUser.getId().equals(bot.getOwnerId()));
+
+    boolean registrationOpen =
+        upcoming && startsInFuture && registrationStarted && hasAvailableSlots;
+    boolean hasOwnedBots = !ownedBots.isEmpty();
+    boolean hasSelectableBots = !selectableBots.isEmpty();
+    boolean showJoinButton =
+        currentUser != null
+            && !isAdmin
+            && registrationOpen
+            && !alreadyRegistered
+            && hasSelectableBots;
+
+    String joinMessage = null;
+    String joinMessageClass = null;
+
+    if (!isAdmin) {
+      if (alreadyRegistered) {
+        joinMessage = "You are already registered in this tournament.";
+        joinMessageClass = "alert-info";
+      } else if (!upcoming || !startsInFuture) {
+        joinMessage = "Registration is closed for this tournament.";
+        joinMessageClass = "alert-warning";
+      } else if (!registrationStarted) {
+        joinMessage = "Registration opens on " + formatDate(registrationOpenDate) + ".";
+        joinMessageClass = "alert-info";
+      } else if (!hasAvailableSlots) {
+        joinMessage = "Tournament is full.";
+        joinMessageClass = "alert-warning";
+      } else if (currentUser == null) {
+        joinMessage = "Log in to join this tournament.";
+        joinMessageClass = "alert-info";
+      } else if (!hasOwnedBots) {
+        joinMessage = "Create a bot before joining this tournament.";
+        joinMessageClass = "alert-warning";
+      } else if (!hasSelectableBots) {
+        joinMessage = "You do not have any available bots for this tournament.";
+        joinMessageClass = "alert-warning";
+      } else if (registrationOpen) {
+        joinMessage = "Registration is open. Choose a bot to join.";
+        joinMessageClass = "alert-success";
+      }
+    }
+
+    return new TournamentRegistrationState(
+        registrationOpen,
+        hasAvailableSlots,
+        registrationStarted,
+        startsInFuture,
+        upcoming,
+        alreadyRegistered,
+        hasOwnedBots,
+        hasSelectableBots,
+        showJoinButton,
+        registeredParticipants,
+        joinMessage,
+        joinMessageClass);
+  }
+
+  @Transactional(readOnly = true)
+  public TournamentJoinPage getTournamentJoinPage(Long tournamentId, User currentUser) {
+    Tournament tournament = tournamentRepository.findById(tournamentId).orElseThrow();
+    TournamentRegistrationState registrationState = getRegistrationState(tournament, currentUser);
+
+    Set<Long> participantIds = getParticipantIds(tournament.getParticipants());
+    List<BotOption> botOptions =
+        getOwnedBots(currentUser).stream()
+            .filter(bot -> bot.getId() != null && !participantIds.contains(bot.getId()))
+            .sorted(Comparator.comparingInt(Bot::getElo).reversed())
+            .map(bot -> new BotOption(bot.getId(), bot.getName(), bot.getElo(), false))
+            .toList();
+
+    List<BotOption> resolvedBotOptions = selectFirstBot(botOptions);
+    return new TournamentJoinPage(
+        tournament,
+        resolvedBotOptions,
+        registrationState.showJoinButton(),
+        registrationState.registeredParticipants(),
+        formatDate(tournament.getStartDate()),
+        formatDate(extractRegistrationOpenDate(tournament.getDescription()).orElse(null)),
+        extractFormat(tournament.getDescription()),
+        registrationState.joinMessage(),
+        registrationState.joinMessageClass(),
+        !registrationState.hasOwnedBots());
+  }
+
+  @Transactional
+  public JoinTournamentResult joinTournament(Long tournamentId, Long botId, User currentUser) {
+    Tournament tournament = tournamentRepository.findById(tournamentId).orElse(null);
+    if (tournament == null) {
+      return new JoinTournamentResult(
+          JoinTournamentStatus.TOURNAMENT_NOT_FOUND, "Tournament not found.");
+    }
+
+    if (currentUser == null || currentUser.getId() == null) {
+      return new JoinTournamentResult(
+          JoinTournamentStatus.INVALID_USER, "You must be logged in to join a tournament.");
+    }
+
+    if (isAdmin(currentUser)) {
+      return new JoinTournamentResult(
+          JoinTournamentStatus.ADMIN_NOT_ALLOWED, "Administrators cannot join tournaments.");
+    }
+
+    if (botId == null) {
+      return new JoinTournamentResult(
+          JoinTournamentStatus.INVALID_BOT, "Select a bot to complete your registration.");
+    }
+
+    Bot selectedBot = botRepository.findById(botId).orElse(null);
+    if (selectedBot == null || !currentUser.getId().equals(selectedBot.getOwnerId())) {
+      return new JoinTournamentResult(
+          JoinTournamentStatus.INVALID_BOT, "The selected bot does not belong to your account.");
+    }
+
+    TournamentRegistrationState registrationState = getRegistrationState(tournament, currentUser);
+    if (registrationState.alreadyRegistered()) {
+      return new JoinTournamentResult(
+          JoinTournamentStatus.ALREADY_REGISTERED,
+          "You are already registered in this tournament.");
+    }
+
+    if (!registrationState.upcoming() || !registrationState.startsInFuture()) {
+      return new JoinTournamentResult(
+          JoinTournamentStatus.REGISTRATION_CLOSED, "Registration is closed for this tournament.");
+    }
+
+    if (!registrationState.registrationStarted()) {
+      LocalDate registrationOpenDate =
+          extractRegistrationOpenDate(tournament.getDescription()).orElse(null);
+      return new JoinTournamentResult(
+          JoinTournamentStatus.REGISTRATION_NOT_OPEN,
+          "Registration opens on " + formatDate(registrationOpenDate) + ".");
+    }
+
+    if (!registrationState.hasAvailableSlots()) {
+      return new JoinTournamentResult(JoinTournamentStatus.TOURNAMENT_FULL, "Tournament is full.");
+    }
+
+    Set<Long> participantIds = getParticipantIds(tournament.getParticipants());
+    if (selectedBot.getId() != null && participantIds.contains(selectedBot.getId())) {
+      return new JoinTournamentResult(
+          JoinTournamentStatus.BOT_ALREADY_REGISTERED,
+          "The selected bot is already registered in this tournament.");
+    }
+
+    List<Bot> participants =
+        tournament.getParticipants() == null
+            ? new ArrayList<>()
+            : new ArrayList<>(tournament.getParticipants());
+    participants.add(selectedBot);
+    tournament.setParticipants(participants);
+    tournamentRepository.save(tournament);
+
+    return new JoinTournamentResult(JoinTournamentStatus.JOINED, "Bot registered successfully.");
   }
 
   public TournamentPage getTournamentPage(Pageable pageable) {
@@ -252,9 +448,8 @@ public class TournamentService {
             : tournamentRepository.findById(id).orElseThrow();
 
     String status = normalizeStatus(tournament.getStatus());
-    int slots = extractSlots(tournament.getDescription());
-    int participants =
-        tournament.getParticipants() == null ? 0 : tournament.getParticipants().size();
+    int slots = tournament.getSlots();
+    int participants = getParticipantIds(tournament.getParticipants()).size();
     return new AdminTournamentDetail(
         tournament.getId(),
         tournament.getName(),
@@ -271,21 +466,6 @@ public class TournamentService {
       return "Unknown";
     }
     return status.trim();
-  }
-
-  private int extractSlots(String description) {
-    if (description == null || description.isBlank()) {
-      return 0;
-    }
-    Matcher matcher = SLOT_PATTERN.matcher(description);
-    if (!matcher.find()) {
-      return 0;
-    }
-    try {
-      return Integer.parseInt(matcher.group(1));
-    } catch (NumberFormatException ex) {
-      return 0;
-    }
   }
 
   private String buildDescription(
@@ -309,6 +489,66 @@ public class TournamentService {
 
   public Optional<Tournament> getTournamentById(Long id) {
     return tournamentRepository.findById(id);
+  }
+
+  private List<Bot> getOwnedBots(User currentUser) {
+    if (currentUser == null || currentUser.getId() == null || isAdmin(currentUser)) {
+      return List.of();
+    }
+    return botRepository.findByOwnerId(currentUser.getId()).stream()
+        .sorted(Comparator.comparingInt(Bot::getElo).reversed())
+        .toList();
+  }
+
+  private boolean isAdmin(User user) {
+    return user.getRoles() != null && user.getRoles().contains("ADMIN");
+  }
+
+  private Optional<LocalDate> extractRegistrationOpenDate(String description) {
+    if (description == null || description.isBlank()) {
+      return Optional.empty();
+    }
+
+    var matcher = REGISTRATION_OPEN_PATTERN.matcher(description);
+    if (!matcher.find()) {
+      return Optional.empty();
+    }
+
+    try {
+      return Optional.of(LocalDate.parse(matcher.group(1)));
+    } catch (Exception ex) {
+      return Optional.empty();
+    }
+  }
+
+  private Set<Long> getParticipantIds(List<Bot> participants) {
+    if (participants == null || participants.isEmpty()) {
+      return Set.of();
+    }
+
+    Set<Long> participantIds = new LinkedHashSet<>();
+    for (Bot participant : participants) {
+      if (participant != null && participant.getId() != null) {
+        participantIds.add(participant.getId());
+      }
+    }
+    return participantIds;
+  }
+
+  private List<BotOption> selectFirstBot(List<BotOption> botOptions) {
+    if (botOptions.isEmpty()) {
+      return List.of();
+    }
+
+    List<BotOption> resolvedBotOptions = new ArrayList<>(botOptions.size());
+    boolean selectedAssigned = false;
+    for (BotOption botOption : botOptions) {
+      boolean selected = !selectedAssigned;
+      resolvedBotOptions.add(
+          new BotOption(botOption.id(), botOption.name(), botOption.elo(), selected));
+      selectedAssigned = true;
+    }
+    return resolvedBotOptions;
   }
 
   public record TournamentListItem(
@@ -359,6 +599,49 @@ public class TournamentService {
       long totalElements,
       int fromItem,
       int toItem) {}
+
+  public record TournamentRegistrationState(
+      boolean registrationOpen,
+      boolean hasAvailableSlots,
+      boolean registrationStarted,
+      boolean startsInFuture,
+      boolean upcoming,
+      boolean alreadyRegistered,
+      boolean hasOwnedBots,
+      boolean hasSelectableBots,
+      boolean showJoinButton,
+      int registeredParticipants,
+      String joinMessage,
+      String joinMessageClass) {}
+
+  public record BotOption(Long id, String name, int elo, boolean selected) {}
+
+  public record TournamentJoinPage(
+      Tournament tournament,
+      List<BotOption> botOptions,
+      boolean canSubmit,
+      int participants,
+      String startDate,
+      String registrationOpenDate,
+      String format,
+      String availabilityMessage,
+      String availabilityMessageClass,
+      boolean showCreateBotAction) {}
+
+  public record JoinTournamentResult(JoinTournamentStatus status, String message) {}
+
+  public enum JoinTournamentStatus {
+    JOINED,
+    TOURNAMENT_NOT_FOUND,
+    INVALID_USER,
+    ADMIN_NOT_ALLOWED,
+    INVALID_BOT,
+    ALREADY_REGISTERED,
+    REGISTRATION_NOT_OPEN,
+    REGISTRATION_CLOSED,
+    TOURNAMENT_FULL,
+    BOT_ALREADY_REGISTERED
+  }
 
   private enum RegistrationFilter {
     ALL,

@@ -14,8 +14,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/tournaments")
@@ -57,12 +59,17 @@ public class TournamentController {
     Optional<Tournament> tournamentOp = tournamentService.getTournamentById(id);
     if (tournamentOp.isPresent()) {
       Tournament tournament = tournamentOp.get();
+      TournamentService.TournamentRegistrationState registrationState =
+          tournamentService.getRegistrationState(tournament, currentUser);
+
       model.addAttribute("isAdmin", type == UserType.ADMIN);
       model.addAttribute("logged", currentUser != null);
-      model.addAttribute("canJoin", currentUser != null && type != UserType.ADMIN);
-      model.addAttribute("open", true);
+      model.addAttribute("open", registrationState.registrationOpen());
+      model.addAttribute("showJoinButton", registrationState.showJoinButton());
+      model.addAttribute("joinMessage", registrationState.joinMessage());
+      model.addAttribute("joinMessageClass", registrationState.joinMessageClass());
       model.addAttribute("hasTournamentPhoto", tournament.getImage() != null);
-      model.addAttribute("participants", tournament.getParticipants().size());
+      model.addAttribute("participants", registrationState.registeredParticipants());
       model.addAttribute("tournament", tournamentOp.get());
       return "tournament-detail";
     }
@@ -76,8 +83,56 @@ public class TournamentController {
   }
 
   @GetMapping("/join")
-  public String tournamentJoin() {
+  public String tournamentJoinRedirect() {
+    return "redirect:/tournaments";
+  }
+
+  @GetMapping("/join/{id}")
+  public String tournamentJoin(@PathVariable Long id, Authentication authentication, Model model) {
+    User currentUser = userService.getCurrentUser(authentication);
+    if (userService.isAdmin(currentUser)) {
+      return "redirect:/tournaments/detail/" + id;
+    }
+
+    Optional<Tournament> tournamentOp = tournamentService.getTournamentById(id);
+    if (tournamentOp.isEmpty()) {
+      return "error";
+    }
+
+    TournamentService.TournamentJoinPage joinPage =
+        tournamentService.getTournamentJoinPage(id, currentUser);
+    model.addAttribute("joinPage", joinPage);
     return "tournament-join";
+  }
+
+  @PostMapping("/join/{id}")
+  public String joinTournament(
+      @PathVariable Long id,
+      @RequestParam(required = false) Long botId,
+      Authentication authentication,
+      RedirectAttributes redirectAttributes) {
+    User currentUser = userService.getCurrentUser(authentication);
+    TournamentService.JoinTournamentResult result =
+        tournamentService.joinTournament(id, botId, currentUser);
+
+    switch (result.status()) {
+      case JOINED -> {
+        redirectAttributes.addFlashAttribute("successMessage", result.message());
+        return "redirect:/tournaments/detail/" + id;
+      }
+      case INVALID_BOT -> {
+        redirectAttributes.addFlashAttribute("errorMessage", result.message());
+        return "redirect:/tournaments/join/" + id;
+      }
+      case TOURNAMENT_NOT_FOUND -> {
+        redirectAttributes.addFlashAttribute("errorMessage", result.message());
+        return "redirect:/tournaments";
+      }
+      default -> {
+        redirectAttributes.addFlashAttribute("errorMessage", result.message());
+        return "redirect:/tournaments/detail/" + id;
+      }
+    }
   }
 
   @GetMapping("/results")
