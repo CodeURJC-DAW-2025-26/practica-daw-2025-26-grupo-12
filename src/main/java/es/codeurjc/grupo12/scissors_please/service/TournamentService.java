@@ -363,6 +363,7 @@ public class TournamentService {
         listItem.actionLabel(),
         listItem.actionHref(),
         listItem.actionDisabled(),
+        listItem.hasImage(),
         isRegistered,
         registrationLabel,
         registrationBadgeClass);
@@ -434,7 +435,8 @@ public class TournamentService {
         badgeClass,
         actionLabel,
         actionHref,
-        actionDisabled);
+        actionDisabled,
+        tournament.getImage() != null);
   }
 
   public AdminTournamentDetail getAdminTournamentDetail(Long id) {
@@ -456,7 +458,8 @@ public class TournamentService {
         tournament.getStartDate(),
         slots,
         participants,
-        "Upcoming".equalsIgnoreCase(status));
+        "Upcoming".equalsIgnoreCase(status),
+        tournament.getImage() != null);
   }
 
   private String normalizeStatus(String status) {
@@ -552,7 +555,8 @@ public class TournamentService {
       String badgeClass,
       String actionLabel,
       String actionHref,
-      boolean actionDisabled) {}
+      boolean actionDisabled,
+      boolean hasImage) {}
 
   public record UserTournamentItem(
       Long id,
@@ -564,6 +568,7 @@ public class TournamentService {
       String actionLabel,
       String actionHref,
       boolean actionDisabled,
+      boolean hasImage,
       boolean registered,
       String registrationLabel,
       String registrationBadgeClass) {}
@@ -583,7 +588,8 @@ public class TournamentService {
       LocalDate startDate,
       int slots,
       int participants,
-      boolean canRunNow) {}
+      boolean canRunNow,
+      boolean hasImage) {}
 
   public record TournamentPage(
       List<TournamentListItem> tournaments,
