@@ -118,10 +118,17 @@
                 <div class="d-flex flex-wrap gap-2 mt-4">
 
                     {{#open}}
+                    {{#canJoin}}
                         <a href="/tournaments/join/{{tournament.id}}"
                            class="btn btn-primary btn-sm">
                             Join Tournament
                         </a>
+                    {{/canJoin}}
+                    {{^canJoin}}
+                        <a href="/login" class="btn btn-outline-muted btn-sm">
+                            Log in to Join
+                        </a>
+                    {{/canJoin}}
                     {{/open}}
 
                     {{^open}}
