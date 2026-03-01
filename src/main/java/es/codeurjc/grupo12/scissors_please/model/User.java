@@ -63,19 +63,10 @@ public class User {
 
   @PrePersist
   public void onCreate() {
-    createdAt = generateRandomDateIn2026();
+    if (createdAt == null){
+      createdAt = LocalDateTime.now();
+    }
   }
 
-  // Just for testing
-  private LocalDateTime generateRandomDateIn2026() {
-    long startEpochDay = LocalDate.of(2026, Month.JANUARY, 1).toEpochDay();
-    long endEpochDay = LocalDate.of(2026, Month.DECEMBER, 31).toEpochDay();
-
-    long randomDay = ThreadLocalRandom.current().nextLong(startEpochDay, endEpochDay);
-
-    int hour = ThreadLocalRandom.current().nextInt(0, 24);
-    int minute = ThreadLocalRandom.current().nextInt(0, 60);
-
-    return LocalDate.ofEpochDay(randomDay).atTime(hour, minute);
-  }
+  
 }

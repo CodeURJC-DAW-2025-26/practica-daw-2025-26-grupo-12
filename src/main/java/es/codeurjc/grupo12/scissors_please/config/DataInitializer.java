@@ -10,9 +10,11 @@ import es.codeurjc.grupo12.scissors_please.repository.TournamentRepository;
 import es.codeurjc.grupo12.scissors_please.repository.UserRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
@@ -61,6 +63,7 @@ public class DataInitializer {
           User seededUser = new User();
           seededUser.setUsername("seed_user_" + i);
           seededUser.setEmail("seed_user_" + i + "@scissors-please.com");
+          seededUser.setCreatedAt(generateRandomDateIn2026());
           seededUser.setPassword(passwordEncoder.encode("user123"));
           seededUser.setRoles(List.of("USER"));
           users.add(seededUser);
@@ -245,5 +248,17 @@ public class DataInitializer {
     } catch (NumberFormatException ex) {
       return 0;
     }
+  }
+  // Just for testing
+  private LocalDateTime generateRandomDateIn2026() {
+    long startEpochDay = LocalDate.of(2026, Month.JANUARY, 1).toEpochDay();
+    long endEpochDay = LocalDate.of(2026, Month.DECEMBER, 31).toEpochDay();
+
+    long randomDay = ThreadLocalRandom.current().nextLong(startEpochDay, endEpochDay);
+
+    int hour = ThreadLocalRandom.current().nextInt(0, 24);
+    int minute = ThreadLocalRandom.current().nextInt(0, 60);
+
+    return LocalDate.ofEpochDay(randomDay).atTime(hour, minute);
   }
 }
