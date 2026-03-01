@@ -43,6 +43,44 @@ public class BotService {
   }
 
   @Transactional(readOnly = true)
+  public BotPage getAdminBotPage(String query, String visibility, Pageable pageable) {
+    int safePage = Math.max(pageable.getPageNumber(), 0);
+    int safeSize = Math.min(Math.max(pageable.getPageSize(), 1), MAX_PAGE_SIZE);
+    Pageable safePageable = PageRequest.of(safePage, safeSize);
+
+    String normalizedQuery = (query != null) ? query.trim() : "";
+    boolean hasQuery = !normalizedQuery.isBlank();
+    Page<Bot> pageResult;
+
+    if ("public".equalsIgnoreCase(visibility)) {
+      pageResult =
+          hasQuery
+              ? botRepository.findByNameContainingIgnoreCaseAndIsPublicOrderByIdDesc(
+                  normalizedQuery, true, safePageable)
+              : botRepository.findByIsPublicOrderByIdDesc(true, safePageable);
+    } else if ("private".equalsIgnoreCase(visibility)) {
+      pageResult =
+          hasQuery
+              ? botRepository.findByNameContainingIgnoreCaseAndIsPublicOrderByIdDesc(
+                  normalizedQuery, false, safePageable)
+              : botRepository.findByIsPublicOrderByIdDesc(false, safePageable);
+    } else {
+      pageResult =
+          hasQuery
+              ? botRepository.findByNameContainingIgnoreCaseOrderByIdDesc(
+                  normalizedQuery, safePageable)
+              : botRepository.findAllByOrderByIdDesc(safePageable);
+    }
+
+    List<Bot> bots = pageResult.getContent();
+    long totalElements = pageResult.getTotalElements();
+    int fromItem = bots.isEmpty() ? 0 : (safePage * safeSize) + 1;
+    int toItem = bots.isEmpty() ? 0 : fromItem + bots.size() - 1;
+
+    return new BotPage(bots, safePage + 1, pageResult.hasNext(), totalElements, fromItem, toItem);
+  }
+
+  @Transactional(readOnly = true)
   public List<Bot> getBotsForUser(User user, boolean includePrivate) {
     Long ownerId = requireOwnerId(user);
     if (includePrivate) {

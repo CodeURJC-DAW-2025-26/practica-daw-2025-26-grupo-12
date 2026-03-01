@@ -1,7 +1,6 @@
 package es.codeurjc.grupo12.scissors_please.controller.web;
 
 import es.codeurjc.grupo12.scissors_please.config.ErrorConstants;
-import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.Image;
 import es.codeurjc.grupo12.scissors_please.model.Tournament;
 import es.codeurjc.grupo12.scissors_please.model.TournamentStatus;
@@ -327,6 +326,7 @@ public class AdminController {
 
   @GetMapping("/users")
   public String adminUsers(
+      @PageableDefault(size = 10) Pageable pageable,
       @RequestParam(name = "q", required = false) String query,
       @RequestParam(name = "status", required = false) String status,
       Authentication authentication,
@@ -341,12 +341,13 @@ public class AdminController {
     String normalizedQuery = normalizeQuery(query);
     UserStatusFilter statusFilter = UserStatusFilter.fromValue(status);
     User currentAdmin = userService.getCurrentUser(authentication);
-    populateUsersSearchModel(model, normalizedQuery, statusFilter, currentAdmin);
+    populateUsersSearchModel(model, normalizedQuery, statusFilter, currentAdmin, pageable);
     return "admin-users";
   }
 
   @GetMapping("/users/table")
   public String adminUsersTable(
+      @PageableDefault(size = 10) Pageable pageable,
       @RequestParam(name = "q", required = false) String query,
       @RequestParam(name = "status", required = false) String status,
       Authentication authentication,
@@ -354,7 +355,7 @@ public class AdminController {
     String normalizedQuery = normalizeQuery(query);
     UserStatusFilter statusFilter = UserStatusFilter.fromValue(status);
     User currentAdmin = userService.getCurrentUser(authentication);
-    populateUsersSearchModel(model, normalizedQuery, statusFilter, currentAdmin);
+    populateUsersSearchModel(model, normalizedQuery, statusFilter, currentAdmin, pageable);
     return "components/admin-user-rows";
   }
 
@@ -380,25 +381,45 @@ public class AdminController {
 
   @GetMapping("/bots")
   public String adminBots(
+      @PageableDefault(size = 10) Pageable pageable,
       @RequestParam(name = "q", required = false) String query,
       @RequestParam(name = "visibility", required = false, defaultValue = "all") String visibility,
       Model model) {
 
     String normalizedQuery = normalizeQuery(query);
+    populateBotsSearchModel(model, normalizedQuery, visibility, pageable);
+    return "admin-bots";
+  }
 
-    List<Bot> bots = botService.searchBots(normalizedQuery, visibility);
+  @GetMapping("/bots/table")
+  public String adminBotsTable(
+      @PageableDefault(size = 10) Pageable pageable,
+      @RequestParam(name = "q", required = false) String query,
+      @RequestParam(name = "visibility", required = false, defaultValue = "all") String visibility,
+      Model model) {
+    String normalizedQuery = normalizeQuery(query);
+    populateBotsSearchModel(model, normalizedQuery, visibility, pageable);
+    return "components/admin-bot-rows";
+  }
 
-    model.addAttribute("searchQuery", normalizedQuery);
+  private void populateBotsSearchModel(
+      Model model, String searchQuery, String visibility, Pageable pageable) {
+    BotService.BotPage botPage = botService.getAdminBotPage(searchQuery, visibility, pageable);
 
+    model.addAttribute("searchQuery", searchQuery);
     model.addAttribute("visibilityFilter", visibility);
-
     model.addAttribute("visAll", visibility.equals("all"));
     model.addAttribute("visPublic", visibility.equals("public"));
     model.addAttribute("visPrivate", visibility.equals("private"));
-    model.addAttribute("resultCount", bots.size());
-    model.addAttribute("bots", bots);
 
-    return "admin-bots";
+    model.addAttribute("bots", botPage.bots());
+    model.addAttribute("nextPage", botPage.nextPage());
+    model.addAttribute("hasMore", botPage.hasMore());
+    model.addAttribute("totalElements", botPage.totalElements());
+    model.addAttribute("fromItem", botPage.fromItem());
+    model.addAttribute("toItem", botPage.toItem());
+    model.addAttribute("resultCount", botPage.totalElements());
+    model.addAttribute("size", Math.max(pageable.getPageSize(), 1));
   }
 
   private String updateBlockedStatus(
@@ -476,19 +497,29 @@ public class AdminController {
   }
 
   private void populateUsersSearchModel(
-      Model model, String searchQuery, UserStatusFilter statusFilter, User currentAdmin) {
+      Model model,
+      String searchQuery,
+      UserStatusFilter statusFilter,
+      User currentAdmin,
+      Pageable pageable) {
+    UserService.UserPage userPage = userService.getUserPage(searchQuery, statusFilter, pageable);
     List<AdminUserView> users =
-        userService.searchUsers(searchQuery, statusFilter).stream()
-            .map(user -> toAdminUserView(user, currentAdmin))
-            .toList();
+        userPage.users().stream().map(user -> toAdminUserView(user, currentAdmin)).toList();
 
     model.addAttribute("searchQuery", searchQuery);
     model.addAttribute("statusFilter", statusFilter.value());
     model.addAttribute("statusAll", statusFilter == UserStatusFilter.ALL);
     model.addAttribute("statusActive", statusFilter == UserStatusFilter.ACTIVE);
     model.addAttribute("statusBlocked", statusFilter == UserStatusFilter.BLOCKED);
-    model.addAttribute("resultCount", users.size());
+
     model.addAttribute("users", users);
+    model.addAttribute("nextPage", userPage.nextPage());
+    model.addAttribute("hasMore", userPage.hasMore());
+    model.addAttribute("totalElements", userPage.totalElements());
+    model.addAttribute("fromItem", userPage.fromItem());
+    model.addAttribute("toItem", userPage.toItem());
+    model.addAttribute("resultCount", userPage.totalElements());
+    model.addAttribute("size", Math.max(pageable.getPageSize(), 1));
   }
 
   private String buildUsersRedirect(String query, UserStatusFilter statusFilter) {

@@ -53,7 +53,8 @@
         <div class="card p-4">
             <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap mb-3">
                 <h2 class="h5 fw-bold mb-0">Matching Bots</h2>
-                <span id="admin-bots-result-counter" class="badge bg-secondary">{{resultCount}} results</span>
+                <span id="admin-bots-result-counter" class="badge bg-secondary">Showing {{fromItem}}-{{toItem}} of
+                    {{totalElements}}</span>
             </div>
             <div class="table-responsive">
                 <table class="table mb-0 align-middle text-nowrap">
@@ -67,58 +68,18 @@
                             <th scope="col" class="text-end pe-3">Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="admin-bots-table-body">
-                        {{#bots}}
-                        <tr class="bot-row">
-                            <td class="ps-3">
-                                <div style="width: 40px; height: 40px;">
-                                    {{#hasImage}}
-                                    <img src="/bot-images/{{id}}"
-                                        class="rounded-circle border border-primary w-100 h-100"
-                                        style="object-fit: cover;" alt="{{name}}">
-                                    {{/hasImage}}
-                                    {{^hasImage}}
-                                    <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold w-100 h-100 shadow-sm"
-                                        style="font-size: 0.9rem;">{{initial}}</div>
-                                    {{/hasImage}}
-                                </div>
-                            </td>
-                            <td>
-                                <span class="fw-bold d-block text-white">{{name}}</span>
-                                <span class="text-secondary small">ID: #{{id}}</span>
-                            </td>
-                            <td><span class="text-secondary small">Owner: #{{ownerId}}</span></td>
-                            <td><span class="badge bg-primary font-monospace">{{elo}}</span></td>
-                            <td>
-                                {{#isPublic}}
-                                <span class="badge border border-success text-success">Public</span>
-                                {{/isPublic}}
-                                {{^isPublic}}
-                                <span class="badge border border-warning text-warning">Private</span>
-                                {{/isPublic}}
-                            </td>
-                            <td class="text-end pe-3">
-                                <div class="d-flex justify-content-end gap-2">
-                                    <a href="/bots/detail/{{id}}" class="btn btn-sm btn-outline-light">View</a>
-                                    <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
-                                        data-bs-target="#deleteBotModal" data-bot-id="{{id}}" data-bot-name="{{name}}">
-                                        Delete
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        {{/bots}}
-                        {{#showEmpty}}
-                        <tr>
-                            <td class="ps-3 py-4 text-center" colspan="6">
-                                <span class="text-secondary italic">No bots found matching your criteria.</span>
-                            </td>
-                        </tr>
-                        {{/showEmpty}}
-                    </tbody>
+                    <tbody id="admin-bots-table-body">{{> components/admin-bot-rows}}</tbody>
                 </table>
             </div>
+            <div class="d-flex justify-content-center mt-3">
+                <button id="show-more-admin-bots-btn" class="btn btn-outline-muted btn-sm"
+                    {{^hasMore}}hidden{{/hasMore}}>
+                    Show more
+                </button>
+            </div>
         </div>
+    </div>
+    </div>
     </div>
 
     <div class="modal fade" id="deleteBotModal" tabindex="-1" aria-labelledby="deleteBotModalLabel" aria-hidden="true">
@@ -159,39 +120,6 @@
     </div>
 
     {{> components/scripts}}
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Lógica de búsqueda
-            const form = document.getElementById('admin-bot-search-form');
-            const searchInput = document.getElementById('admin-bot-search');
-            const visibilitySelect = document.getElementById('admin-bot-visibility-filter');
-
-            let timer;
-            searchInput.addEventListener('input', () => {
-                clearTimeout(timer);
-                timer = setTimeout(() => form.submit(), 500);
-            });
-
-            visibilitySelect.addEventListener('change', () => form.submit());
-
-            // Lógica del Modal (Igual que la primera plantilla)
-            const deleteModal = document.getElementById('deleteBotModal');
-            if (deleteModal) {
-                deleteModal.addEventListener('show.bs.modal', (event) => {
-                    const button = event.relatedTarget;
-                    const botId = button.getAttribute('data-bot-id');
-                    const botName = button.getAttribute('data-bot-name');
-
-                    const formDelete = deleteModal.querySelector('#deleteBotForm');
-                    const nameSpan = deleteModal.querySelector('#deleteBotName');
-
-                    // Seteamos la URL dinámica
-                    formDelete.action = `/bots/${botId}/delete`; 
-                    nameSpan.textContent = botName;
-                });
-            }
-        });
-    </script>
+    <script src="/js/admin-bots.js"></script>
 </body>
 </html>

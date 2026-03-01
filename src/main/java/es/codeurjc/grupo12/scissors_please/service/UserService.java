@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -19,10 +22,68 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class UserService {
 
+  private static final int MAX_PAGE_SIZE = 25;
   @Autowired private UserRepository userRepository;
   @Autowired private PasswordEncoder passwordEncoder;
 
   @Autowired private BotRepository botRepository;
+
+  public record UserPage(
+      List<User> users,
+      int nextPage,
+      boolean hasMore,
+      long totalElements,
+      int fromItem,
+      int toItem) {}
+
+  @Transactional(readOnly = true)
+  public UserPage getUserPage(Pageable pageable) {
+    return getUserPage("", UserStatusFilter.ALL, pageable);
+  }
+
+  @Transactional(readOnly = true)
+  public UserPage getUserPage(String query, UserStatusFilter statusFilter, Pageable pageable) {
+    int safePage = Math.max(pageable.getPageNumber(), 0);
+    int safeSize = Math.min(Math.max(pageable.getPageSize(), 1), MAX_PAGE_SIZE);
+    Pageable safePageable = PageRequest.of(safePage, safeSize);
+
+    UserStatusFilter effectiveStatusFilter =
+        statusFilter == null ? UserStatusFilter.ALL : statusFilter;
+    String normalizedQuery = query == null ? "" : query.trim();
+
+    Page<User> pageResult;
+    if (normalizedQuery.isBlank()) {
+      pageResult =
+          switch (effectiveStatusFilter) {
+            case ALL -> userRepository.findAllByOrderByUsernameAsc(safePageable);
+            case BLOCKED -> userRepository.findByBlockedOrderByUsernameAsc(true, safePageable);
+            case ACTIVE -> userRepository.findByBlockedOrderByUsernameAsc(false, safePageable);
+          };
+    } else {
+      pageResult =
+          switch (effectiveStatusFilter) {
+            case ALL ->
+                userRepository
+                    .findByUsernameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrderByUsernameAsc(
+                        normalizedQuery, normalizedQuery, safePageable);
+            case BLOCKED ->
+                userRepository
+                    .findByBlockedAndUsernameContainingIgnoreCaseOrBlockedAndEmailContainingIgnoreCaseOrderByUsernameAsc(
+                        true, normalizedQuery, true, normalizedQuery, safePageable);
+            case ACTIVE ->
+                userRepository
+                    .findByBlockedAndUsernameContainingIgnoreCaseOrBlockedAndEmailContainingIgnoreCaseOrderByUsernameAsc(
+                        false, normalizedQuery, false, normalizedQuery, safePageable);
+          };
+    }
+
+    List<User> users = pageResult.getContent();
+    long totalElements = pageResult.getTotalElements();
+    int fromItem = users.isEmpty() ? 0 : (safePage * safeSize) + 1;
+    int toItem = users.isEmpty() ? 0 : fromItem + users.size() - 1;
+
+    return new UserPage(users, safePage + 1, pageResult.hasNext(), totalElements, fromItem, toItem);
+  }
 
   public User registerUser(String username, String email, String password) {
     if (username == null || username.isBlank()) {

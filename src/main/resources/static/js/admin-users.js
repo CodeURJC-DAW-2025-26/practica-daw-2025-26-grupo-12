@@ -8,6 +8,14 @@
 
     let debounceTimer;
     let activeController;
+    let nextPage = 0;
+    let loading = false;
+
+    const initialMeta = document.querySelector(".admin-user-meta-row");
+    if (initialMeta) {
+      nextPage = Number(initialMeta.dataset.nextPage || "0");
+    }
+
     let lastRequestedQuery = searchInput ? searchInput.value.trim() : "";
     let lastRequestedStatus = statusSelect ? statusSelect.value : "all";
 
@@ -37,6 +45,12 @@
       const resultCount = metaRow.dataset.resultCount || "0";
       const searchQuery = metaRow.dataset.searchQuery || "";
       const statusFilter = metaRow.dataset.statusFilter || "all";
+      const hasMore = metaRow.dataset.hasMore === "true";
+      const next = Number(metaRow.dataset.nextPage || "0");
+      const fromItem = metaRow.dataset.fromItem || "0";
+      const toItem = metaRow.dataset.toItem || "0";
+      const totalElements = metaRow.dataset.totalElements || "0";
+
       metaRow.remove();
 
       return {
@@ -44,57 +58,95 @@
         resultCount,
         searchQuery,
         statusFilter,
+        hasMore,
+        nextPage: next,
+        fromItem,
+        toItem,
+        totalElements
       };
     };
 
-    const refreshUsers = async (query, status) => {
+    const loadUsers = async (query, status, page = 0, append = false) => {
       if (!tableBody || !resultCounter) {
         return;
       }
 
-      if (activeController) {
+      if (activeController && !append) {
         activeController.abort();
       }
+
       const controller = new AbortController();
-      activeController = controller;
+      if (!append) activeController = controller;
 
       try {
         const url = new URL("/admin/users/table", window.location.origin);
-        if (query) {
-          url.searchParams.set("q", query);
-        }
-        if (status && status !== "all") {
-          url.searchParams.set("status", status);
-        }
+        if (query) url.searchParams.set("q", query);
+        if (status && status !== "all") url.searchParams.set("status", status);
+        url.searchParams.set("page", page);
 
         const response = await fetch(url.toString(), {
           headers: { "X-Requested-With": "XMLHttpRequest" },
-          signal: controller.signal,
+          signal: append ? null : controller.signal,
         });
-        if (!response.ok) {
-          throw new Error(`Request failed: ${response.status}`);
-        }
+
+        if (!response.ok) throw new Error(`Request failed: ${response.status}`);
 
         const html = await response.text();
         const payload = parseRowsPayload(html);
-        tableBody.innerHTML = payload.rowsHtml;
-        resultCounter.textContent = `${payload.resultCount} results`;
+
+        if (append) {
+          const tempBody = document.createElement("tbody");
+          tempBody.innerHTML = payload.rowsHtml;
+          Array.from(tempBody.querySelectorAll("tr")).forEach(row => tableBody.appendChild(row));
+        } else {
+          tableBody.innerHTML = payload.rowsHtml;
+        }
+
+        resultCounter.textContent = `Showing ${payload.fromItem}-${payload.toItem} of ${payload.totalElements}`;
+
         lastRequestedQuery = payload.searchQuery;
         lastRequestedStatus = payload.statusFilter;
-        if (statusSelect) {
-          statusSelect.value = payload.statusFilter;
+        nextPage = payload.nextPage;
+
+        const loadMoreBtn = document.getElementById("show-more-admin-users-btn");
+        if (loadMoreBtn) {
+          loadMoreBtn.hidden = !payload.hasMore;
+          loadMoreBtn.disabled = false;
+          loadMoreBtn.textContent = "Show more";
         }
-        updateUrlQuery(payload.searchQuery, payload.statusFilter);
+
+        if (!append) {
+          if (statusSelect) statusSelect.value = payload.statusFilter;
+          updateUrlQuery(payload.searchQuery, payload.statusFilter);
+        }
       } catch (error) {
-        if (error.name !== "AbortError") {
-          console.error(error);
-        }
+        if (error.name !== "AbortError") console.error(error);
       } finally {
-        if (activeController === controller) {
-          activeController = undefined;
-        }
+        if (activeController === controller) activeController = undefined;
+        loading = false;
       }
     };
+
+    const refreshUsers = (query, status) => {
+      nextPage = 0;
+      loadUsers(query, status, 0, false);
+    };
+
+    const loadMoreUsers = () => {
+      if (loading) return;
+      loading = true;
+      const loadMoreBtn = document.getElementById("show-more-admin-users-btn");
+      if (loadMoreBtn) {
+        loadMoreBtn.disabled = true;
+        loadMoreBtn.textContent = "Loading...";
+      }
+      loadUsers(lastRequestedQuery, lastRequestedStatus, nextPage, true);
+    };
+
+    const loadMoreBtn = document.getElementById("show-more-admin-users-btn");
+    if (loadMoreBtn) {
+      loadMoreBtn.addEventListener("click", loadMoreUsers);
+    }
 
     const queueLiveSearch = () => {
       if (!searchInput) {
