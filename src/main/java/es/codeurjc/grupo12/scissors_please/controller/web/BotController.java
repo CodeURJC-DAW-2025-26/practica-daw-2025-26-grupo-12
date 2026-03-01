@@ -222,6 +222,7 @@ public class BotController {
     int currentElo = bot.getElo();
     int trend = currentElo - startElo;
 
+    model.addAttribute("rankingPosition", botService.findRankingPositionById(bot.getId()));
     model.addAttribute("totalMatches", total);
     model.addAttribute("bot", bot);
     model.addAttribute("username", username);

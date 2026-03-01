@@ -22,6 +22,10 @@ public interface BotRepository extends JpaRepository<Bot, Long> {
   Page<Bot> findByOwnerIdAndIsPublicTrueOrderByIdDesc(Long ownerId, Pageable pageable);
 
   @Query(
+      "SELECT COUNT(b) + 1 FROM Bot b WHERE b.isPublic = true AND b.elo > (SELECT b2.elo FROM Bot b2 WHERE b2.id = :botId)")
+  Long findRankingPositionById(@Param("botId") Long botId);
+
+  @Query(
       "SELECT SUM(b.wins) as totalWins, SUM(b.losses) as totalLosses, "
           + "SUM(b.draws) as totalDraws FROM Bot b WHERE b.ownerId = :ownerId")
   StatsProjection aggregateStatsByOwnerId(@Param("ownerId") Long ownerId);
