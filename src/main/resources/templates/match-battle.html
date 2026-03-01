@@ -21,7 +21,12 @@
                         style="font-size: 2.25rem;">{{battle.bot1Initial}}</div>
                     {{/battle.bot1HasImage}}
                 </div>
-                <h2 class="h5 fw-bold mt-3 mb-0">{{battle.bot1Name}}</h2>
+                <h2 class="h5 fw-bold mt-3 mb-0">
+                    <a href="/bots/detail/{{battle.bot1Id}}"
+                        class="text-light text-decoration-none hover-link">{{battle.bot1Name}}</a>
+                </h2>
+                <p class="small text-secondary mb-0">by <a href="/user/profile?user={{battle.bot1OwnerName}}"
+                        class="text-secondary text-decoration-none hover-link">{{battle.bot1OwnerName}}</a></p>
             </div>
             <div class="fw-bold text-primary" style="font-size: clamp(2.5rem, 6vw, 3.5rem);">VS</div>
             <div class="text-center">
@@ -36,7 +41,12 @@
                         style="font-size: 2.25rem;">{{battle.bot2Initial}}</div>
                     {{/battle.bot2HasImage}}
                 </div>
-                <h2 class="h5 fw-bold mt-3 mb-0">{{battle.bot2Name}}</h2>
+                <h2 class="h5 fw-bold mt-3 mb-0">
+                    <a href="/bots/detail/{{battle.bot2Id}}"
+                        class="text-light text-decoration-none hover-link">{{battle.bot2Name}}</a>
+                </h2>
+                <p class="small text-secondary mb-0">by <a href="/user/profile?user={{battle.bot2OwnerName}}"
+                        class="text-secondary text-decoration-none hover-link">{{battle.bot2OwnerName}}</a></p>
             </div>
         </div>
         <p class="lead text-secondary mb-4">Match simulation completed. You can view the generated results now.</p>
