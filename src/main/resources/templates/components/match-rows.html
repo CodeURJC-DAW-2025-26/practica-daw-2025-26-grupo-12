@@ -14,7 +14,14 @@
                     style="width: 32px; height: 32px;">{{bot1Initial}}</div>
                 {{/bot1HasImage}}
             </div>
-            <span class="fw-medium">{{bot1Name}}</span>
+            <div class="d-flex flex-column">
+                <a href="/bots/detail/{{bot1Id}}"
+                    class="fw-medium text-decoration-none text-white hover-link">{{bot1Name}}</a>
+                <span class="small text-secondary">
+                    by <a href="/user/profile?user={{bot1OwnerName}}"
+                        class="text-secondary text-decoration-none hover-link">{{bot1OwnerName}}</a>
+                </span>
+            </div>
         </div>
     </td>
     <td>
@@ -30,7 +37,14 @@
                     style="width: 32px; height: 32px;">{{bot2Initial}}</div>
                 {{/bot2HasImage}}
             </div>
-            <span class="text-secondary">{{bot2Name}}</span>
+            <div class="d-flex flex-column">
+                <a href="/bots/detail/{{bot2Id}}"
+                    class="text-secondary text-decoration-none hover-link">{{bot2Name}}</a>
+                <span class="small text-secondary">
+                    by <a href="/user/profile?user={{bot2OwnerName}}"
+                        class="text-secondary text-decoration-none hover-link">{{bot2OwnerName}}</a>
+                </span>
+            </div>
         </div>
     </td>
     <td class="text-secondary">{{topElo}}</td>

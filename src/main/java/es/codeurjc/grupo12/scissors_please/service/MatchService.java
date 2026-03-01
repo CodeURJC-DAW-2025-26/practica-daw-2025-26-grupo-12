@@ -285,23 +285,45 @@ public class MatchService {
     Bot bot2 = match.getBot2();
     String bot1Name = resolveBotName(bot1);
     String bot2Name = resolveBotName(bot2);
+    String bot1OwnerName =
+        bot1 != null && bot1.getOwnerId() != null
+            ? userService.getUserById(bot1.getOwnerId()).getUsername()
+            : "Unknown";
+    String bot2OwnerName =
+        bot2 != null && bot2.getOwnerId() != null
+            ? userService.getUserById(bot2.getOwnerId()).getUsername()
+            : "Unknown";
+
     return new MatchBattleView(
         match.getId(),
         bot1 != null ? bot1.getId() : null,
         bot1Name,
         resolveInitial(bot1Name),
         bot1 != null && bot1.getImage() != null,
+        bot1OwnerName,
         bot2 != null ? bot2.getId() : null,
         bot2Name,
         resolveInitial(bot2Name),
         bot2 != null && bot2.getImage() != null,
+        bot2OwnerName,
         "/matches/stats?id=" + match.getId());
   }
 
   public MatchStatsView getMatchStatsView(Long matchId) {
     Match match = resolveMatch(matchId);
-    String bot1Name = resolveBotName(match.getBot1());
-    String bot2Name = resolveBotName(match.getBot2());
+    Bot bot1 = match.getBot1();
+    Bot bot2 = match.getBot2();
+    String bot1Name = resolveBotName(bot1);
+    String bot2Name = resolveBotName(bot2);
+    String bot1OwnerName =
+        bot1 != null && bot1.getOwnerId() != null
+            ? userService.getUserById(bot1.getOwnerId()).getUsername()
+            : "Unknown";
+    String bot2OwnerName =
+        bot2 != null && bot2.getOwnerId() != null
+            ? userService.getUserById(bot2.getOwnerId()).getUsername()
+            : "Unknown";
+
     String winnerLabel = resolveWinnerLabel(match, bot1Name, bot2Name);
     String winnerBadgeClass =
         "Draw".equalsIgnoreCase(winnerLabel) ? "bg-secondary" : "badge-soft-success";
@@ -314,8 +336,12 @@ public class MatchService {
 
     return new MatchStatsView(
         match.getId(),
+        bot1 != null ? bot1.getId() : null,
         bot1Name,
+        bot1OwnerName,
+        bot2 != null ? bot2.getId() : null,
         bot2Name,
+        bot2OwnerName,
         winnerLabel,
         winnerBadgeClass,
         match.getBot1Score(),
@@ -614,24 +640,45 @@ public class MatchService {
     Bot bot1 = match.getBot1();
     Bot bot2 = match.getBot2();
 
+    Long myBotId = null;
     String myBotName = "-";
+    Long opponentBotId = null;
     String opponentName = resolveBotName(bot1) + " vs " + resolveBotName(bot2);
+    String opponentOwnerName = "Unknown";
     String result = resolveResult(match);
 
     if (played) {
       boolean bot1Owned = isOwnedByUser(bot1, userId);
       boolean bot2Owned = isOwnedByUser(bot2, userId);
       if (bot1Owned && !bot2Owned) {
+        myBotId = bot1.getId();
         myBotName = resolveBotName(bot1);
+        opponentBotId = bot2 != null ? bot2.getId() : null;
         opponentName = resolveBotName(bot2);
+        opponentOwnerName =
+            bot2 != null && bot2.getOwnerId() != null
+                ? userService.getUserById(bot2.getOwnerId()).getUsername()
+                : "Unknown";
         result = resolveResultFromScores(match.getBot1Score(), match.getBot2Score());
       } else if (!bot1Owned && bot2Owned) {
+        myBotId = bot2.getId();
         myBotName = resolveBotName(bot2);
+        opponentBotId = bot1 != null ? bot1.getId() : null;
         opponentName = resolveBotName(bot1);
+        opponentOwnerName =
+            bot1 != null && bot1.getOwnerId() != null
+                ? userService.getUserById(bot1.getOwnerId()).getUsername()
+                : "Unknown";
         result = resolveResultFromScores(match.getBot2Score(), match.getBot1Score());
       } else if (bot1Owned) {
+        myBotId = bot1.getId();
         myBotName = resolveBotName(bot1);
+        opponentBotId = bot2 != null ? bot2.getId() : null;
         opponentName = resolveBotName(bot2);
+        opponentOwnerName =
+            bot2 != null && bot2.getOwnerId() != null
+                ? userService.getUserById(bot2.getOwnerId()).getUsername()
+                : "Unknown";
         result = resolveResult(match);
       }
     }
@@ -642,12 +689,17 @@ public class MatchService {
 
     return new UserMatchItem(
         match.getId(),
-        bot1 != null ? bot1.getId() : null,
+        myBotId,
         myBotName,
-        bot1 != null && bot1.getImage() != null,
-        bot2 != null ? bot2.getId() : null,
+        bot1 != null && isOwnedByUser(bot1, userId)
+            ? (bot1.getImage() != null)
+            : (bot2 != null && isOwnedByUser(bot2, userId) && bot2.getImage() != null),
+        opponentBotId,
         opponentName,
-        bot2 != null && bot2.getImage() != null,
+        opponentOwnerName,
+        bot1 != null && !isOwnedByUser(bot1, userId)
+            ? (bot1.getImage() != null)
+            : (bot2 != null && !isOwnedByUser(bot2, userId) && bot2.getImage() != null),
         result,
         resolveBadgeClass(result),
         formatDate(match.getTimestamp()),
@@ -780,6 +832,14 @@ public class MatchService {
     Bot bot2 = match.getBot2();
     String bot1Name = resolveBotName(bot1);
     String bot2Name = resolveBotName(bot2);
+    String bot1OwnerName =
+        bot1 != null && bot1.getOwnerId() != null
+            ? userService.getUserById(bot1.getOwnerId()).getUsername()
+            : "Unknown";
+    String bot2OwnerName =
+        bot2 != null && bot2.getOwnerId() != null
+            ? userService.getUserById(bot2.getOwnerId()).getUsername()
+            : "Unknown";
     int topElo = Math.max(resolveBotElo(bot1), resolveBotElo(bot2));
     String result = resolveResult(match);
     String badgeClass = resolveBadgeClass(result);
@@ -791,10 +851,12 @@ public class MatchService {
         bot1Name,
         resolveInitial(bot1Name),
         bot1 != null && bot1.getImage() != null,
+        bot1OwnerName,
         bot2 != null ? bot2.getId() : null,
         bot2Name,
         resolveInitial(bot2Name),
         bot2 != null && bot2.getImage() != null,
+        bot2OwnerName,
         topElo,
         result,
         badgeClass,
@@ -886,10 +948,12 @@ public class MatchService {
       String bot1Name,
       String bot1Initial,
       boolean bot1HasImage,
+      String bot1OwnerName,
       Long bot2Id,
       String bot2Name,
       String bot2Initial,
       boolean bot2HasImage,
+      String bot2OwnerName,
       int topElo,
       String result,
       String resultBadgeClass,
@@ -906,12 +970,13 @@ public class MatchService {
 
   public record UserMatchItem(
       Long id,
-      Long bot1Id,
+      Long myBotId,
       String myBotName,
-      boolean bot1HasImage,
-      Long bot2Id,
+      boolean myBotHasImage,
+      Long opponentBotId,
       String opponentName,
-      boolean bot2HasImage,
+      String opponentOwnerName,
+      boolean opponentHasImage,
       String result,
       String resultBadgeClass,
       String date,
@@ -1007,10 +1072,12 @@ public class MatchService {
       String bot1Name,
       String bot1Initial,
       boolean bot1HasImage,
+      String bot1OwnerName,
       Long bot2Id,
       String bot2Name,
       String bot2Initial,
       boolean bot2HasImage,
+      String bot2OwnerName,
       String statsHref) {}
 
   public record MatchRoundView(
@@ -1018,8 +1085,12 @@ public class MatchService {
 
   public record MatchStatsView(
       Long matchId,
+      Long bot1Id,
       String bot1Name,
+      String bot1OwnerName,
+      Long bot2Id,
       String bot2Name,
+      String bot2OwnerName,
       String winnerLabel,
       String winnerBadgeClass,
       int bot1Score,

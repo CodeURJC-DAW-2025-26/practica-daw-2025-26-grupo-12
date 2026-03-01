@@ -11,7 +11,19 @@
         <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
             <div>
                 <p class="text-secondary mb-1 small text-uppercase">Match #{{stats.matchId}}</p>
-                <h1 class="h3 fw-bold mb-0">{{stats.bot1Name}} vs {{stats.bot2Name}}</h1>
+                <h1 class="h3 fw-bold mb-0">
+                    <a href="/bots/detail/{{stats.bot1Id}}"
+                        class="text-light text-decoration-none hover-link">{{stats.bot1Name}}</a>
+                    <span class="text-secondary opacity-50 small"> (by <a
+                            href="/user/profile?user={{stats.bot1OwnerName}}"
+                            class="text-secondary text-decoration-none hover-link">{{stats.bot1OwnerName}}</a>)</span>
+                    vs
+                    <a href="/bots/detail/{{stats.bot2Id}}"
+                        class="text-light text-decoration-none hover-link">{{stats.bot2Name}}</a>
+                    <span class="text-secondary opacity-50 small"> (by <a
+                            href="/user/profile?user={{stats.bot2OwnerName}}"
+                            class="text-secondary text-decoration-none hover-link">{{stats.bot2OwnerName}}</a>)</span>
+                </h1>
             </div>
             <div class="d-flex flex-wrap align-items-center gap-2">
                 <span class="badge {{stats.winnerBadgeClass}} rounded-pill px-3 py-2">{{stats.winnerLabel}}</span>
@@ -39,7 +51,9 @@
                 <div class="card p-3 stat-card h-100">
                     <h6 class="text-secondary text-uppercase small fw-bold mb-2">Winner</h6>
                     <div class="d-flex align-items-baseline">
-                        <span class="h5 fw-bold mb-0 text-white">{{stats.winnerLabel}}</span>
+                        <span class="h5 fw-bold mb-0 text-white">
+                            {{stats.winnerLabel}}
+                        </span>
                     </div>
                 </div>
             </div>
@@ -60,8 +74,14 @@
                     <thead>
                         <tr class="text-secondary small text-uppercase">
                             <th scope="col" class="ps-3">Round</th>
-                            <th scope="col">{{stats.bot1Name}}</th>
-                            <th scope="col">{{stats.bot2Name}}</th>
+                            <th scope="col">
+                                <a href="/bots/detail/{{stats.bot1Id}}"
+                                    class="text-secondary text-decoration-none hover-link">{{stats.bot1Name}}</a>
+                            </th>
+                            <th scope="col">
+                                <a href="/bots/detail/{{stats.bot2Id}}"
+                                    class="text-secondary text-decoration-none hover-link">{{stats.bot2Name}}</a>
+                            </th>
                             <th scope="col">Result</th>
                         </tr>
                     </thead>

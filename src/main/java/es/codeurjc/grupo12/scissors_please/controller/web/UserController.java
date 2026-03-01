@@ -113,7 +113,7 @@ public class UserController {
 
   private ProfileBotView toProfileBotView(Bot bot) {
 
-    return new ProfileBotView(bot.getName(), bot.getElo(), bot.isPublic());
+    return new ProfileBotView(bot.getId(), bot.getName(), bot.getElo(), bot.isPublic());
   }
 
   private String resolveInitial(String value) {
@@ -170,5 +170,5 @@ public class UserController {
     }
   }
 
-  private record ProfileBotView(String name, int elo, boolean publicBot) {}
+  private record ProfileBotView(Long id, String name, int elo, boolean publicBot) {}
 }

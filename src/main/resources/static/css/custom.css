@@ -592,3 +592,12 @@ body.centered-layout .card.centered-layout-card--wide {
 .object-fit-cover {
     object-fit: cover;
 }
+
+.hover-link {
+    transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.hover-link:hover {
+    color: var(--bs-primary) !important;
+    opacity: 0.8;
+}

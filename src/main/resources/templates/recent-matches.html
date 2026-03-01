@@ -42,33 +42,44 @@
                             <td>
                                 <div class="d-flex align-items-center">
                                     <div class="position-relative me-2" style="width: 24px; height: 24px;">
-                                        {{#bot1HasImage}}
-                                        <img src="/bot-images/{{bot1Id}}" class="rounded-circle"
+                                        {{#myBotHasImage}}
+                                        <img src="/bot-images/{{myBotId}}" class="rounded-circle"
                                             style="width: 24px; height: 24px; object-fit: cover;"
                                             onerror="this.parentElement.innerHTML='<div class=&quot;rounded-circle bg-primary d-flex align-items-center justify-content-center text-white&quot; style=&quot;width: 24px; height: 24px; font-size: 0.75rem;&quot;>?</div>'">
-                                        {{/bot1HasImage}}
-                                        {{^bot1HasImage}}
+                                        {{/myBotHasImage}}
+                                        {{^myBotHasImage}}
                                         <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white"
                                             style="width: 24px; height: 24px; font-size: 0.75rem;">?</div>
-                                        {{/bot1HasImage}}
+                                        {{/myBotHasImage}}
                                     </div>
-                                    <span>{{myBotName}}</span>
+                                    <div class="d-flex flex-column">
+                                        <a href="/bots/detail/{{myBotId}}"
+                                            class="text-white text-decoration-none hover-link">{{myBotName}}</a>
+                                        <span class="small text-secondary">by You</span>
+                                    </div>
                                 </div>
                             </td>
                             <td>
                                 <div class="d-flex align-items-center">
                                     <div class="position-relative me-2" style="width: 24px; height: 24px;">
-                                        {{#bot2HasImage}}
-                                        <img src="/bot-images/{{bot2Id}}" class="rounded-circle"
+                                        {{#opponentHasImage}}
+                                        <img src="/bot-images/{{opponentBotId}}" class="rounded-circle"
                                             style="width: 24px; height: 24px; object-fit: cover;"
                                             onerror="this.parentElement.innerHTML='<div class=&quot;rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white&quot; style=&quot;width: 24px; height: 24px; font-size: 0.75rem;&quot;>?</div>'">
-                                        {{/bot2HasImage}}
-                                        {{^bot2HasImage}}
+                                        {{/opponentHasImage}}
+                                        {{^opponentHasImage}}
                                         <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white"
                                             style="width: 24px; height: 24px; font-size: 0.75rem;">?</div>
-                                        {{/bot2HasImage}}
+                                        {{/opponentHasImage}}
                                     </div>
-                                    <span class="text-secondary">{{opponentName}}</span>
+                                    <div class="d-flex flex-column">
+                                        <a href="/bots/detail/{{opponentBotId}}"
+                                            class="text-secondary text-decoration-none hover-link">{{opponentName}}</a>
+                                        <span class="small text-secondary">
+                                            by <a href="/user/profile?user={{opponentOwnerName}}"
+                                                class="text-secondary text-decoration-none hover-link">{{opponentOwnerName}}</a>
+                                        </span>
+                                    </div>
                                 </div>
                             </td>
                             <td><span

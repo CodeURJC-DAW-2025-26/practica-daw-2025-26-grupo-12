@@ -97,7 +97,10 @@
                                 <tbody>
                                     {{#topBots}}
                                     <tr>
-                                        <td class="ps-3">{{name}}</td>
+                                        <td class="ps-3">
+                                            <a href="/bots/detail/{{id}}"
+                                                class="text-white text-decoration-none hover-link fw-semibold">{{name}}</a>
+                                        </td>
                                         <td class="text-secondary">{{elo}}</td>
                                         <td class="text-end pe-3">
                                             {{#publicBot}}<span class="badge bg-secondary">Public</span>{{/publicBot}}
@@ -124,7 +127,16 @@
                             {{#recentMatches}}
                             <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
                                 <div>
-                                    <div class="fw-semibold">{{myBotName}} vs {{opponentName}}</div>
+                                    <div class="fw-semibold">
+                                        <a href="/bots/detail/{{myBotId}}"
+                                            class="text-white text-decoration-none hover-link">{{myBotName}}</a>
+                                        <span class="text-secondary opacity-50 mx-1">vs</span>
+                                        <a href="/bots/detail/{{opponentBotId}}"
+                                            class="text-white text-decoration-none hover-link">{{opponentName}}</a>
+                                        <span class="text-secondary opacity-50 small"> (by <a
+                                                href="/user/profile?user={{opponentOwnerName}}"
+                                                class="text-secondary text-decoration-none hover-link">{{opponentOwnerName}}</a>)</span>
+                                    </div>
                                     <small class="text-secondary">Match #{{id}}</small>
                                 </div>
                                 <div class="text-end">
