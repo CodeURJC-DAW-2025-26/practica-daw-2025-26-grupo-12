@@ -93,7 +93,7 @@ public class AdminController {
     return "components/admin-tournament-page-chunk";
   }
 
-  @GetMapping("/tournament/create")
+  @GetMapping("/tournaments/create")
   public String adminTournamentCreate(@RequestParam(required = false) String success, Model model) {
     if (success != null) {
       model.addAttribute("successMessage", "Tournament created successfully.");
@@ -102,7 +102,7 @@ public class AdminController {
     return "admin-tournament-create";
   }
 
-  @PostMapping("/tournament/create")
+  @PostMapping("/tournaments/create")
   public String createTournament(
       @RequestParam(required = false) String adminTitle,
       @RequestParam(required = false) String adminMaxPlayers,
@@ -182,7 +182,7 @@ public class AdminController {
         startDate,
         format,
         prize);
-    return "redirect:/admin/tournament/create?success";
+    return "redirect:/admin/tournaments/create?success";
   }
 
   @GetMapping("/tournaments/edit/{id}")
@@ -236,7 +236,7 @@ public class AdminController {
     return "error";
   }
 
-  @GetMapping("/tournament/detail")
+  @GetMapping("/tournaments/detail")
   public String adminTournamentDetail(
       @RequestParam(required = false) Long id,
       @RequestParam(required = false) String runResult,
@@ -265,18 +265,19 @@ public class AdminController {
     return "redirect:/admin/panel?processed=" + processed;
   }
 
-  @PostMapping("/tournament/{id}/run-now")
+  @PostMapping("/tournaments/{id}/run-now")
   public String runTournamentNow(@org.springframework.web.bind.annotation.PathVariable Long id) {
     TournamentAutomationService.RunNowResult result =
         tournamentAutomationService.runTournamentNow(id);
     return switch (result) {
-      case EXECUTED -> "redirect:/admin/tournament/detail?id=" + id + "&runResult=executed";
-      case NOT_UPCOMING -> "redirect:/admin/tournament/detail?id=" + id + "&runResult=not-upcoming";
-      case NOT_FOUND -> "redirect:/admin/tournament/detail?runResult=not-found";
+      case EXECUTED -> "redirect:/admin/tournaments/detail?id=" + id + "&runResult=executed";
+      case NOT_UPCOMING ->
+          "redirect:/admin/tournaments/detail?id=" + id + "&runResult=not-upcoming";
+      case NOT_FOUND -> "redirect:/admin/tournaments/detail?runResult=not-found";
     };
   }
 
-  @PostMapping("/tournament/{id}/delete")
+  @PostMapping("/tournaments/{id}/delete")
   public String deleteTournament(@PathVariable Long id, RedirectAttributes redirectAttributes) {
     try {
       tournamentService.deleteTournament(id);

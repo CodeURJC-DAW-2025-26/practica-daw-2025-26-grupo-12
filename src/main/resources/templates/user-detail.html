@@ -9,7 +9,7 @@
 
     <form id="profilePhotoForm" method="post" action="/user/profile/update-photo" enctype="multipart/form-data">
         <input type="hidden" name="_csrf" value="{{_csrf.token}}">
-        
+
         <input type="file" id="realProfileImage" name="image" accept="image/*" class="d-none">
 
         <div class="container py-5">
@@ -43,7 +43,8 @@
 
                 <div class="col-md-auto d-flex gap-2">
                     {{#showPhotoActions}}
-                    <button type="button" class="btn btn-outline-muted btn-sm" data-bs-toggle="modal" data-bs-target="#profilePhotoModal">
+                    <button type="button" class="btn btn-outline-muted btn-sm" data-bs-toggle="modal"
+                        data-bs-target="#profilePhotoModal">
                         Edit Photo
                     </button>
                     {{/showPhotoActions}}
@@ -102,12 +103,16 @@
                                         <td class="text-secondary">{{elo}}</td>
                                         <td class="text-end pe-3">
                                             {{#publicBot}}<span class="badge bg-secondary">Public</span>{{/publicBot}}
-                                            {{^publicBot}}<span class="badge bg-dark border border-secondary text-secondary">Private</span>{{/publicBot}}
+                                            {{^publicBot}}<span
+                                                class="badge bg-dark border border-secondary text-secondary">Private</span>{{/publicBot}}
                                         </td>
                                     </tr>
                                     {{/topBots}}
                                     {{^topBots}}
-                                    <tr><td colspan="4" class="ps-3 text-secondary text-center">No bots available yet.</td></tr>
+                                    <tr>
+                                        <td colspan="4" class="ps-3 text-secondary text-center">No bots available yet.
+                                        </td>
+                                    </tr>
                                     {{/topBots}}
                                 </tbody>
                             </table>
@@ -140,26 +145,6 @@
         </div>
     </form>
 
-    {{> components/scripts}}
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const modalInput = document.getElementById('modalFileInput');
-            const realInput = document.getElementById('realProfileImage');
-            const confirmBtn = document.getElementById('confirmImageBtn');
-            const profileForm = document.getElementById('profilePhotoForm');
-
-            confirmBtn.addEventListener('click', function () {
-                if (modalInput.files.length > 0) {
-                    // Sincronizar los archivos entre inputs
-                    realInput.files = modalInput.files;
-                    // Enviar el formulario automáticamente
-                    profileForm.submit();
-                }
-            });
-        });
-    </script>
-
     {{#showPhotoActions}}
     <div class="modal fade" id="profilePhotoModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -168,10 +153,17 @@
                     <h5 class="modal-title">Update Profile Photo</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <p class="text-secondary small mb-3">Choose a new avatar image. It will be uploaded immediately after confirmation.</p>
+                <div class="modal-body text-center">
+                    <p class="text-secondary small mb-3 text-start">Choose a new avatar image. It will be uploaded
+                        immediately after confirmation.</p>
+
+                    <div id="modalImagePreview" class="mb-3 d-none">
+                        <img id="previewImg" src="" class="rounded-circle border border-primary"
+                            style="width: 120px; height: 120px; object-fit: cover;">
+                    </div>
+
                     <input class="form-control" type="file" id="modalFileInput" accept="image/*">
-                    <div class="form-text text-secondary">PNG, JPG up to 2MB.</div>
+                    <div class="form-text text-secondary text-start mt-2">PNG, JPG up to 2MB.</div>
                 </div>
                 <div class="modal-footer border-secondary">
                     <button type="button" class="btn btn-outline-muted" data-bs-dismiss="modal">Cancel</button>
@@ -182,5 +174,57 @@
     </div>
     {{/showPhotoActions}}
 
+    {{> components/scripts}}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const modalInput = document.getElementById('modalFileInput');
+            const realInput = document.getElementById('realProfileImage');
+            const confirmBtn = document.getElementById('confirmImageBtn');
+            const profileForm = document.getElementById('profilePhotoForm');
+            const previewContainer = document.getElementById('modalImagePreview');
+            const previewImg = document.getElementById('previewImg');
+            const modalEl = document.getElementById('profilePhotoModal');
+
+            if (modalInput) {
+                modalInput.addEventListener('change', function () {
+                    const file = this.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            previewImg.src = e.target.result;
+                            previewContainer.classList.remove('d-none');
+                        }
+                        reader.readAsDataURL(file);
+                    } else {
+                        previewContainer.classList.add('d-none');
+                    }
+                });
+            }
+
+            if (confirmBtn) {
+                confirmBtn.addEventListener('click', function () {
+                    if (modalInput.files.length > 0) {
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(modalInput.files[0]);
+                        realInput.files = dataTransfer.files;
+
+                        profileForm.submit();
+                    } else {
+                        alert("Please select an image first.");
+                    }
+                });
+            }
+            if (modalEl) {
+                modalEl.addEventListener('hidden.bs.modal', function () {
+                    if (modalInput) modalInput.value = '';
+                    if (previewContainer) previewContainer.classList.add('d-none');
+                    if (previewImg) previewImg.src = '';
+                });
+            }
+        });
+    </script>
+
 </body>
+
 </html>
