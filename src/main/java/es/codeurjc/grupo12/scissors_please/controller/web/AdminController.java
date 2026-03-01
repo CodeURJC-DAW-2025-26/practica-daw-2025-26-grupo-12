@@ -1,12 +1,14 @@
 package es.codeurjc.grupo12.scissors_please.controller.web;
 
 import es.codeurjc.grupo12.scissors_please.config.ErrorConstants;
+import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.Image;
 import es.codeurjc.grupo12.scissors_please.model.Tournament;
 import es.codeurjc.grupo12.scissors_please.model.TournamentStatus;
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.repository.UserRepository.MonthlyUserCount;
 import es.codeurjc.grupo12.scissors_please.security.ActiveSessionService;
+import es.codeurjc.grupo12.scissors_please.service.BotService;
 import es.codeurjc.grupo12.scissors_please.service.ChartService;
 import es.codeurjc.grupo12.scissors_please.service.TournamentAutomationService;
 import es.codeurjc.grupo12.scissors_please.service.TournamentService;
@@ -45,23 +47,25 @@ public class AdminController {
   private static final int MAX_TITLE_LENGTH = 80;
   private static final int MAX_DESCRIPTION_LENGTH = 500;
   private static final int MAX_PRIZE_LENGTH = 120;
-  @Autowired private TournamentService tournamentService;
-  @Autowired private ChartService chartService;
-  @Autowired private TournamentAutomationService tournamentAutomationService;
-  @Autowired private UserService userService;
-  @Autowired private ActiveSessionService activeSessionService;
+  @Autowired
+  private TournamentService tournamentService;
+  @Autowired
+  private ChartService chartService;
+  @Autowired
+  private TournamentAutomationService tournamentAutomationService;
+  @Autowired
+  private UserService userService;
+  @Autowired
+  private ActiveSessionService activeSessionService;
+  @Autowired
+  private BotService botService;
 
-  @GetMapping("/panel")
-  public String adminPanel(
+  @GetMapping("/tournaments")
+  public String adminTournaments(
       @PageableDefault(size = 5) Pageable pageable,
       @RequestParam(required = false) Integer processed,
       Model model) {
 
-    List<MonthlyUserCount> data = userService.getMonthlyUserCount();
-    byte[] barChart = chartService.generateUserHistory(data);
-
-    String base64Chart = Base64.getEncoder().encodeToString(barChart);
-    model.addAttribute("barChart", base64Chart);
     model.addAttribute("size", Math.max(pageable.getPageSize(), 1));
     model.addAttribute("fromItem", 0);
     model.addAttribute("toItem", 0);
@@ -74,10 +78,10 @@ public class AdminController {
         model.addAttribute("successMessage", "No upcoming tournaments to process.");
       }
     }
-    return "admin-panel";
+    return "admin-tournaments";
   }
 
-  @GetMapping("/panel/page")
+  @GetMapping("/tournaments/page")
   public String adminPanelPage(@PageableDefault(size = 5) Pageable pageable, Model model) {
     TournamentService.TournamentPage tournamentPage = tournamentService.getTournamentPage(pageable);
     model.addAttribute("tournaments", tournamentPage.tournaments());
@@ -126,8 +130,7 @@ public class AdminController {
     }
 
     Integer maxPlayers = parseMaxPlayers(maxPlayersRaw, errors);
-    LocalDate registrationStart =
-        parseDate("Registration opens date is invalid.", registrationStartRaw, errors);
+    LocalDate registrationStart = parseDate("Registration opens date is invalid.", registrationStartRaw, errors);
     LocalDate startDate = parseDate("Start date is invalid.", startDateRaw, errors);
 
     if (description.length() > MAX_DESCRIPTION_LENGTH) {
@@ -218,7 +221,7 @@ public class AdminController {
 
       tournamentService.save(tournament);
 
-      return "redirect:/admin/panel";
+      return "redirect:/admin/tournaments";
     }
     model.addAttribute("errorMessage", ErrorConstants.TOURNAMENT_NOT_FOUND);
     model.addAttribute("errorCode", ErrorConstants.NOT_FOUND_CODE);
@@ -230,15 +233,14 @@ public class AdminController {
       @RequestParam(required = false) Long id,
       @RequestParam(required = false) String runResult,
       Model model) {
-    TournamentService.AdminTournamentDetail tournament =
-        tournamentService.getAdminTournamentDetail(id);
+    TournamentService.AdminTournamentDetail tournament = tournamentService.getAdminTournamentDetail(id);
     model.addAttribute("tournament", tournament);
     if (runResult != null) {
       switch (runResult) {
         case "executed" ->
-            model.addAttribute("successMessage", "Tournament executed successfully.");
+          model.addAttribute("successMessage", "Tournament executed successfully.");
         case "not-upcoming" ->
-            model.addAttribute("errorMessage", "Only upcoming tournaments can be executed now.");
+          model.addAttribute("errorMessage", "Only upcoming tournaments can be executed now.");
         case "not-found" -> model.addAttribute("errorMessage", "Tournament not found.");
         default -> {
           // no-op
@@ -251,17 +253,16 @@ public class AdminController {
   @PostMapping("/tournaments/process-due")
   public String processDueTournamentsManually() {
     int processed = tournamentAutomationService.processDueUpcomingTournamentsNow();
-    return "redirect:/admin/panel?processed=" + processed;
+    return "redirect:/admin/tournaments?processed=" + processed;
   }
 
   @PostMapping("/tournaments/{id}/run-now")
   public String runTournamentNow(@org.springframework.web.bind.annotation.PathVariable Long id) {
-    TournamentAutomationService.RunNowResult result =
-        tournamentAutomationService.runTournamentNow(id);
+    TournamentAutomationService.RunNowResult result = tournamentAutomationService.runTournamentNow(id);
     return switch (result) {
       case EXECUTED -> "redirect:/admin/tournaments/detail?id=" + id + "&runResult=executed";
       case NOT_UPCOMING ->
-          "redirect:/admin/tournaments/detail?id=" + id + "&runResult=not-upcoming";
+        "redirect:/admin/tournaments/detail?id=" + id + "&runResult=not-upcoming";
       case NOT_FOUND -> "redirect:/admin/tournaments/detail?runResult=not-found";
     };
   }
@@ -274,7 +275,7 @@ public class AdminController {
     } catch (NoSuchElementException e) {
       redirectAttributes.addFlashAttribute("errorMessage", "Tournament not found.");
     }
-    return "redirect:/admin/panel";
+    return "redirect:/admin/tournaments";
   }
 
   private Integer parseMaxPlayers(String value, List<String> errors) {
@@ -333,6 +334,13 @@ public class AdminController {
       @RequestParam(name = "status", required = false) String status,
       Authentication authentication,
       Model model) {
+
+    List<MonthlyUserCount> data = userService.getMonthlyUserCount();
+    byte[] barChart = chartService.generateUserHistory(data);
+
+    String base64Chart = Base64.getEncoder().encodeToString(barChart);
+    model.addAttribute("barChart", base64Chart);
+
     String normalizedQuery = normalizeQuery(query);
     UserStatusFilter statusFilter = UserStatusFilter.fromValue(status);
     User currentAdmin = userService.getCurrentUser(authentication);
@@ -373,6 +381,29 @@ public class AdminController {
     return updateBlockedStatus(id, query, status, authentication, redirectAttributes, false);
   }
 
+  @GetMapping("/bots")
+  public String adminBots(
+      @RequestParam(name = "q", required = false) String query,
+      @RequestParam(name = "visibility", required = false, defaultValue = "all") String visibility,
+      Model model) {
+
+    String normalizedQuery = normalizeQuery(query);
+
+    List<Bot> bots = botService.searchBots(normalizedQuery, visibility);
+
+    model.addAttribute("searchQuery", normalizedQuery);
+
+    model.addAttribute("visibilityFilter", visibility);
+
+    model.addAttribute("visAll", visibility.equals("all"));
+    model.addAttribute("visPublic", visibility.equals("public"));
+    model.addAttribute("visPrivate", visibility.equals("private"));
+    model.addAttribute("resultCount", bots.size());
+    model.addAttribute("bots", bots);
+
+    return "admin-bots";
+  }
+
   private String updateBlockedStatus(
       Long userId,
       String query,
@@ -384,10 +415,9 @@ public class AdminController {
     UserStatusFilter statusFilter = UserStatusFilter.fromValue(status);
     try {
       User currentAdmin = userService.getCurrentUser(authentication);
-      User targetUser =
-          blocked
-              ? userService.blockUser(userId, currentAdmin)
-              : userService.unblockUser(userId, currentAdmin);
+      User targetUser = blocked
+          ? userService.blockUser(userId, currentAdmin)
+          : userService.unblockUser(userId, currentAdmin);
 
       if (blocked) {
         activeSessionService.expireSessions(targetUser);
@@ -449,10 +479,9 @@ public class AdminController {
 
   private void populateUsersSearchModel(
       Model model, String searchQuery, UserStatusFilter statusFilter, User currentAdmin) {
-    List<AdminUserView> users =
-        userService.searchUsers(searchQuery, statusFilter).stream()
-            .map(user -> toAdminUserView(user, currentAdmin))
-            .toList();
+    List<AdminUserView> users = userService.searchUsers(searchQuery, statusFilter).stream()
+        .map(user -> toAdminUserView(user, currentAdmin))
+        .toList();
 
     model.addAttribute("searchQuery", searchQuery);
     model.addAttribute("statusFilter", statusFilter.value());
@@ -515,5 +544,6 @@ public class AdminController {
       boolean manageable,
       boolean adminRole,
       boolean hasImage,
-      String initial) {}
+      String initial) {
+  }
 }

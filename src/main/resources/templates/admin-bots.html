@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+
+{{> components/head}}
+
+<body class="d-flex flex-column min-vh-100">
+
+    {{> components/navbar}}
+
+    <div class="container py-5">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+            <div>
+                <p class="text-secondary mb-1 small text-uppercase">Administration</p>
+                <h1 class="h3 fw-bold mb-0">Bot Management</h1>
+            </div>
+        </div>
+
+        {{#successMessage}}
+        <div class="alert alert-success px-3 py-2 small" role="alert">
+            {{successMessage}}
+        </div>
+        {{/successMessage}}
+
+        {{#errorMessage}}
+        <div class="alert alert-danger px-3 py-2 small" role="alert">
+            {{errorMessage}}
+        </div>
+        {{/errorMessage}}
+
+        <div class="card p-4 mb-4">
+            <form id="admin-bot-search-form" method="get" action="/admin/bots" class="row g-3 align-items-center">
+                <div class="col-lg-7">
+                    <label for="admin-bot-search" class="form-label text-uppercase small mb-1">Search bots</label>
+                    <input id="admin-bot-search" type="search" name="q" class="form-control"
+                        placeholder="Search by bot name..." value="{{searchQuery}}" autocomplete="off">
+                </div>
+                <div class="col-lg-2">
+                    <label for="admin-bot-visibility-filter"
+                        class="form-label text-uppercase small mb-1">Visibility</label>
+                    <select id="admin-bot-visibility-filter" name="visibility" class="form-select">
+                        <option value="all" {{#visAll}}selected{{/visAll}}>All</option>
+                        <option value="public" {{#visPublic}}selected{{/visPublic}}>Public</option>
+                        <option value="private" {{#visPrivate}}selected{{/visPrivate}}>Private</option>
+                    </select>
+                </div>
+                <div class="col-lg-3 d-grid d-lg-flex justify-content-lg-end gap-2">
+                    <button type="submit" class="btn btn-primary btn-sm px-3 mt-lg-4">Search</button>
+                    <a href="/admin/bots" class="btn btn-outline-muted btn-sm px-3 mt-lg-4">Clear</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="card p-4">
+            <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap mb-3">
+                <h2 class="h5 fw-bold mb-0">Matching Bots</h2>
+                <span id="admin-bots-result-counter" class="badge bg-secondary">{{resultCount}} results</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table mb-0 align-middle text-nowrap">
+                    <thead>
+                        <tr class="text-secondary small text-uppercase">
+                            <th scope="col" class="ps-3">Icon</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Owner</th>
+                            <th scope="col">ELO</th>
+                            <th scope="col">Visibility</th>
+                            <th scope="col" class="text-end pe-3">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-bots-table-body">
+                        {{#bots}}
+                        <tr class="bot-row">
+                            <td class="ps-3">
+                                <div style="width: 40px; height: 40px;">
+                                    {{#hasImage}}
+                                    <img src="/bot-images/{{id}}"
+                                        class="rounded-circle border border-primary w-100 h-100"
+                                        style="object-fit: cover;" alt="{{name}}">
+                                    {{/hasImage}}
+                                    {{^hasImage}}
+                                    <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold w-100 h-100 shadow-sm"
+                                        style="font-size: 0.9rem;">{{initial}}</div>
+                                    {{/hasImage}}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="fw-bold d-block text-white">{{name}}</span>
+                                <span class="text-secondary small">ID: #{{id}}</span>
+                            </td>
+                            <td><span class="text-secondary small">Owner: #{{ownerId}}</span></td>
+                            <td><span class="badge bg-primary font-monospace">{{elo}}</span></td>
+                            <td>
+                                {{#isPublic}}
+                                <span class="badge border border-success text-success">Public</span>
+                                {{/isPublic}}
+                                {{^isPublic}}
+                                <span class="badge border border-warning text-warning">Private</span>
+                                {{/isPublic}}
+                            </td>
+                            <td class="text-end pe-3">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a href="/bots/detail/{{id}}" class="btn btn-sm btn-outline-light">View</a>
+                                    <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                                        data-bs-target="#deleteBotModal" data-bot-id="{{id}}" data-bot-name="{{name}}">
+                                        Delete
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {{/bots}}
+                        {{#showEmpty}}
+                        <tr>
+                            <td class="ps-3 py-4 text-center" colspan="6">
+                                <span class="text-secondary italic">No bots found matching your criteria.</span>
+                            </td>
+                        </tr>
+                        {{/showEmpty}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteBotModal" tabindex="-1" aria-labelledby="deleteBotModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content glass-card shadow-2xl border-0 overflow-hidden">
+                <div class="modal-body p-0">
+                    <div class="text-center p-5">
+                        <div class="mb-4">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-danger bg-opacity-10 rounded-circle"
+                                style="width: 80px; height: 80px;">
+                                <i class="bi bi-trash3-fill text-danger fs-1"></i>
+                            </div>
+                        </div>
+                        <h4 class="fw-bold mb-2 text-white">Delete <span id="deleteBotName"
+                                class="text-primary italic"></span>?
+                        </h4>
+                        <p class="text-secondary px-3">This will permanently remove this bot from the system. This action cannot be undone.</p>
+                    </div>
+                    <div class="bg-black bg-opacity-25 p-4">
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <button type="button" class="btn btn-outline-muted w-100 py-2 fw-medium"
+                                    data-bs-dismiss="modal">Cancel</button>
+                            </div>
+                            <div class="col-6">
+                                <form id="deleteBotForm" method="post" action="">
+                                    <input type="hidden" name="_csrf" value="{{_csrf.token}}">
+                                    <input type="hidden" name="q" value="{{searchQuery}}">
+                                    <input type="hidden" name="visibility" value="{{visibilityFilter}}">
+                                    <button type="submit" class="btn btn-danger w-100 py-2 fw-medium">Delete Forever</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{> components/scripts}}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Lógica de búsqueda
+            const form = document.getElementById('admin-bot-search-form');
+            const searchInput = document.getElementById('admin-bot-search');
+            const visibilitySelect = document.getElementById('admin-bot-visibility-filter');
+
+            let timer;
+            searchInput.addEventListener('input', () => {
+                clearTimeout(timer);
+                timer = setTimeout(() => form.submit(), 500);
+            });
+
+            visibilitySelect.addEventListener('change', () => form.submit());
+
+            // Lógica del Modal (Igual que la primera plantilla)
+            const deleteModal = document.getElementById('deleteBotModal');
+            if (deleteModal) {
+                deleteModal.addEventListener('show.bs.modal', (event) => {
+                    const button = event.relatedTarget;
+                    const botId = button.getAttribute('data-bot-id');
+                    const botName = button.getAttribute('data-bot-name');
+
+                    const formDelete = deleteModal.querySelector('#deleteBotForm');
+                    const nameSpan = deleteModal.querySelector('#deleteBotName');
+
+                    // Seteamos la URL dinámica
+                    formDelete.action = `/bots/${botId}/delete`; 
+                    nameSpan.textContent = botName;
+                });
+            }
+        });
+    </script>
+</body>
+</html>
