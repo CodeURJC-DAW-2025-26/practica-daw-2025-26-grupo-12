@@ -16,7 +16,9 @@
             <div class="d-flex flex-wrap align-items-center gap-2">
                 <span class="badge {{stats.winnerBadgeClass}} rounded-pill px-3 py-2">{{stats.winnerLabel}}</span>
                 {{#logged}}
-                <a href="/matches/search" class="btn btn-primary btn-sm">Rematch</a>
+                {{#canRematch}}
+                <a href="/matches/rematch/request?id={{stats.matchId}}" class="btn btn-primary btn-sm">Rematch</a>
+                {{/canRematch}}
                 {{/logged}}
             </div>
         </div>
