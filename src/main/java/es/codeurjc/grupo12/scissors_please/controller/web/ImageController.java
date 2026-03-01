@@ -1,8 +1,10 @@
 package es.codeurjc.grupo12.scissors_please.controller.web;
 
 import es.codeurjc.grupo12.scissors_please.model.Bot;
+import es.codeurjc.grupo12.scissors_please.model.Tournament;
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.service.BotService;
+import es.codeurjc.grupo12.scissors_please.service.TournamentService;
 import es.codeurjc.grupo12.scissors_please.service.UserService;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -20,6 +22,7 @@ public class ImageController {
 
   @Autowired private BotService botService;
   @Autowired private UserService userService;
+  @Autowired private TournamentService tournamentService;
 
   @GetMapping("/bot-images/{id}")
   public ResponseEntity<byte[]> getBotImage(@PathVariable Long id) {
@@ -49,6 +52,29 @@ public class ImageController {
 
     if (user != null && user.getImage() != null) {
       byte[] imageBytes = user.getImage().getData();
+
+      String mimeType = null;
+      try {
+        mimeType = URLConnection.guessContentTypeFromStream(new ByteArrayInputStream(imageBytes));
+      } catch (IOException e) {
+      }
+
+      MediaType contentType =
+          (mimeType != null) ? MediaType.parseMediaType(mimeType) : MediaType.IMAGE_JPEG;
+
+      return ResponseEntity.ok().contentType(contentType).body(imageBytes);
+    }
+
+    return ResponseEntity.notFound().build();
+  }
+
+  @GetMapping("/tournament-images/{id}")
+  public ResponseEntity<byte[]> getTournamentImage(@PathVariable Long id) {
+
+    Optional<Tournament> opTournament = tournamentService.getTournamentById(id);
+    if (opTournament.isPresent() && opTournament.get().getImage() != null) {
+      Tournament tournament = opTournament.get();
+      byte[] imageBytes = tournament.getImage().getData();
 
       String mimeType = null;
       try {

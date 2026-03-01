@@ -1,5 +1,6 @@
 package es.codeurjc.grupo12.scissors_please.controller.web;
 
+import es.codeurjc.grupo12.scissors_please.model.Image;
 import es.codeurjc.grupo12.scissors_please.model.Tournament;
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.security.ActiveSessionService;
@@ -7,6 +8,7 @@ import es.codeurjc.grupo12.scissors_please.service.TournamentAutomationService;
 import es.codeurjc.grupo12.scissors_please.service.TournamentService;
 import es.codeurjc.grupo12.scissors_please.service.UserService;
 import es.codeurjc.grupo12.scissors_please.service.UserService.UserStatusFilter;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.util.UriUtils;
 
@@ -96,6 +99,7 @@ public class AdminController {
       @RequestParam(required = false) String adminFormat,
       @RequestParam(required = false) String adminDescription,
       @RequestParam(required = false) String adminPrize,
+      @RequestParam(required = false) MultipartFile image,
       Model model) {
     List<String> errors = new ArrayList<>();
 
@@ -145,9 +149,27 @@ public class AdminController {
           prize);
       return "admin-tournament-create";
     }
+    Image tournamentImage = null;
+    if (image != null && !image.isEmpty()) {
+      try {
+        tournamentImage = new Image();
+        tournamentImage.setFilename(image.getOriginalFilename());
+        tournamentImage.setContentType(image.getContentType());
+        tournamentImage.setData(image.getBytes());
+      } catch (IOException e) {
+        return "error";
+      }
+    }
 
     tournamentService.createTournament(
-        title, description, maxPlayers, registrationStart, startDate, format, prize);
+        title,
+        tournamentImage,
+        description,
+        maxPlayers,
+        registrationStart,
+        startDate,
+        format,
+        prize);
     return "redirect:/admin/tournament/create?success";
   }
 
@@ -169,7 +191,8 @@ public class AdminController {
       @RequestParam String name,
       @RequestParam(required = false) String description,
       @RequestParam(required = false) String startDate,
-      @RequestParam int slots,
+      @RequestParam(required = false) int slots,
+      @RequestParam(required = false) MultipartFile image,
       @RequestParam String status,
       Authentication authentication) {
 
@@ -177,7 +200,9 @@ public class AdminController {
 
     if (opTournament.isPresent()) {
       Tournament tournament = opTournament.get();
-
+      if (!handleImageUpload(tournament, image)) {
+        return "error";
+      }
       tournament.setName(name);
       tournament.setDescription(description != null ? description : "");
       tournament.setSlots(slots);
@@ -426,6 +451,30 @@ public class AdminController {
           .append(statusFilter.value());
     }
     return redirectBuilder.toString();
+  }
+
+  private boolean handleImageUpload(Tournament tournament, MultipartFile imageFile) {
+    if (imageFile == null || imageFile.isEmpty()) {
+      return true;
+    }
+
+    String contentType = imageFile.getContentType();
+    if (contentType == null || !contentType.startsWith("image/")) {
+      return false;
+    }
+
+    try {
+      Image img = new Image();
+      img.setFilename(imageFile.getOriginalFilename());
+      img.setContentType(contentType);
+      img.setData(imageFile.getBytes());
+
+      tournament.setImage(img);
+      return true;
+
+    } catch (IOException e) {
+      return false;
+    }
   }
 
   private record AdminUserView(
