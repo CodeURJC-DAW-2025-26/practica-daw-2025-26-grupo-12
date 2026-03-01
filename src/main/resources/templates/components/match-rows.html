@@ -3,15 +3,33 @@
     <td class="ps-4 text-secondary">#{{id}}</td>
     <td>
         <div class="d-flex align-items-center">
-            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white me-2"
-                style="width: 32px; height: 32px;">{{bot1Initial}}</div>
+            <div class="position-relative me-2" style="width: 32px; height: 32px;">
+                {{#bot1HasImage}}
+                <img src="/bot-images/{{bot1Id}}" class="rounded-circle"
+                    style="width: 32px; height: 32px; object-fit: cover;"
+                    onerror="this.parentElement.innerHTML='<div class=&quot;rounded-circle bg-primary d-flex align-items-center justify-content-center text-white&quot; style=&quot;width: 32px; height: 32px;&quot;>{{bot1Initial}}</div>'">
+                {{/bot1HasImage}}
+                {{^bot1HasImage}}
+                <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white"
+                    style="width: 32px; height: 32px;">{{bot1Initial}}</div>
+                {{/bot1HasImage}}
+            </div>
             <span class="fw-medium">{{bot1Name}}</span>
         </div>
     </td>
     <td>
         <div class="d-flex align-items-center">
-            <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white me-2"
-                style="width: 32px; height: 32px;">{{bot2Initial}}</div>
+            <div class="position-relative me-2" style="width: 32px; height: 32px;">
+                {{#bot2HasImage}}
+                <img src="/bot-images/{{bot2Id}}" class="rounded-circle"
+                    style="width: 32px; height: 32px; object-fit: cover;"
+                    onerror="this.parentElement.innerHTML='<div class=&quot;rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white&quot; style=&quot;width: 32px; height: 32px;&quot;>{{bot2Initial}}</div>'">
+                {{/bot2HasImage}}
+                {{^bot2HasImage}}
+                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white"
+                    style="width: 32px; height: 32px;">{{bot2Initial}}</div>
+                {{/bot2HasImage}}
+            </div>
             <span class="text-secondary">{{bot2Name}}</span>
         </div>
     </td>

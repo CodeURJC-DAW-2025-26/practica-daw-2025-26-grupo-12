@@ -204,7 +204,22 @@
               <div class="list-group list-group-flush">
                 {{#recentMatches}}
                 <div class="list-group-item d-flex justify-content-between align-items-center">
-                  #{{id}} vs {{opponentName}} <span class="badge {{resultBadgeClass}} rounded-pill">{{result}}</span>
+                  <div class="d-flex align-items-center">
+                    <div class="position-relative me-2" style="width: 24px; height: 24px;">
+                      {{#bot2HasImage}}
+                      <img src="/bot-images/{{bot2Id}}" class="rounded-circle"
+                        style="width: 24px; height: 24px; object-fit: cover;"
+                        onerror="this.parentElement.innerHTML='<div class=&quot;rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white&quot; style=&quot;width: 24px; height: 24px; font-size: 0.75rem;&quot;>?</div>'">
+                      {{/bot2HasImage}}
+                      {{^bot2HasImage}}
+                      <div
+                        class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white"
+                        style="width: 24px; height: 24px; font-size: 0.75rem;">?</div>
+                      {{/bot2HasImage}}
+                    </div>
+                    <span>#{{id}} vs {{opponentName}}</span>
+                  </div>
+                  <span class="badge {{resultBadgeClass}} rounded-pill">{{result}}</span>
                 </div>
                 {{/recentMatches}}
               </div>

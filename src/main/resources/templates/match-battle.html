@@ -10,14 +10,32 @@
         <p class="text-secondary small mb-4">Match #{{battle.matchId}}</p>
         <div class="d-flex flex-column flex-md-row align-items-center justify-content-center gap-3 gap-md-4 mb-4">
             <div class="text-center">
-                <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold mx-auto"
-                    style="width: 88px; height: 88px; font-size: 2.25rem;">{{battle.bot1Initial}}</div>
+                <div class="position-relative mx-auto rounded-circle overflow-hidden shadow-sm"
+                    style="width: 88px; height: 88px;">
+                    {{#battle.bot1HasImage}}
+                    <img src="/bot-images/{{battle.bot1Id}}" class="w-100 h-100 object-fit-cover"
+                        onerror="this.parentElement.innerHTML='<div class=&quot;bg-primary d-flex align-items-center justify-content-center text-white fw-bold w-100 h-100&quot; style=&quot;font-size: 2.25rem;&quot;>{{battle.bot1Initial}}</div>'">
+                    {{/battle.bot1HasImage}}
+                    {{^battle.bot1HasImage}}
+                    <div class="bg-primary d-flex align-items-center justify-content-center text-white fw-bold w-100 h-100"
+                        style="font-size: 2.25rem;">{{battle.bot1Initial}}</div>
+                    {{/battle.bot1HasImage}}
+                </div>
                 <h2 class="h5 fw-bold mt-3 mb-0">{{battle.bot1Name}}</h2>
             </div>
             <div class="fw-bold text-primary" style="font-size: clamp(2.5rem, 6vw, 3.5rem);">VS</div>
             <div class="text-center">
-                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white fw-bold mx-auto"
-                    style="width: 88px; height: 88px; font-size: 2.25rem;">{{battle.bot2Initial}}</div>
+                <div class="position-relative mx-auto rounded-circle overflow-hidden shadow-sm"
+                    style="width: 88px; height: 88px;">
+                    {{#battle.bot2HasImage}}
+                    <img src="/bot-images/{{battle.bot2Id}}" class="w-100 h-100 object-fit-cover"
+                        onerror="this.parentElement.innerHTML='<div class=&quot;bg-secondary d-flex align-items-center justify-content-center text-white fw-bold w-100 h-100&quot; style=&quot;font-size: 2.25rem;&quot;>{{battle.bot2Initial}}</div>'">
+                    {{/battle.bot2HasImage}}
+                    {{^battle.bot2HasImage}}
+                    <div class="bg-secondary d-flex align-items-center justify-content-center text-white fw-bold w-100 h-100"
+                        style="font-size: 2.25rem;">{{battle.bot2Initial}}</div>
+                    {{/battle.bot2HasImage}}
+                </div>
                 <h2 class="h5 fw-bold mt-3 mb-0">{{battle.bot2Name}}</h2>
             </div>
         </div>

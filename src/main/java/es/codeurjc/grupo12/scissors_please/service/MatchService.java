@@ -281,14 +281,20 @@ public class MatchService {
 
   public MatchBattleView getMatchBattleView(Long matchId) {
     Match match = resolveMatch(matchId);
-    String bot1Name = resolveBotName(match.getBot1());
-    String bot2Name = resolveBotName(match.getBot2());
+    Bot bot1 = match.getBot1();
+    Bot bot2 = match.getBot2();
+    String bot1Name = resolveBotName(bot1);
+    String bot2Name = resolveBotName(bot2);
     return new MatchBattleView(
         match.getId(),
+        bot1 != null ? bot1.getId() : null,
         bot1Name,
         resolveInitial(bot1Name),
+        bot1 != null && bot1.getImage() != null,
+        bot2 != null ? bot2.getId() : null,
         bot2Name,
         resolveInitial(bot2Name),
+        bot2 != null && bot2.getImage() != null,
         "/matches/stats?id=" + match.getId());
   }
 
@@ -636,8 +642,12 @@ public class MatchService {
 
     return new UserMatchItem(
         match.getId(),
+        bot1 != null ? bot1.getId() : null,
         myBotName,
+        bot1 != null && bot1.getImage() != null,
+        bot2 != null ? bot2.getId() : null,
         opponentName,
+        bot2 != null && bot2.getImage() != null,
         result,
         resolveBadgeClass(result),
         formatDate(match.getTimestamp()),
@@ -766,19 +776,25 @@ public class MatchService {
   }
 
   private MatchListItem toListItem(Match match) {
-    String bot1Name = resolveBotName(match.getBot1());
-    String bot2Name = resolveBotName(match.getBot2());
-    int topElo = Math.max(resolveBotElo(match.getBot1()), resolveBotElo(match.getBot2()));
+    Bot bot1 = match.getBot1();
+    Bot bot2 = match.getBot2();
+    String bot1Name = resolveBotName(bot1);
+    String bot2Name = resolveBotName(bot2);
+    int topElo = Math.max(resolveBotElo(bot1), resolveBotElo(bot2));
     String result = resolveResult(match);
     String badgeClass = resolveBadgeClass(result);
     String date = formatDate(match.getTimestamp());
 
     return new MatchListItem(
         match.getId(),
+        bot1 != null ? bot1.getId() : null,
         bot1Name,
         resolveInitial(bot1Name),
+        bot1 != null && bot1.getImage() != null,
+        bot2 != null ? bot2.getId() : null,
         bot2Name,
         resolveInitial(bot2Name),
+        bot2 != null && bot2.getImage() != null,
         topElo,
         result,
         badgeClass,
@@ -866,10 +882,14 @@ public class MatchService {
 
   public record MatchListItem(
       Long id,
+      Long bot1Id,
       String bot1Name,
       String bot1Initial,
+      boolean bot1HasImage,
+      Long bot2Id,
       String bot2Name,
       String bot2Initial,
+      boolean bot2HasImage,
       int topElo,
       String result,
       String resultBadgeClass,
@@ -886,8 +906,12 @@ public class MatchService {
 
   public record UserMatchItem(
       Long id,
+      Long bot1Id,
       String myBotName,
+      boolean bot1HasImage,
+      Long bot2Id,
       String opponentName,
+      boolean bot2HasImage,
       String result,
       String resultBadgeClass,
       String date,
@@ -979,10 +1003,14 @@ public class MatchService {
 
   public record MatchBattleView(
       Long matchId,
+      Long bot1Id,
       String bot1Name,
       String bot1Initial,
+      boolean bot1HasImage,
+      Long bot2Id,
       String bot2Name,
       String bot2Initial,
+      boolean bot2HasImage,
       String statsHref) {}
 
   public record MatchRoundView(
