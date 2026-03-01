@@ -186,6 +186,7 @@ public class BotController {
 
     model.addAttribute("bot", bot);
     model.addAttribute("username", username);
+     model.addAttribute("initial", bot.getName().charAt(0));
     model.addAttribute("totalMatches", total);
     model.addAttribute("winRateFormatted", String.format("%.1f", winRate));
 
