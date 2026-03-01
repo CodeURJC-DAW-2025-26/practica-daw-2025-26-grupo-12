@@ -89,4 +89,12 @@ public class Bot {
     this.elo = newElo;
     this.eloHistory.add(newElo);
   }
+
+  public boolean isHasImage() {
+    return this.image != null;
+  }
+
+  public char getInitial() {
+    return this.name.charAt(0);
+  }
 }
