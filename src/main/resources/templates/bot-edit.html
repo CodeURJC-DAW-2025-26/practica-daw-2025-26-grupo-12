@@ -3,7 +3,6 @@
 
 {{> components/head}}
 
-
 <body class="d-flex flex-column min-vh-100">
 
     {{> components/navbar}}
@@ -21,11 +20,10 @@
 
         <div class="row g-4">
             <div class="col-lg-8">
-                <div class="card p-4">
+                <div class="card p-4 shadow-sm">
                     <h2 class="h5 fw-bold mb-3">Bot Settings</h2>
-                    <form method="post" action="/bots/edit/{{bot.id}}" enctype="multipart/form-data">
+                    <form id="botEditForm" method="post" action="/bots/edit/{{bot.id}}" enctype="multipart/form-data">
                         <input type="hidden" name="_csrf" value="{{_csrf.token}}">
-
                         <input type="file" id="realBotImage" name="image" accept="image/*" class="d-none">
 
                         <div class="row g-3">
@@ -57,9 +55,11 @@
                                 <textarea class="form-control form-control-lg font-monospace" id="code" name="code"
                                     rows="8">{{bot.code}}</textarea>
                             </div>
-                            <div class="col-12 d-flex flex-wrap gap-2 mt-2">
-                                <button type="submit" class="btn btn-primary">Save Changes</button>
-                                <button type="reset" class="btn btn-outline-muted">Discard</button>
+
+                            <div class="col-12 d-flex flex-wrap align-items-center gap-3 mt-4">
+                                <button type="submit" class="btn btn-primary px-4 fw-bold">Save Changes</button>
+                                <a href="/bots/my-bots"
+                                    class="btn btn-outline-muted border-0 text-secondary">Discard</a>
                             </div>
                         </div>
                     </form>
@@ -67,50 +67,40 @@
             </div>
 
             <div class="col-lg-4">
-                <div class="card p-4 mb-4 text-center">
-                    <h2 class="h5 fw-bold mb-3">Bot Image</h2>
-                    <div class="mx-auto" style="width: 96px; height: 96px;">
+                <div class="card p-4 text-center shadow-sm">
+                    <h2 class="h5 fw-bold mb-3 text-start">Bot Image</h2>
+
+                    <div id="imageDisplayContainer" class="mx-auto my-3" style="width: 120px; height: 120px;">
                         {{#bot.image}}
-                        <img src="/bot-images/{{bot.id}}" class="rounded-circle border border-primary w-100 h-100"
+                        <img id="mainImagePreview" src="/bot-images/{{bot.id}}"
+                            class="rounded-circle border border-primary border-3 w-100 h-100"
                             style="object-fit: cover;">
                         {{/bot.image}}
+
                         {{^bot.image}}
-                        <div
-                            class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white display-6 fw-bold w-100 h-100">
+                        <div id="initialsCircle"
+                            class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white display-5 fw-bold w-100 h-100 shadow">
                             {{initial}}
                         </div>
+                        <img id="mainImagePreview" src="#"
+                            class="rounded-circle border border-primary border-3 w-100 h-100 d-none"
+                            style="object-fit: cover;">
                         {{/bot.image}}
                     </div>
-                    <div id="fileNameDisplay" class="text-info small mt-2"></div>
-                    <button class="btn btn-outline-muted btn-sm mt-3" data-bs-toggle="modal"
+
+                    <div id="fileNameDisplay" class="text-info small mb-2"></div>
+
+                    <button class="btn btn-outline-muted btn-sm w-100" data-bs-toggle="modal"
                         data-bs-target="#botImageModal">
-                        <span id="btnText">Change Image</span>
+                        <span id="btnText">Change Avatar</span>
                     </button>
+                    <p class="text-secondary small mt-3 mb-0">Click to upload a new profile picture for your bot.</p>
                 </div>
             </div>
         </div>
     </div>
 
     {{> components/scripts}}
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const modalInput = document.getElementById('modalFileInput');
-            const realInput = document.getElementById('realBotImage');
-            const confirmBtn = document.getElementById('confirmImageBtn');
-            const fileNameDisplay = document.getElementById('fileNameDisplay');
-            const btnText = document.getElementById('btnText');
-
-            confirmBtn.addEventListener('click', function () {
-                if (modalInput.files.length > 0) {
-                    realInput.files = modalInput.files;
-                    const fileName = modalInput.files[0].name;
-                    fileNameDisplay.textContent = "Selected: " + fileName;
-                    btnText.textContent = "Change Image";
-                }
-            });
-        });
-    </script>
 
     <div class="modal fade" id="botImageModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -119,9 +109,13 @@
                     <h5 class="modal-title">Edit Bot Image</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body text-center">
+                    <div class="mb-3">
+                        <img id="modalImagePreview" src="#" alt="Preview" class="img-thumbnail d-none"
+                            style="max-height: 200px; background: transparent;">
+                    </div>
                     <input class="form-control" type="file" id="modalFileInput" accept="image/*">
-                    <div class="form-text text-secondary">PNG, JPG up to 2MB.</div>
+                    <div class="form-text text-secondary mt-2">PNG, JPG up to 2MB.</div>
                 </div>
                 <div class="modal-footer border-secondary">
                     <button type="button" class="btn btn-outline-muted" data-bs-dismiss="modal">Cancel</button>
@@ -131,6 +125,51 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const modalInput = document.getElementById('modalFileInput');
+            const realInput = document.getElementById('realBotImage');
+            const confirmBtn = document.getElementById('confirmImageBtn');
+            const fileNameDisplay = document.getElementById('fileNameDisplay');
+            const btnText = document.getElementById('btnText');
+            const modalPreview = document.getElementById('modalImagePreview');
+            const mainPreview = document.getElementById('mainImagePreview');
+            const initialsCircle = document.getElementById('initialsCircle');
+
+            modalInput.addEventListener('change', function () {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        modalPreview.src = e.target.result;
+                        modalPreview.classList.remove('d-none');
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            confirmBtn.addEventListener('click', function () {
+                if (modalInput.files.length > 0) {
+                    realInput.files = modalInput.files;
+                    const file = modalInput.files[0];
+                    fileNameDisplay.textContent = "New: " + file.name;
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        mainPreview.src = e.target.result;
+                        mainPreview.classList.remove('d-none');
+                        if (initialsCircle) initialsCircle.classList.add('d-none');
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            document.getElementById('botEditForm').addEventListener('reset', () => {
+                setTimeout(() => location.reload(), 10);
+            });
+        });
+    </script>
 </body>
 
 </html>

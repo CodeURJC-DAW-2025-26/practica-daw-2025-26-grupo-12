@@ -5,223 +5,135 @@
 
 <body class="d-flex flex-column min-vh-100">
 
-{{> components/navbar}}
+    {{> components/navbar}}
 
-<div class="container py-5">
-
-    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
-        <div class="d-flex align-items-center gap-4">
-            <div class="position-relative">
-                {{#hasTournamentPhoto}}
-                    <img src="/tournament-images/{{tournament.id}}" 
-                         class="rounded border border-primary shadow" 
-                         style="width: 100px; height: 100px; object-fit: cover;">
-                {{/hasTournamentPhoto}}
-
-                {{^hasTournamentPhoto}}
-                    <div class="rounded bg-primary d-flex align-items-center justify-content-center text-white" 
-                         style="width: 100px; height: 100px;">
-                        <span class="display-6 fw-bold">T</span>
-                    </div>
-                {{/hasTournamentPhoto}}
-            </div>
-        <div>
-
-            {{^isAdmin}}
-                <p class="text-secondary mb-1 small text-uppercase">
-                    {{#open}}Open Tournament{{/open}}
-                    {{^open}}Upcoming Tournament{{/open}}
-                </p>
-            {{/isAdmin}}
-
-            {{#isAdmin}}
-                <p class="text-secondary mb-1 small text-uppercase">
-                    Tournament Admin Panel
-                </p>
-            {{/isAdmin}}
-
-            <h1 class="h3 fw-bold mb-0">{{tournament.name}}</h1>
-        </div>
-
-        <div class="d-flex flex-wrap gap-2">
-
-            {{^isAdmin}}
-                <a href="/tournaments" class="btn btn-outline-muted btn-sm">
-                    Back to Tournaments
-                </a>
-            {{/isAdmin}}
-
-            {{#isAdmin}}
-                <a href="/admin/panel" class="btn btn-outline-muted btn-sm">
-                    Back to Admin
-                </a>
-                <a href="/admin/tournaments/edit/{{tournament.id}}"
-                   class="btn btn-primary btn-sm">
-                    Edit Tournament
-                </a>
-            {{/isAdmin}}
-
-        </div>
-    </div>
-
-    {{^isAdmin}}
-
-    <div class="row g-4">
-
-        <div class="col-lg-7">
-            <div class="card p-4">
-
-                <h2 class="h5 fw-bold mb-3">Description</h2>
-                <p class="text-secondary mb-4">
-                    {{tournament.description}}
-                </p>
-
-                <div class="row g-3">
-
-                    <div class="col-md-6">
-                        <div class="card p-3 stat-card h-100">
-                            <h6 class="text-secondary text-uppercase small fw-bold mb-2">
-                                Start Date
-                            </h6>
-                            <span class="h5 fw-bold text-white">
-                                {{tournament.startDate}}
-                            </span>
+    <div class="container py-5">
+        <div class="card border-0 bg-transparent mb-5">
+            <div class="d-flex flex-column flex-md-row align-items-center gap-4">
+                <div class="position-relative">
+                    {{#hasTournamentPhoto}}
+                        <img src="/tournament-images/{{tournament.id}}" 
+                             class="rounded-4 border border-primary shadow-lg" 
+                             style="width: 140px; height: 140px; object-fit: cover;">
+                    {{/hasTournamentPhoto}}
+                    {{^hasTournamentPhoto}}
+                        <div class="rounded-4 bg-primary d-flex align-items-center justify-content-center text-white shadow-lg" 
+                             style="width: 140px; height: 140px;">
+                            <span class="display-4 fw-bold">T</span>
                         </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="card p-3 stat-card h-100">
-                            <h6 class="text-secondary text-uppercase small fw-bold mb-2">
-                                Slots
-                            </h6>
-                            <span class="h5 fw-bold text-white">
-                                {{participants}} / {{tournament.slots}}
-                            </span>
-
-                            {{#open}}
-                                <p class="text-secondary small mb-0">
-                                    Registration open
-                                </p>
-                            {{/open}}
-
-                            {{^open}}
-                                <p class="text-secondary small mb-0">
-                                    Registration closed
-                                </p>
-                            {{/open}}
-
-                        </div>
-                    </div>
-
-                </div>
-
-                <div class="d-flex flex-wrap gap-2 mt-4">
-
+                    {{/hasTournamentPhoto}}
                     {{#open}}
-                    {{#canJoin}}
-                        <a href="/tournaments/join/{{tournament.id}}"
-                           class="btn btn-primary btn-sm">
-                            Join Tournament
-                        </a>
-                    {{/canJoin}}
-                    {{^canJoin}}
-                        <a href="/login" class="btn btn-outline-muted btn-sm">
-                            Log in to Join
-                        </a>
-                    {{/canJoin}}
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success border border-dark">
+                            OPEN
+                        </span>
                     {{/open}}
-
-                    {{^open}}
-                        <button class="btn btn-outline-muted btn-sm" disabled>
-                            Registration Closed
-                        </button>
-                    {{/open}}
-
                 </div>
 
+                <div class="text-center text-md-start flex-grow-1">
+                    <p class="text-primary mb-1 small text-uppercase fw-bold tracking-wider">
+                        {{#isAdmin}}Admin Control Panel{{/isAdmin}}
+                        {{^isAdmin}}{{#open}}Registration Phase{{/open}}{{^open}}Tournament Details{{/open}}{{/isAdmin}}
+                    </p>
+                    <h1 class="display-5 fw-extrabold mb-2">{{tournament.name}}</h1>
+                    <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-3 mt-3">
+                        {{#isAdmin}}
+                            <a href="/admin/tournaments/edit/{{tournament.id}}" class="btn btn-primary px-4">
+                                <i class="bi bi-pencil-square me-2"></i>Edit Settings
+                            </a>
+                            <a href="/admin/panel" class="btn btn-outline-secondary px-4">Admin Dashboard</a>
+                        {{/isAdmin}}
+                        {{^isAdmin}}
+                            {{#open}}
+                                <a href="/tournaments/join/{{tournament.id}}" class="btn btn-primary px-5 fw-bold">JOIN NOW</a>
+                            {{/open}}
+                            <a href="/tournaments" class="btn btn-outline-secondary px-4">All Tournaments</a>
+                        {{/isAdmin}}
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="col-lg-5">
-            <div class="card p-4">
-                <h2 class="h5 fw-bold mb-3">Rules</h2>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item">Best of 20 rounds per match.</li>
-                    <li class="list-group-item">Bots must be uploaded 24h before start.</li>
-                    <li class="list-group-item">No external API calls allowed.</li>
-                </ul>
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="card p-4 border-secondary h-100 shadow-sm">
+                    <h3 class="h5 fw-bold mb-4 border-bottom border-secondary pb-2 text-uppercase small">About this Tournament</h3>
+                    <div class="description-text text-light-emphasis leading-relaxed mb-4">
+                        {{tournament.description}}
+                    </div>
+
+                    {{#isAdmin}}
+                    <div class="mt-auto pt-4 border-top border-secondary">
+                        <h4 class="h6 fw-bold mb-3 text-secondary uppercase small">Management Actions</h4>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="/admin/tournaments/bracket/{{tournament.id}}" class="btn btn-sm btn-outline-info">
+                                <i class="bi bi-diagram-3 me-1"></i> Generate Bracket
+                            </a>
+                            <a href="/admin/tournaments/export/{{tournament.id}}" class="btn btn-sm btn-outline-light">
+                                <i class="bi bi-download me-1"></i> Export Roster (CSV)
+                            </a>
+                        </div>
+                    </div>
+                    {{/isAdmin}}
+                </div>
             </div>
-        </div>
 
-    </div>
+            <div class="col-lg-4">
+                <div class="d-flex flex-column gap-4">
+                    <div class="card p-4 bg-dark-subtle border-primary">
+                        <div class="mb-4">
+                            <label class="text-secondary small text-uppercase d-block mb-1">Status</label>
+                            {{#open}}
+                                <span class="badge bg-success-subtle text-success px-3 py-2 border border-success w-100 text-center">Open for Registration</span>
+                            {{/open}}
+                            {{^open}}
+                                <span class="badge bg-danger-subtle text-danger px-3 py-2 border border-danger w-100 text-center">Registration Closed</span>
+                            {{/open}}
+                        </div>
+                        
+                        <div class="row g-3">
+                            <div class="col-6 text-center border-end border-secondary">
+                                <label class="text-secondary small text-uppercase d-block mb-1">Players</label>
+                                <span class="h4 fw-bold">{{participants}}</span>
+                                <span class="text-secondary small">/ {{tournament.slots}}</span>
+                            </div>
+                        </div>
 
-    {{/isAdmin}}
-
-    {{#isAdmin}}
-
-    <div class="row g-4">
-
-        <div class="col-lg-7">
-            <div class="card p-4">
-
-                <h2 class="h5 fw-bold mb-3">Overview</h2>
-
-                <p class="text-secondary mb-4">
-                    {{tournament.description}}
-                </p>
-
-                <div class="row g-3">
-
-                    <div class="col-md-6">
-                        <div class="card p-3 stat-card h-100">
-                            <h6 class="text-secondary text-uppercase small fw-bold mb-2">
-                                Start Date
-                            </h6>
-                            <span class="h6 fw-bold text-white">
-                                {{tournament.startDate}}
-                            </span>
+                        <div class="mt-4 pt-4 border-top border-secondary">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-primary bg-opacity-10 p-2 rounded">
+                                    <i class="bi bi-calendar-event text-primary fs-4"></i>
+                                </div>
+                                <div>
+                                    <label class="text-secondary small text-uppercase d-block">Start Date</label>
+                                    <span class="fw-bold">{{tournament.startDate}}</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="col-md-6">
-                        <div class="card p-3 stat-card h-100">
-                            <h6 class="text-secondary text-uppercase small fw-bold mb-2">
-                                Participants
-                            </h6>
-                            <span class="h6 fw-bold text-white">
-                                {{participants}} / {{tournament.slots}}
-                            </span>
+                    <div class="card p-4 border-secondary shadow-sm">
+                        <h3 class="h6 fw-bold mb-3 text-uppercase">Tournament Rules</h3>
+                        <div class="small">
+                            <div class="d-flex gap-2 mb-2">
+                                <i class="bi bi-check2-circle text-primary"></i>
+                                <span>Best of 20 rounds per match.</span>
+                            </div>
+                            <div class="d-flex gap-2 mb-2">
+                                <i class="bi bi-check2-circle text-primary"></i>
+                                <span>Bots 24h before start.</span>
+                            </div>
+                            <div class="d-flex gap-2 mb-2">
+                                <i class="bi bi-check2-circle text-primary"></i>
+                                <span>No external API calls.</span>
+                            </div>
                         </div>
                     </div>
-
                 </div>
-
-                <hr class="border-secondary my-4">
-
-                <div class="d-grid gap-2">
-
-                    <a href="/admin/tournament/bracket/{{tournament.id}}"
-                       class="btn btn-outline-muted btn-sm">
-                        Publish Bracket
-                    </a>
-
-                    <a href="/admin/tournament/export/{{tournament.id}}"
-                       class="btn btn-outline-muted btn-sm">
-                        Export Participants
-                    </a>
-
-                </div>
-
             </div>
         </div>
-
     </div>
 
-    {{/isAdmin}}
-
-</div>
-
-{{> components/scripts}}
+    {{> components/scripts}}
 
 </body>
 </html>
