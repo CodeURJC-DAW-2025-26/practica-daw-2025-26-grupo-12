@@ -56,7 +56,7 @@ public class AdminController {
 
   @GetMapping("/tournaments")
   public String adminTournaments(
-      @PageableDefault(size = 5) Pageable pageable,
+      @PageableDefault(size = 10) Pageable pageable,
       @RequestParam(required = false) Integer processed,
       Model model) {
 
@@ -76,7 +76,7 @@ public class AdminController {
   }
 
   @GetMapping("/tournaments/page")
-  public String adminPanelPage(@PageableDefault(size = 5) Pageable pageable, Model model) {
+  public String adminPanelPage(@PageableDefault(size = 10) Pageable pageable, Model model) {
     TournamentService.TournamentPage tournamentPage = tournamentService.getTournamentPage(pageable);
     model.addAttribute("tournaments", tournamentPage.tournaments());
     model.addAttribute(

@@ -29,7 +29,7 @@ public class MatchController {
   @Autowired private UserService userService;
 
   @GetMapping("/list")
-  public String matchList(@PageableDefault(size = 5) Pageable pageable, Model model) {
+  public String matchList(@PageableDefault(size = 10) Pageable pageable, Model model) {
     model.addAttribute("size", Math.max(pageable.getPageSize(), 1));
     model.addAttribute("fromItem", 0);
     model.addAttribute("toItem", 0);
@@ -38,7 +38,7 @@ public class MatchController {
   }
 
   @GetMapping("/list/page")
-  public String matchListPage(@PageableDefault(size = 5) Pageable pageable, Model model) {
+  public String matchListPage(@PageableDefault(size = 10) Pageable pageable, Model model) {
     MatchService.MatchPage matchPage = matchService.getBestMatchPage(pageable);
     model.addAttribute("matches", matchPage.matches());
     model.addAttribute("showEmpty", pageable.getPageNumber() == 0 && matchPage.matches().isEmpty());

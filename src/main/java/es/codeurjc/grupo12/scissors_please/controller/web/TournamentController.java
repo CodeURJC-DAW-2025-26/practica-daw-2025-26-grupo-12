@@ -28,7 +28,7 @@ public class TournamentController {
   @Autowired private UserService userService;
 
   @GetMapping
-  public String tournamentList(@PageableDefault(size = 5) Pageable pageable, Model model) {
+  public String tournamentList(@PageableDefault(size = 10) Pageable pageable, Model model) {
     model.addAttribute("size", Math.max(pageable.getPageSize(), 1));
     model.addAttribute("fromItem", 0);
     model.addAttribute("toItem", 0);
@@ -37,7 +37,7 @@ public class TournamentController {
   }
 
   @GetMapping("/page")
-  public String tournamentListPage(@PageableDefault(size = 5) Pageable pageable, Model model) {
+  public String tournamentListPage(@PageableDefault(size = 10) Pageable pageable, Model model) {
     TournamentService.TournamentPage tournamentPage = tournamentService.getTournamentPage(pageable);
     model.addAttribute("tournaments", tournamentPage.tournaments());
     model.addAttribute(
