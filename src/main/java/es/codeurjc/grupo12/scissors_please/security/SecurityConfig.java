@@ -51,6 +51,7 @@ public class SecurityConfig {
                         "/js/**",
                         "/images/**",
                         "/tournament-images/**",
+                        "/bot-images/**",
                         "/h2-console/**")
                     .permitAll()
                     .requestMatchers(
@@ -61,7 +62,8 @@ public class SecurityConfig {
                         "/tournaments",
                         "/tournaments/page",
                         "/tournaments/detail/**",
-                        "/tournaments/results")
+                        "/tournaments/results",
+                        "/bots/detail/**")
                     .permitAll()
                     .requestMatchers("/admin/**")
                     .hasRole("ADMIN")

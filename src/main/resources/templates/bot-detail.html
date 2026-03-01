@@ -32,12 +32,28 @@
                 </p>
             </div>
             <div class="col-md-auto mt-3 mt-md-0 d-flex flex-wrap gap-2">
-                {{#logged}}
+                {{#canManage}}
                 <a href="/bots/edit/{{bot.id}}" class="btn btn-outline-muted">Edit Bot</a>
+                {{/canManage}}
+                {{#logged}}
                 <a href="/matches/search" class="btn btn-primary">Find Match</a>
                 {{/logged}}
             </div>
         </div>
+
+        {{#showCode}}
+        <div class="row g-4 mb-5">
+            <div class="col-12">
+                <div class="card p-4 h-100">
+                    <h3 class="h6 fw-bold mb-3">Bot Logic (Python)</h3>
+                    <div class="bg-black border border-secondary rounded p-3 overflow-auto" style="max-height: 400px;">
+                        <pre class="font-monospace text-info mb-0"
+                            style="font-size: 0.9rem;"><code>{{bot.code}}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{/showCode}}
 
         <div class="row g-4 mb-5">
             <div class="col-md-3">

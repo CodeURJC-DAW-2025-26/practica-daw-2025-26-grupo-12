@@ -6,6 +6,7 @@ public class ErrorConstants {
   public static String TOURNAMENT_NOT_FOUND = "The tournament is no longer in the database.";
   public static String DATE_INVALID = "The date entered is invalid.";
   public static String BOT_NOT_FOUND = "The bot is no longer in the database.";
+  public static String ACCESS_DENIED = "You do not have permission to access this resource.";
 
   public static final String BAD_REQUEST_CODE = "400";
   public static final String UNAUTHORIZED_CODE = "401";
