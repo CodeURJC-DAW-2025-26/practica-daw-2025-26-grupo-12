@@ -3,6 +3,7 @@ package es.codeurjc.grupo12.scissors_please.service;
 import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.Match;
 import es.codeurjc.grupo12.scissors_please.model.Tournament;
+import es.codeurjc.grupo12.scissors_please.model.TournamentStatus;
 import es.codeurjc.grupo12.scissors_please.repository.BotRepository;
 import es.codeurjc.grupo12.scissors_please.repository.TournamentRepository;
 import java.time.LocalDate;
@@ -23,9 +24,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class TournamentAutomationService {
 
-  private static final String STATUS_UPCOMING = "Upcoming";
-  private static final String STATUS_IN_PROGRESS = "In Progress";
-  private static final String STATUS_COMPLETED = "Completed";
+  private static final TournamentStatus STATUS_UPCOMING = TournamentStatus.UPCOMING;
+  private static final TournamentStatus STATUS_IN_PROGRESS = TournamentStatus.IN_PROGRESS;
+  private static final TournamentStatus STATUS_COMPLETED = TournamentStatus.COMPLETED;
 
   @Autowired private TournamentRepository tournamentRepository;
   @Autowired private BotRepository botRepository;
@@ -54,8 +55,8 @@ public class TournamentAutomationService {
       return RunNowResult.NOT_FOUND;
     }
 
-    String status = tournament.getStatus() == null ? "" : tournament.getStatus().trim();
-    if (!STATUS_UPCOMING.equalsIgnoreCase(status)) {
+    TournamentStatus status = tournament.getStatus();
+    if (STATUS_UPCOMING != status) {
       return RunNowResult.NOT_UPCOMING;
     }
 
@@ -65,7 +66,7 @@ public class TournamentAutomationService {
 
   int processDueUpcomingTournaments(LocalDate today) {
     List<Tournament> dueTournaments =
-        tournamentRepository.findByStatusIgnoreCaseAndStartDateLessThanEqualOrderByStartDateAsc(
+        tournamentRepository.findByStatusAndStartDateLessThanEqualOrderByStartDateAsc(
             STATUS_UPCOMING, today);
 
     if (dueTournaments.isEmpty()) {

@@ -3,6 +3,7 @@ package es.codeurjc.grupo12.scissors_please.service;
 import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.Image;
 import es.codeurjc.grupo12.scissors_please.model.Tournament;
+import es.codeurjc.grupo12.scissors_please.model.TournamentStatus;
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.repository.BotRepository;
 import es.codeurjc.grupo12.scissors_please.repository.TournamentRepository;
@@ -29,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class TournamentService {
 
   private static final int MAX_PAGE_SIZE = 20;
-  private static final String STATUS_UPCOMING = "Upcoming";
+  private static final TournamentStatus STATUS_UPCOMING = TournamentStatus.UPCOMING;
   private static final DateTimeFormatter TOURNAMENT_DATE_FORMATTER =
       DateTimeFormatter.ofPattern("MMM dd, yyyy", Locale.ENGLISH);
 
@@ -60,7 +61,10 @@ public class TournamentService {
     tournament.setName(title);
     tournament.setStartDate(startDate);
     tournament.setSlots(maxPlayers);
-    tournament.setStatus(startDate.isAfter(LocalDate.now()) ? "Upcoming" : "In Progress");
+    tournament.setStatus(
+        startDate.isAfter(LocalDate.now())
+            ? TournamentStatus.UPCOMING
+            : TournamentStatus.IN_PROGRESS);
     tournament.setDescription(buildDescription(description, maxPlayers, registrationStart, prize));
     return tournamentRepository.save(tournament);
   }
@@ -83,7 +87,7 @@ public class TournamentService {
         registrationOpenDate == null || !today.isBefore(registrationOpenDate);
     boolean startsInFuture =
         tournament.getStartDate() != null && today.isBefore(tournament.getStartDate());
-    boolean upcoming = STATUS_UPCOMING.equalsIgnoreCase(normalizeStatus(tournament.getStatus()));
+    boolean upcoming = STATUS_UPCOMING == tournament.getStatus();
     boolean hasAvailableSlots = slots > 0 && registeredParticipants < slots;
 
     List<Bot> ownedBots = getOwnedBots(currentUser);
@@ -399,7 +403,8 @@ public class TournamentService {
 
   private TournamentListItem toListItem(Tournament tournament) {
 
-    String rawStatus = tournament.getStatus() == null ? "" : tournament.getStatus().trim();
+    TournamentStatus status = tournament.getStatus();
+    String rawStatus = status == null ? "" : status.getDisplayName();
     String statusLower = rawStatus.toLowerCase();
 
     String label = rawStatus.isBlank() ? "Unknown" : rawStatus;
@@ -447,7 +452,7 @@ public class TournamentService {
                 .orElseThrow()
             : tournamentRepository.findById(id).orElseThrow();
 
-    String status = normalizeStatus(tournament.getStatus());
+    TournamentStatus status = tournament.getStatus();
     int slots = tournament.getSlots();
     int participants = getParticipantIds(tournament.getParticipants()).size();
     return new AdminTournamentDetail(
@@ -458,15 +463,8 @@ public class TournamentService {
         tournament.getStartDate(),
         slots,
         participants,
-        "Upcoming".equalsIgnoreCase(status),
+        TournamentStatus.UPCOMING == status,
         tournament.getImage() != null);
-  }
-
-  private String normalizeStatus(String status) {
-    if (status == null || status.isBlank()) {
-      return "Unknown";
-    }
-    return status.trim();
   }
 
   private String buildDescription(
@@ -584,7 +582,7 @@ public class TournamentService {
       Long id,
       String name,
       String description,
-      String status,
+      TournamentStatus status,
       LocalDate startDate,
       int slots,
       int participants,
