@@ -1,5 +1,6 @@
 package es.codeurjc.grupo12.scissors_please.controller.web;
 
+import es.codeurjc.grupo12.scissors_please.config.ErrorConstants;
 import es.codeurjc.grupo12.scissors_please.model.Tournament;
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.service.TournamentService;
@@ -73,7 +74,7 @@ public class TournamentController {
       model.addAttribute("tournament", tournamentOp.get());
       return "tournament-detail";
     }
-
+    model.addAttribute("errorMessage", ErrorConstants.TOURNAMENT_NOT_FOUND);
     return "error";
   }
 

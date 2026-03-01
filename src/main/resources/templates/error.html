@@ -11,11 +11,15 @@
                 <h1 class="error-code mb-4">404</h1>
                 <h2 class="h3 fw-bold mb-3">Something's missing</h2>
                 <p class="text-secondary lead mb-4">
+                    {{#errorMessage}}
+                    {{errorMessage}}
+                    {{/errorMessage}}
+                    {{^errorMessage}}
                     The page you are looking for doesn't exist or has been moved.
                     Unless you were looking for this error page, in which case: Congrats! You found it.
+                    {{/errorMessage}}
                 </p>
                 <a href="/" class="btn btn-primary px-4 py-2 me-2">Go Home</a>
-                <a href="#" class="btn btn-outline-muted px-4 py-2">Report Issue</a>
             </div>
         </div>
     </div>

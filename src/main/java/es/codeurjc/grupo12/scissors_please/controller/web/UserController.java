@@ -1,5 +1,6 @@
 package es.codeurjc.grupo12.scissors_please.controller.web;
 
+import es.codeurjc.grupo12.scissors_please.config.ErrorConstants;
 import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.Image;
 import es.codeurjc.grupo12.scissors_please.model.User;
@@ -77,12 +78,13 @@ public class UserController {
 
   @PostMapping("/profile/update-photo")
   public String updatePhoto(
-      @RequestParam("image") MultipartFile image, Authentication authentication)
+      @RequestParam("image") MultipartFile image, Model model, Authentication authentication)
       throws IOException {
     User currentUser = userService.getCurrentUser(authentication);
 
     if (!image.isEmpty()) {
       if (!handleImageUpload(currentUser, image)) {
+        model.addAttribute("errorMessage", ErrorConstants.IMAGE_ERROR_UPLOAD);
         return "error";
       }
       userService.updateUser(currentUser);
