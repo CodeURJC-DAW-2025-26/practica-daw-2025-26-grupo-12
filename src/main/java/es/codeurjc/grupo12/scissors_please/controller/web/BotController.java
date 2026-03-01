@@ -107,7 +107,6 @@ public class BotController {
     Bot bot = new Bot();
     bot.setName(name);
     bot.setDescription(description);
-    bot.setLanguage(language);
     if (!handleImageUpload(bot, image)) {
       return "error";
     }
