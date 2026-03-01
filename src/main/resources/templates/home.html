@@ -277,7 +277,7 @@
             <h1 class="h3 fw-bold mb-1">{{currentUsername}}</h1>
             <p class="text-secondary mb-0">
               Logged in • {{totalBotCount}} bots
-              {{#hasRanking}}• ELO {{currentBestElo}}{{/hasRanking}}
+              {{#hasRanking}}• Best ELO: {{currentBestElo}}{{/hasRanking}}
               {{^hasRanking}}• No ranked bots yet{{/hasRanking}}
             </p>
           </div>
@@ -401,19 +401,22 @@
       <div class="col-lg-4">
         <div class="card p-4 mb-4">
           <h2 class="h5 fw-bold mb-3">My Performance</h2>
+
           <div class="d-flex justify-content-between text-secondary small mb-2">
-            <span>Win Rate</span><span>63%</span>
+            <span>Win Rate</span><span>{{winRateValue}}%</span>
           </div>
-          <div class="progress mb-3" role="progressbar" aria-label="Win Rate">
-            <div class="progress-bar bg-success" style="width: 63%"></div>
+          <div class="mb-3">
+            <img src="data:image/png;base64,{{winRateBar}}" class="img-fluid rounded" alt="Win Rate Progress">
           </div>
+
           <div class="d-flex justify-content-between text-secondary small mb-2">
-            <span>Current ELO</span><span>1824</span>
+            <span>Current ELO (Peak)</span><span>{{currentBestElo}}</span>
           </div>
-          <div class="progress" role="progressbar" aria-label="ELO">
-            <div class="progress-bar bg-primary" style="width: 72%"></div>
+          <div>
+            <img src="data:image/png;base64,{{eloBar}}" class="img-fluid rounded" alt="ELO Progress">
           </div>
         </div>
+
         <div class="card p-4">
           <h2 class="h5 fw-bold mb-3">My Rankings</h2>
           <p class="text-secondary mb-2">Current placement in the global ladder.</p>

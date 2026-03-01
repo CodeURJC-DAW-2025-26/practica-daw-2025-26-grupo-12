@@ -2,19 +2,27 @@ package es.codeurjc.grupo12.scissors_please.service;
 
 import es.codeurjc.grupo12.scissors_please.repository.UserRepository.MonthlyUserCount;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.format.TextStyle;
 import java.util.List;
+import javax.imageio.ImageIO;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryLabelPositions;
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.labels.ItemLabelAnchor;
+import org.jfree.chart.labels.ItemLabelPosition;
+import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PiePlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.renderer.category.LineAndShapeRenderer;
+import org.jfree.chart.renderer.category.StackedBarRenderer;
 import org.jfree.chart.renderer.category.StandardBarPainter;
+import org.jfree.chart.ui.TextAnchor;
+import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
 import org.springframework.stereotype.Service;
@@ -129,13 +137,86 @@ public class ChartService {
     return chartToBytes(chart, 800, 400);
   }
 
+  public byte[] generateProgressBar(int current, int max, Color barColor) {
+
+    if (max <= 0) max = 1;
+    final int finalCurrent = Math.max(0, Math.min(current, max));
+    final int finalMax = max;
+
+    DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+    dataset.addValue(finalCurrent, "Progress", "Value");
+    dataset.addValue(finalMax - finalCurrent, "Remaining", "Value");
+
+    JFreeChart chart =
+        ChartFactory.createStackedBarChart(
+            null, null, null, dataset, PlotOrientation.HORIZONTAL, false, false, false);
+
+    chart.setBackgroundPaint(TRANSPARENT);
+
+    CategoryPlot plot = chart.getCategoryPlot();
+    plot.setBackgroundPaint(TRANSPARENT);
+    plot.setOutlineVisible(false);
+
+    plot.getDomainAxis().setVisible(false);
+    plot.getRangeAxis().setVisible(false);
+    plot.getRangeAxis().setRange(0, finalMax);
+
+    StackedBarRenderer renderer = new StackedBarRenderer();
+    renderer.setBarPainter(new StandardBarPainter());
+    renderer.setShadowVisible(false);
+    renderer.setDrawBarOutline(false);
+
+    renderer.setSeriesPaint(0, barColor);
+    renderer.setSeriesPaint(1, new Color(51, 65, 85, 120));
+
+    renderer.setDefaultItemLabelGenerator(
+        new org.jfree.chart.labels.CategoryItemLabelGenerator() {
+          @Override
+          public String generateLabel(CategoryDataset dataset, int row, int column) {
+            if (row == 0) {
+              return finalCurrent + " / " + finalMax;
+            }
+            return null;
+          }
+
+          @Override
+          public String generateRowLabel(CategoryDataset dataset, int row) {
+            return null;
+          }
+
+          @Override
+          public String generateColumnLabel(CategoryDataset dataset, int column) {
+            return null;
+          }
+        });
+
+    renderer.setDefaultItemLabelsVisible(true);
+    renderer.setDefaultPositiveItemLabelPosition(
+        new ItemLabelPosition(ItemLabelAnchor.CENTER, TextAnchor.CENTER));
+
+    renderer.setDefaultItemLabelFont(new Font("SansSerif", Font.BOLD, 14));
+
+    double luminance =
+        (0.299 * barColor.getRed() + 0.587 * barColor.getGreen() + 0.114 * barColor.getBlue())
+            / 255;
+    renderer.setDefaultItemLabelPaint(luminance > 0.6 ? Color.BLACK : Color.WHITE);
+
+    plot.setRenderer(renderer);
+
+    plot.getDomainAxis().setLowerMargin(0);
+    plot.getDomainAxis().setUpperMargin(0);
+    plot.getRangeAxis().setLowerMargin(0);
+    plot.getRangeAxis().setUpperMargin(0);
+
+    return chartToBytes(chart, 600, 70);
+  }
+
   private byte[] chartToBytes(JFreeChart chart, int width, int height) {
     try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-      java.awt.image.BufferedImage bufferedImage =
-          chart.createBufferedImage(
-              width, height, java.awt.image.BufferedImage.TYPE_INT_ARGB, null);
+      BufferedImage bufferedImage =
+          chart.createBufferedImage(width, height, BufferedImage.TYPE_INT_ARGB, null);
 
-      javax.imageio.ImageIO.write(bufferedImage, "png", baos);
+      ImageIO.write(bufferedImage, "png", baos);
 
       return baos.toByteArray();
     } catch (IOException e) {

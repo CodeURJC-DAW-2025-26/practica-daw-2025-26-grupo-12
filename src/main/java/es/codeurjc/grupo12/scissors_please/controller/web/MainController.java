@@ -3,9 +3,13 @@ package es.codeurjc.grupo12.scissors_please.controller.web;
 import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.service.BotService;
+import es.codeurjc.grupo12.scissors_please.service.ChartService;
 import es.codeurjc.grupo12.scissors_please.service.MatchService;
 import es.codeurjc.grupo12.scissors_please.service.TournamentService;
 import es.codeurjc.grupo12.scissors_please.service.UserService;
+import es.codeurjc.grupo12.scissors_please.service.UserService.UserStats;
+import java.awt.Color;
+import java.util.Base64;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -21,6 +25,7 @@ public class MainController {
   @Autowired private MatchService matchService;
   @Autowired private TournamentService tournamentService;
   @Autowired private UserService userService;
+  @Autowired private ChartService chartService;
 
   @GetMapping("/")
   public String index() {
@@ -41,6 +46,24 @@ public class MainController {
           tournamentService.getUserHomeTournaments(currentUser.getId(), 3);
       BotService.UserGlobalRanking userGlobalRanking = botService.getUserGlobalRanking(currentUser);
       List<Bot> allUserBots = botService.getBotsForUser(currentUser, true);
+
+      UserStats stats = userService.getTotalStats(currentUser);
+      int maxElo = userService.getMaxElo(currentUser);
+      byte[] winRateImg =
+          chartService.generateProgressBar(
+              stats.totalWins(), stats.totalMatches(), new Color(34, 197, 94));
+      byte[] eloImg = chartService.generateProgressBar(maxElo, 2500, new Color(139, 92, 246));
+
+      model.addAttribute("winRateBar", Base64.getEncoder().encodeToString(winRateImg));
+      model.addAttribute("winRateValue", stats.getWinRate());
+      model.addAttribute("eloBar", Base64.getEncoder().encodeToString(eloImg));
+
+      int currentElo = userGlobalRanking.bestElo();
+      int maxEloGoal = 3000;
+      byte[] eloChart =
+          chartService.generateProgressBar(currentElo, maxEloGoal, new Color(139, 92, 246));
+      model.addAttribute("eloBar", Base64.getEncoder().encodeToString(eloChart));
+      model.addAttribute("currentBestElo", currentElo);
 
       model.addAttribute("hasProfilePhoto", currentUser.getImage() != null);
       model.addAttribute("profileId", currentUser.getId());
