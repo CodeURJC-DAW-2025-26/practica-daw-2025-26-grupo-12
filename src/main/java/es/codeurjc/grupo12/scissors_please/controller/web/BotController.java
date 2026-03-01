@@ -1,5 +1,6 @@
 package es.codeurjc.grupo12.scissors_please.controller.web;
 
+import es.codeurjc.grupo12.scissors_please.config.ErrorConstants;
 import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.Image;
 import es.codeurjc.grupo12.scissors_please.model.User;
@@ -99,6 +100,7 @@ public class BotController {
       @RequestParam(defaultValue = "false") boolean isPublic,
       @RequestParam(required = false) String tags,
       @RequestParam(required = false) MultipartFile image,
+      Model model,
       Authentication authentication) {
     User currentUser = userService.getCurrentUser(authentication);
     if (isAdmin(currentUser)) {
@@ -108,6 +110,7 @@ public class BotController {
     bot.setName(name);
     bot.setDescription(description);
     if (!handleImageUpload(bot, image)) {
+      model.addAttribute("errorMessage", ErrorConstants.IMAGE_ERROR_UPLOAD);
       return "error";
     }
     bot.setPublic(isPublic);
@@ -135,6 +138,7 @@ public class BotController {
       model.addAttribute("bot", bot);
       return "bot-edit";
     }
+    model.addAttribute("errorMessage", ErrorConstants.BOT_NOT_FOUND);
     return "error";
   }
 
@@ -148,6 +152,7 @@ public class BotController {
       @RequestParam(required = false) MultipartFile image,
       @RequestParam boolean isPublic,
       @RequestParam(required = false) String tags,
+      Model model,
       Authentication authentication) {
 
     Optional<Bot> opBot = botService.getBotById(id);
@@ -157,6 +162,7 @@ public class BotController {
       bot.setDescription(description != null ? description : "");
       bot.setCode(code != null ? code : "");
       if (!handleImageUpload(bot, image)) {
+        model.addAttribute("errorMessage", ErrorConstants.IMAGE_ERROR_UPLOAD);
         return "error";
       }
       bot.setPublic(isPublic);
@@ -166,6 +172,7 @@ public class BotController {
 
       return "redirect:/bots/my-bots";
     }
+    model.addAttribute("errorMessage", ErrorConstants.BOT_NOT_FOUND);
     return "error";
   }
 
@@ -173,6 +180,7 @@ public class BotController {
   public String botDetail(@PathVariable Long id, Model model) {
     Optional<Bot> opBot = botService.getBotById(id);
     if (opBot.isEmpty()) {
+      model.addAttribute("errorMessage", ErrorConstants.BOT_NOT_FOUND);
       return "error";
     }
     Bot bot = opBot.get();

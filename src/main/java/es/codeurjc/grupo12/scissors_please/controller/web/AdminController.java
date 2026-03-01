@@ -1,5 +1,6 @@
 package es.codeurjc.grupo12.scissors_please.controller.web;
 
+import es.codeurjc.grupo12.scissors_please.config.ErrorConstants;
 import es.codeurjc.grupo12.scissors_please.model.Image;
 import es.codeurjc.grupo12.scissors_please.model.Tournament;
 import es.codeurjc.grupo12.scissors_please.model.User;
@@ -169,6 +170,7 @@ public class AdminController {
         tournamentImage.setContentType(image.getContentType());
         tournamentImage.setData(image.getBytes());
       } catch (IOException e) {
+        model.addAttribute("errorMessage", ErrorConstants.IMAGE_ERROR_UPLOAD);
         return "error";
       }
     }
@@ -194,6 +196,7 @@ public class AdminController {
       model.addAttribute("tournament", tournament);
       return "admin-tournament-edit";
     }
+    model.addAttribute("errorMessage", ErrorConstants.TOURNAMENT_NOT_FOUND);
     return "error";
   }
 
@@ -206,6 +209,7 @@ public class AdminController {
       @RequestParam(required = false) int slots,
       @RequestParam(required = false) MultipartFile image,
       @RequestParam String status,
+      Model model,
       Authentication authentication) {
 
     Optional<Tournament> opTournament = tournamentService.getTournamentById(id);
@@ -213,6 +217,7 @@ public class AdminController {
     if (opTournament.isPresent()) {
       Tournament tournament = opTournament.get();
       if (!handleImageUpload(tournament, image)) {
+        model.addAttribute("errorMessage", ErrorConstants.IMAGE_ERROR_UPLOAD);
         return "error";
       }
       tournament.setName(name);
@@ -224,6 +229,7 @@ public class AdminController {
         try {
           tournament.setStartDate(LocalDate.parse(startDate));
         } catch (Exception e) {
+          model.addAttribute("errorMessage", ErrorConstants.DATE_INVALID);
           return "error";
         }
       }
