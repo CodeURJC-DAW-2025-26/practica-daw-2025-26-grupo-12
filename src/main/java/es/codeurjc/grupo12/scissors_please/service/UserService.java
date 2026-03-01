@@ -1,7 +1,9 @@
 package es.codeurjc.grupo12.scissors_please.service;
 
 import es.codeurjc.grupo12.scissors_please.model.User;
+import es.codeurjc.grupo12.scissors_please.repository.BotRepository;
 import es.codeurjc.grupo12.scissors_please.repository.UserRepository;
+import es.codeurjc.grupo12.scissors_please.repository.UserRepository.MonthlyUserCount;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +21,8 @@ public class UserService {
 
   @Autowired private UserRepository userRepository;
   @Autowired private PasswordEncoder passwordEncoder;
+
+  @Autowired private BotRepository botRepository;
 
   public User registerUser(String username, String email, String password) {
     if (userRepository.findByUsername(username).isPresent()) {
@@ -63,6 +67,10 @@ public class UserService {
   public User updateUser(User user) {
     log.info("Updating user: {}", user.getUsername());
     return userRepository.save(user);
+  }
+
+  public List<MonthlyUserCount> getMonthlyUserCount() {
+    return userRepository.countUsersByMonth();
   }
 
   public void deleteUser(Long id) {
@@ -162,6 +170,33 @@ public class UserService {
     User updatedUser = userRepository.save(targetUser);
     log.info("Updated blocked status for user {}: {}", updatedUser.getUsername(), blocked);
     return updatedUser;
+  }
+
+  @Transactional(readOnly = true)
+  public int getMaxElo(User user) {
+    Integer maxElo = botRepository.findMaxEloByOwnerId(user.getId());
+    return (maxElo != null) ? maxElo : 0;
+  }
+
+  @Transactional(readOnly = true)
+  public UserStats getTotalStats(User user) {
+    BotRepository.StatsProjection stats = botRepository.aggregateStatsByOwnerId(user.getId());
+
+    if (stats == null || stats.getTotalWins() == null) {
+      return new UserStats(0, 0);
+    }
+
+    int totalWins = stats.getTotalWins().intValue();
+    int totalMatches =
+        totalWins + stats.getTotalLosses().intValue() + stats.getTotalDraws().intValue();
+
+    return new UserStats(totalWins, totalMatches);
+  }
+
+  public record UserStats(int totalWins, int totalMatches) {
+    public int getWinRate() {
+      return totalMatches == 0 ? 0 : (int) ((totalWins * 100.0) / totalMatches);
+    }
   }
 
   public enum UserStatusFilter {

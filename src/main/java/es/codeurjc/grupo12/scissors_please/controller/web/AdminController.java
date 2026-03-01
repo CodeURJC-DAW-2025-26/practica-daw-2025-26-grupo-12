@@ -3,7 +3,9 @@ package es.codeurjc.grupo12.scissors_please.controller.web;
 import es.codeurjc.grupo12.scissors_please.model.Image;
 import es.codeurjc.grupo12.scissors_please.model.Tournament;
 import es.codeurjc.grupo12.scissors_please.model.User;
+import es.codeurjc.grupo12.scissors_please.repository.UserRepository.MonthlyUserCount;
 import es.codeurjc.grupo12.scissors_please.security.ActiveSessionService;
+import es.codeurjc.grupo12.scissors_please.service.ChartService;
 import es.codeurjc.grupo12.scissors_please.service.TournamentAutomationService;
 import es.codeurjc.grupo12.scissors_please.service.TournamentService;
 import es.codeurjc.grupo12.scissors_please.service.UserService;
@@ -13,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -45,6 +48,7 @@ public class AdminController {
       Set.of("Single Elimination", "Double Elimination", "Round Robin");
 
   @Autowired private TournamentService tournamentService;
+  @Autowired private ChartService chartService;
   @Autowired private TournamentAutomationService tournamentAutomationService;
   @Autowired private UserService userService;
   @Autowired private ActiveSessionService activeSessionService;
@@ -54,10 +58,17 @@ public class AdminController {
       @PageableDefault(size = 5) Pageable pageable,
       @RequestParam(required = false) Integer processed,
       Model model) {
+
+    List<MonthlyUserCount> data = userService.getMonthlyUserCount();
+    byte[] barChart = chartService.generateUserHistory(data);
+
+    String base64Chart = Base64.getEncoder().encodeToString(barChart);
+    model.addAttribute("barChart", base64Chart);
     model.addAttribute("size", Math.max(pageable.getPageSize(), 1));
     model.addAttribute("fromItem", 0);
     model.addAttribute("toItem", 0);
     model.addAttribute("totalElements", 0);
+
     if (processed != null) {
       if (processed > 0) {
         model.addAttribute("successMessage", "Processed " + processed + " tournament(s).");

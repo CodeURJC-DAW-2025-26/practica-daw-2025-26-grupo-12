@@ -31,7 +31,8 @@
                     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
                         <h2 class="h5 fw-bold mb-0">Managed Tournaments</h2>
                         <div class="d-flex flex-wrap gap-2 align-items-center">
-                            <span id="admin-tournament-counter" class="badge bg-secondary">Showing {{fromItem}}-{{toItem}}
+                            <span id="admin-tournament-counter" class="badge bg-secondary">Showing
+                                {{fromItem}}-{{toItem}}
                                 of {{totalElements}}</span>
                             <a href="/admin/tournament/create" class="btn btn-outline-muted btn-sm">New
                                 Tournament</a>
@@ -53,8 +54,7 @@
                         <button id="show-more-admin-tournaments-btn" class="btn btn-outline-muted btn-sm"
                             data-load-more="tournaments" data-endpoint="/admin/panel/page"
                             data-body-id="admin-tournament-table-body" data-counter-id="admin-tournament-counter"
-                            data-meta-class="admin-tournament-meta-row"
-                            data-size="{{size}}">
+                            data-meta-class="admin-tournament-meta-row" data-size="{{size}}">
                             Show more
                         </button>
                     </div>
@@ -68,34 +68,20 @@
                 <div class="card p-4">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h2 class="h5 fw-bold mb-0">Registered Users (Monthly)</h2>
-                        <span class="badge bg-secondary">Histogram</span>
+                        <span class="badge bg-secondary">Live Data</span>
                     </div>
-                    <div class="bg-secondary-bg border border-secondary rounded p-4">
-                        <svg viewBox="0 0 360 160" width="100%" height="160" role="img"
-                            aria-label="Histogram of registered users by month">
-                            <line x1="30" y1="10" x2="30" y2="140" stroke="#334155" stroke-width="1"></line>
-                            <line x1="30" y1="140" x2="340" y2="140" stroke="#334155" stroke-width="1"></line>
+                    <div class="bg-secondary-bg border border-secondary rounded p-2 d-flex justify-content-center">
+                        {{#barChart}}
+                        <img src="data:image/png;base64,{{barChart}}" alt="User Registration History" class="img-fluid"
+                            style="max-height: 400px; width: auto;" />
+                        {{/barChart}}
 
-                            <rect x="50" y="90" width="24" height="50" fill="#3b82f6"></rect>
-                            <rect x="90" y="75" width="24" height="65" fill="#3b82f6"></rect>
-                            <rect x="130" y="60" width="24" height="80" fill="#3b82f6"></rect>
-                            <rect x="170" y="45" width="24" height="95" fill="#3b82f6"></rect>
-                            <rect x="210" y="70" width="24" height="70" fill="#3b82f6"></rect>
-                            <rect x="250" y="85" width="24" height="55" fill="#3b82f6"></rect>
-                            <rect x="290" y="65" width="24" height="75" fill="#3b82f6"></rect>
-
-                            <text x="50" y="155" fill="#94a3b8" font-size="10">Aug</text>
-                            <text x="90" y="155" fill="#94a3b8" font-size="10">Sep</text>
-                            <text x="130" y="155" fill="#94a3b8" font-size="10">Oct</text>
-                            <text x="170" y="155" fill="#94a3b8" font-size="10">Nov</text>
-                            <text x="210" y="155" fill="#94a3b8" font-size="10">Dec</text>
-                            <text x="250" y="155" fill="#94a3b8" font-size="10">Jan</text>
-                            <text x="290" y="155" fill="#94a3b8" font-size="10">Feb</text>
-                        </svg>
-                        <div class="d-flex flex-wrap gap-2 mt-3">
-                            <span class="badge bg-secondary">Peak: Nov</span>
-                            <span class="badge bg-secondary">Latest: Feb</span>
-                        </div>
+                        {{^barChart}}
+                        <p class="text-muted my-5">No data available for chart</p>
+                        {{/barChart}}
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 mt-3">
+                        <span class="badge bg-primary">Real-time Statistics</span>
                     </div>
                 </div>
             </div>

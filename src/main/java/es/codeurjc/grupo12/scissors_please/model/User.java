@@ -11,7 +11,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -43,6 +45,8 @@ public class User {
   @JsonIgnore
   private String password;
 
+  private LocalDateTime createdAt;
+
   @Column(name = "oauth_provider")
   private String oauthProvider;
 
@@ -53,4 +57,11 @@ public class User {
   @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
   @Column(name = "role")
   private List<String> roles = new ArrayList<>();
+
+  @PrePersist
+  public void onCreate() {
+    if (createdAt == null) {
+      createdAt = LocalDateTime.now();
+    }
+  }
 }
