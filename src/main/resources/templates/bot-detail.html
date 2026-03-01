@@ -10,8 +10,17 @@
 
         <div class="row mb-5 align-items-end">
             <div class="col-md-auto">
+                {{#bot.image}}
+                <img src="/bot-images/{{bot.id}}" class="rounded-circle border border-primary"
+                    style="width: 100px; height: 100px; object-fit: cover;">
+                {{/bot.image}}
+
+                {{^bot.image}}
                 <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white display-4 fw-bold"
-                    style="width: 100px; height: 100px;">A</div>
+                    style="width: 100px; height: 100px;">
+                    {{initial}}
+                </div>
+                {{/bot.image}}
             </div>
             <div class="col">
                 <h1 class="h2 fw-bold mb-1">{{bot.name}}</h1>
@@ -25,7 +34,7 @@
             <div class="col-md-auto mt-3 mt-md-0 d-flex flex-wrap gap-2">
                 {{#logged}}
                 <button class="btn btn-outline-muted">Export Bot</button>
-                <a href="/bots/edit" class="btn btn-outline-muted">Edit Bot</a>
+                <a href="/bots/edit/{{bot.id}}" class="btn btn-outline-muted">Edit Bot</a>
                 <a href="/matches/search" class="btn btn-primary">Find Match</a>
                 {{/logged}}
             </div>

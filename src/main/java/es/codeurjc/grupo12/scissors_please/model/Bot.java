@@ -1,5 +1,6 @@
 package es.codeurjc.grupo12.scissors_please.model;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -10,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OrderColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -37,7 +39,6 @@ public class Bot {
   private String description;
   private String code = "";
   private String language;
-  private String image;
   private boolean isPublic;
   private int elo;
 
@@ -47,6 +48,8 @@ public class Bot {
   private int wins;
   private int losses;
   private int draws;
+  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+  private Image image;
 
   @CreationTimestamp private LocalDateTime createdAt;
 

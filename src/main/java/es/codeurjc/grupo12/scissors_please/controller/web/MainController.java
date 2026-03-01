@@ -42,6 +42,8 @@ public class MainController {
       BotService.UserGlobalRanking userGlobalRanking = botService.getUserGlobalRanking(currentUser);
       List<Bot> allUserBots = botService.getBotsForUser(currentUser, true);
 
+      model.addAttribute("hasProfilePhoto", currentUser.getImage() != null);
+      model.addAttribute("profileId", currentUser.getId());
       model.addAttribute("currentUsername", currentUser.getUsername());
       model.addAttribute("currentUserInitial", resolveInitial(currentUser.getUsername()));
       model.addAttribute("totalBotCount", allUserBots.size());

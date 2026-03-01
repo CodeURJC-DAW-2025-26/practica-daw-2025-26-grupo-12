@@ -1,10 +1,12 @@
 package es.codeurjc.grupo12.scissors_please.controller.web;
 
 import es.codeurjc.grupo12.scissors_please.model.Bot;
+import es.codeurjc.grupo12.scissors_please.model.Image;
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.service.BotService;
 import es.codeurjc.grupo12.scissors_please.service.ChartService;
 import es.codeurjc.grupo12.scissors_please.service.UserService;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 @Controller
 @RequestMapping("/bots")
@@ -42,6 +45,8 @@ public class BotController {
     boolean showPrivate = canViewPrivate(currentUser, targetUser);
     List<Bot> bots = botService.getBotsForUser(targetUser, showPrivate);
     int bestElo = bots.stream().mapToInt(Bot::getElo).max().orElse(0);
+    Long latestBotId = bots.stream().map(Bot::getId).max(Long::compare).orElse(null);
+    model.addAttribute("latestBotId", latestBotId);
     model.addAttribute("totalBots", bots.size());
     model.addAttribute("bestElo", bestElo);
     model.addAttribute("username", targetUser.getUsername());
@@ -91,9 +96,9 @@ public class BotController {
       @RequestParam(required = false) String description,
       @RequestParam(required = false) String language,
       @RequestParam(required = false) String code,
-      @RequestParam(required = false) String image,
       @RequestParam(defaultValue = "false") boolean isPublic,
       @RequestParam(required = false) String tags,
+      @RequestParam(required = false) MultipartFile image,
       Authentication authentication) {
     User currentUser = userService.getCurrentUser(authentication);
     if (isAdmin(currentUser)) {
@@ -103,7 +108,9 @@ public class BotController {
     bot.setName(name);
     bot.setDescription(description);
     bot.setLanguage(language);
-    bot.setImage(image);
+    if (!handleImageUpload(bot, image)) {
+      return "error";
+    }
     bot.setPublic(isPublic);
     bot.setTags(parseTags(tags));
     botService.createBot(bot, currentUser);
@@ -125,6 +132,7 @@ public class BotController {
     Optional<Bot> opBot = botService.getBotById(id);
     if (opBot.isPresent()) {
       Bot bot = opBot.get();
+      model.addAttribute("initial", bot.getName().charAt(0));
       model.addAttribute("bot", bot);
       return "bot-edit";
     }
@@ -134,24 +142,26 @@ public class BotController {
   @PostMapping("/edit/{id}")
   public String editBot(
       @PathVariable Long id,
-      @RequestParam String botName,
+      @RequestParam String name,
       @RequestParam(required = false) String description,
       @RequestParam(required = false) String language,
       @RequestParam(required = false) String code,
-      @RequestParam(required = false) String image,
-      @RequestParam boolean visibility,
+      @RequestParam(required = false) MultipartFile image,
+      @RequestParam boolean isPublic,
       @RequestParam(required = false) String tags,
       Authentication authentication) {
 
     Optional<Bot> opBot = botService.getBotById(id);
     if (opBot.isPresent()) {
       Bot bot = opBot.get();
-      bot.setName(botName);
+      bot.setName(name);
       bot.setDescription(description != null ? description : "");
       bot.setLanguage(language != null ? language : "");
       bot.setCode(code != null ? code : "");
-      bot.setImage(image != null ? image : "");
-      bot.setPublic(visibility);
+      if (!handleImageUpload(bot, image)) {
+        return "error";
+      }
+      bot.setPublic(isPublic);
       bot.setTags(parseTags(tags));
       User currentUser = userService.getCurrentUser(authentication);
       botService.updateBot(bot, currentUser);
@@ -231,5 +241,29 @@ public class BotController {
 
   private boolean isAdmin(User user) {
     return userService.isAdmin(user);
+  }
+
+  private boolean handleImageUpload(Bot bot, MultipartFile imageFile) {
+    if (imageFile == null || imageFile.isEmpty()) {
+      return true;
+    }
+
+    String contentType = imageFile.getContentType();
+    if (contentType == null || !contentType.startsWith("image/")) {
+      return false;
+    }
+
+    try {
+      Image img = new Image();
+      img.setFilename(imageFile.getOriginalFilename());
+      img.setContentType(contentType);
+      img.setData(imageFile.getBytes());
+
+      bot.setImage(img);
+      return true;
+
+    } catch (IOException e) {
+      return false;
+    }
   }
 }

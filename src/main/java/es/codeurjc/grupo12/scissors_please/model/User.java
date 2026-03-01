@@ -1,6 +1,7 @@
 package es.codeurjc.grupo12.scissors_please.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -9,6 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +35,9 @@ public class User {
 
   @Column(unique = true, nullable = false)
   private String email;
+
+  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+  private Image image;
 
   @Column(nullable = true)
   @JsonIgnore

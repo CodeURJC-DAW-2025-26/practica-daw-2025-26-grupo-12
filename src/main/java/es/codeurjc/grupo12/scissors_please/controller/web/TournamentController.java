@@ -60,6 +60,7 @@ public class TournamentController {
       Tournament tournament = tournamentOp.get();
       model.addAttribute("isAdmin", type == UserType.ADMIN);
       model.addAttribute("open", true);
+      model.addAttribute("hasTournamentPhoto", tournament.getImage() != null);
       model.addAttribute("participants", tournament.getParticipants().size());
       model.addAttribute("tournament", tournamentOp.get());
       return "tournament-detail";
