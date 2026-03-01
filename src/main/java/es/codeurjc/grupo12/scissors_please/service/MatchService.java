@@ -52,7 +52,8 @@ public class MatchService {
   private final Map<Long, SearchTicket> searchQueue = new ConcurrentHashMap<>();
   private final Map<Long, ReadyMatch> readyMatches = new ConcurrentHashMap<>();
   private final Map<String, RematchInvitation> rematchInvitations = new ConcurrentHashMap<>();
-  private final Map<Long, RematchInvitation> pendingRematchesByRequester = new ConcurrentHashMap<>();
+  private final Map<Long, RematchInvitation> pendingRematchesByRequester =
+      new ConcurrentHashMap<>();
 
   public MatchStartResult startMatchmaking(Long userId, String username, Long selectedBotId) {
     Bot myBot = resolveMyBot(userId, selectedBotId);
@@ -90,7 +91,8 @@ public class MatchService {
       purgeExpiredState(now);
 
       Match previousMatch = resolveMatch(matchId);
-      RematchParticipants participants = resolveRematchParticipants(previousMatch, requester.getId());
+      RematchParticipants participants =
+          resolveRematchParticipants(previousMatch, requester.getId());
 
       clearPendingRematchForRequester(requester.getId());
 
@@ -164,9 +166,7 @@ public class MatchService {
       notificationService.sendNotification(
           acceptingUser.getUsername(),
           NotificationService.NotificationPayload.info(
-              "rematch_ready",
-              "Rematch accepted. Opening results...",
-              redirectUrl));
+              "rematch_ready", "Rematch accepted. Opening results...", redirectUrl));
 
       return redirectUrl;
     }
@@ -214,7 +214,8 @@ public class MatchService {
 
       RematchInvitation pendingRematch = pendingRematchesByRequester.get(userId);
       if (pendingRematch != null) {
-        long waitSeconds = Math.max(0, Duration.between(pendingRematch.createdAt(), now).getSeconds());
+        long waitSeconds =
+            Math.max(0, Duration.between(pendingRematch.createdAt(), now).getSeconds());
         return MatchmakingStatusView.searching(
             pendingRematch.requesterBot().getId(),
             resolveBotName(pendingRematch.requesterBot()),
@@ -392,7 +393,9 @@ public class MatchService {
         searchQueue.values().stream()
             .filter(ticket -> !ticket.userId().equals(currentRequester.userId()))
             .filter(ticket -> isCandidateCompatible(currentRequester, ticket, now))
-            .min(Comparator.comparingLong(ticket -> calculateCandidateScore(currentRequester, ticket, now)));
+            .min(
+                Comparator.comparingLong(
+                    ticket -> calculateCandidateScore(currentRequester, ticket, now)));
 
     if (candidate.isEmpty()) {
       return null;
@@ -414,8 +417,7 @@ public class MatchService {
   }
 
   private Match createMatch(SearchTicket requester, SearchTicket opponent, LocalDateTime now) {
-    SearchTicket first =
-        requester.createdAt().isAfter(opponent.createdAt()) ? opponent : requester;
+    SearchTicket first = requester.createdAt().isAfter(opponent.createdAt()) ? opponent : requester;
     SearchTicket second = first == requester ? opponent : requester;
 
     Match match = new Match();
@@ -440,7 +442,8 @@ public class MatchService {
         now);
   }
 
-  private void sendMatchFoundNotification(SearchTicket requester, SearchTicket opponent, Long matchId) {
+  private void sendMatchFoundNotification(
+      SearchTicket requester, SearchTicket opponent, Long matchId) {
     notificationService.createAndSendNotification(
         List.of(requester.username(), opponent.username()),
         NotificationService.NotificationPayload.info(
@@ -485,7 +488,8 @@ public class MatchService {
     boolean requesterOwnsBot1 = isOwnedByUser(match.getBot1(), requesterUserId);
     boolean requesterOwnsBot2 = isOwnedByUser(match.getBot2(), requesterUserId);
     if (requesterOwnsBot1 == requesterOwnsBot2) {
-      throw new IllegalArgumentException("You can only request a rematch from one of your own matches.");
+      throw new IllegalArgumentException(
+          "You can only request a rematch from one of your own matches.");
     }
 
     Bot requesterBot = requesterOwnsBot1 ? match.getBot1() : match.getBot2();
@@ -504,12 +508,12 @@ public class MatchService {
 
   private boolean isCandidateCompatible(
       SearchTicket requester, SearchTicket candidate, LocalDateTime now) {
-    if (requester.bot().getId() != null && requester.bot().getId().equals(candidate.bot().getId())) {
+    if (requester.bot().getId() != null
+        && requester.bot().getId().equals(candidate.bot().getId())) {
       return false;
     }
 
-    int eloDifference =
-        Math.abs(resolveBotElo(requester.bot()) - resolveBotElo(candidate.bot()));
+    int eloDifference = Math.abs(resolveBotElo(requester.bot()) - resolveBotElo(candidate.bot()));
     return eloDifference <= acceptableEloGap(requester, candidate, now);
   }
 
@@ -517,8 +521,7 @@ public class MatchService {
       SearchTicket requester, SearchTicket candidate, LocalDateTime now) {
     long requesterWait = Math.max(0, Duration.between(requester.createdAt(), now).getSeconds());
     long candidateWait = Math.max(0, Duration.between(candidate.createdAt(), now).getSeconds());
-    int eloDifference =
-        Math.abs(resolveBotElo(requester.bot()) - resolveBotElo(candidate.bot()));
+    int eloDifference = Math.abs(resolveBotElo(requester.bot()) - resolveBotElo(candidate.bot()));
 
     long waitBonus = Math.min(requesterWait + candidateWait, 180);
     long fairnessPenalty = Math.abs(requesterWait - candidateWait);
@@ -539,10 +542,15 @@ public class MatchService {
   }
 
   private void purgeExpiredState(LocalDateTime now) {
-    searchQueue.entrySet().removeIf(entry -> isOlderThan(entry.getValue().createdAt(), SEARCH_EXPIRATION, now));
-    readyMatches.entrySet().removeIf(entry -> isOlderThan(entry.getValue().createdAt(), READY_MATCH_EXPIRATION, now));
+    searchQueue
+        .entrySet()
+        .removeIf(entry -> isOlderThan(entry.getValue().createdAt(), SEARCH_EXPIRATION, now));
+    readyMatches
+        .entrySet()
+        .removeIf(entry -> isOlderThan(entry.getValue().createdAt(), READY_MATCH_EXPIRATION, now));
     rematchInvitations.values().stream()
-        .filter(invitation -> isOlderThan(invitation.createdAt(), REMATCH_INVITATION_EXPIRATION, now))
+        .filter(
+            invitation -> isOlderThan(invitation.createdAt(), REMATCH_INVITATION_EXPIRATION, now))
         .toList()
         .forEach(this::clearPendingRematch);
   }
@@ -553,7 +561,9 @@ public class MatchService {
 
   private boolean isReadyForRedirect(ReadyMatch readyMatch, LocalDateTime now) {
     return readyMatch.createdAt() != null
-        && !Duration.between(readyMatch.createdAt(), now).minus(MIN_READY_REDIRECT_DELAY).isNegative();
+        && !Duration.between(readyMatch.createdAt(), now)
+            .minus(MIN_READY_REDIRECT_DELAY)
+            .isNegative();
   }
 
   private ReadyMatch getValidReadyMatch(Long userId) {

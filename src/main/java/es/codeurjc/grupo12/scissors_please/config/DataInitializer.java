@@ -1,5 +1,13 @@
 package es.codeurjc.grupo12.scissors_please.config;
 
+import es.codeurjc.grupo12.scissors_please.model.Bot;
+import es.codeurjc.grupo12.scissors_please.model.Match;
+import es.codeurjc.grupo12.scissors_please.model.Tournament;
+import es.codeurjc.grupo12.scissors_please.model.User;
+import es.codeurjc.grupo12.scissors_please.repository.BotRepository;
+import es.codeurjc.grupo12.scissors_please.repository.MatchRepository;
+import es.codeurjc.grupo12.scissors_please.repository.TournamentRepository;
+import es.codeurjc.grupo12.scissors_please.repository.UserRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -9,21 +17,11 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import es.codeurjc.grupo12.scissors_please.model.Bot;
-import es.codeurjc.grupo12.scissors_please.model.Match;
-import es.codeurjc.grupo12.scissors_please.model.Tournament;
-import es.codeurjc.grupo12.scissors_please.model.User;
-import es.codeurjc.grupo12.scissors_please.repository.BotRepository;
-import es.codeurjc.grupo12.scissors_please.repository.MatchRepository;
-import es.codeurjc.grupo12.scissors_please.repository.TournamentRepository;
-import es.codeurjc.grupo12.scissors_please.repository.UserRepository;
-import lombok.extern.slf4j.Slf4j;
 
 @Configuration
 @Slf4j

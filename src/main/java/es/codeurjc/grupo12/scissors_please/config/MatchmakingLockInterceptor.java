@@ -23,8 +23,8 @@ public class MatchmakingLockInterceptor implements HandlerInterceptor {
   @Autowired private UserService userService;
 
   @Override
-  public boolean preHandle(
-      HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+  public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+      throws Exception {
     if (isAllowedRequest(request)) {
       return true;
     }

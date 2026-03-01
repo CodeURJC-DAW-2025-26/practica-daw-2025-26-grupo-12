@@ -1,8 +1,8 @@
 package es.codeurjc.grupo12.scissors_please.service;
 
 import java.io.IOException;
-import java.util.Locale;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -126,7 +126,8 @@ public class NotificationService {
     }
 
     String className = throwable.getClass().getSimpleName();
-    String message = throwable.getMessage() == null ? "" : throwable.getMessage().toLowerCase(Locale.ROOT);
+    String message =
+        throwable.getMessage() == null ? "" : throwable.getMessage().toLowerCase(Locale.ROOT);
     if ("AsyncRequestNotUsableException".equals(className)) {
       return true;
     }
