@@ -3,14 +3,22 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 KEYSTORE_PATH="${SCRIPT_DIR}/keystore.p12"
 ALIAS="scissors-please"
-STOREPASS="potato"
+
+if [[ -f "${REPO_ROOT}/.env" ]]; then
+  set -a
+  source "${REPO_ROOT}/.env"
+  set +a
+fi
+
+STOREPASS="${SERVER_SSL_KEY_STORE_PASSWORD:-password}"
 VALIDITY_DAYS=3650
 
 if [[ -f "${KEYSTORE_PATH}" ]]; then
-  echo "El keystore ya existe en: ${KEYSTORE_PATH}"
-  echo "Si quieres regenerarlo, elimina el archivo y ejecuta de nuevo el script."
+  echo "The keystore already exists at: ${KEYSTORE_PATH}"
+  echo "If you want to regenerate it, delete the file and run the script again."
   exit 0
 fi
 
@@ -27,4 +35,4 @@ keytool -genkeypair \
   -ext "SAN=DNS:localhost,IP:127.0.0.1" \
   -noprompt
 
-echo "Keystore generado en: ${KEYSTORE_PATH}"
+echo "Keystore generated at: ${KEYSTORE_PATH}"
