@@ -53,7 +53,7 @@
                     </div>
                     <div class="d-flex justify-content-center mt-3">
                         <button id="show-more-admin-tournaments-btn" class="btn btn-outline-muted btn-sm"
-                            data-load-more="tournaments" data-endpoint="/admin/panel/page"
+                            data-load-more="tournaments" data-endpoint="/admin/tournaments/page"
                             data-body-id="admin-tournament-table-body" data-counter-id="admin-tournament-counter"
                             data-meta-class="admin-tournament-meta-row" data-size="{{size}}">
                             Show more
@@ -64,29 +64,7 @@
 
         </div>
 
-        <div class="row g-4 mt-1">
-            <div class="col-12">
-                <div class="card p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h2 class="h5 fw-bold mb-0">Registered Users (Monthly)</h2>
-                        <span class="badge bg-secondary">Live Data</span>
-                    </div>
-                    <div class="bg-secondary-bg border border-secondary rounded p-2 d-flex justify-content-center">
-                        {{#barChart}}
-                        <img src="data:image/png;base64,{{barChart}}" alt="User Registration History" class="img-fluid"
-                            style="max-height: 400px; width: auto;" />
-                        {{/barChart}}
-
-                        {{^barChart}}
-                        <p class="text-muted my-5">No data available for chart</p>
-                        {{/barChart}}
-                    </div>
-                    <div class="d-flex flex-wrap gap-2 mt-3">
-                        <span class="badge bg-primary">Real-time Statistics</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+       
 
         <div class="row g-4 mt-1">
             <div class="col-12">

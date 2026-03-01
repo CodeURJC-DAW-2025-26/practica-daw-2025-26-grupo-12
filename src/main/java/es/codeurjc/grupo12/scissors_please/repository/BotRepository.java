@@ -17,6 +17,12 @@ public interface BotRepository extends JpaRepository<Bot, Long> {
 
   List<Bot> findByOwnerIdAndIsPublicTrue(Long ownerId);
 
+  List<Bot> findByNameContainingIgnoreCase(String name);
+
+  List<Bot> findByNameContainingIgnoreCaseAndIsPublic(String name, boolean isPublic);
+
+  List<Bot> findByIsPublic(boolean isPublic);
+
   Page<Bot> findByOwnerIdOrderByIdDesc(Long ownerId, Pageable pageable);
 
   Page<Bot> findByOwnerIdAndIsPublicTrueOrderByIdDesc(Long ownerId, Pageable pageable);

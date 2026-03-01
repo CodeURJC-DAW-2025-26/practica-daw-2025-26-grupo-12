@@ -1,12 +1,14 @@
 package es.codeurjc.grupo12.scissors_please.controller.web;
 
 import es.codeurjc.grupo12.scissors_please.config.ErrorConstants;
+import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.Image;
 import es.codeurjc.grupo12.scissors_please.model.Tournament;
 import es.codeurjc.grupo12.scissors_please.model.TournamentStatus;
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.repository.UserRepository.MonthlyUserCount;
 import es.codeurjc.grupo12.scissors_please.security.ActiveSessionService;
+import es.codeurjc.grupo12.scissors_please.service.BotService;
 import es.codeurjc.grupo12.scissors_please.service.ChartService;
 import es.codeurjc.grupo12.scissors_please.service.TournamentAutomationService;
 import es.codeurjc.grupo12.scissors_please.service.TournamentService;
@@ -50,18 +52,14 @@ public class AdminController {
   @Autowired private TournamentAutomationService tournamentAutomationService;
   @Autowired private UserService userService;
   @Autowired private ActiveSessionService activeSessionService;
+  @Autowired private BotService botService;
 
-  @GetMapping("/panel")
-  public String adminPanel(
+  @GetMapping("/tournaments")
+  public String adminTournaments(
       @PageableDefault(size = 5) Pageable pageable,
       @RequestParam(required = false) Integer processed,
       Model model) {
 
-    List<MonthlyUserCount> data = userService.getMonthlyUserCount();
-    byte[] barChart = chartService.generateUserHistory(data);
-
-    String base64Chart = Base64.getEncoder().encodeToString(barChart);
-    model.addAttribute("barChart", base64Chart);
     model.addAttribute("size", Math.max(pageable.getPageSize(), 1));
     model.addAttribute("fromItem", 0);
     model.addAttribute("toItem", 0);
@@ -74,10 +72,10 @@ public class AdminController {
         model.addAttribute("successMessage", "No upcoming tournaments to process.");
       }
     }
-    return "admin-panel";
+    return "admin-tournaments";
   }
 
-  @GetMapping("/panel/page")
+  @GetMapping("/tournaments/page")
   public String adminPanelPage(@PageableDefault(size = 5) Pageable pageable, Model model) {
     TournamentService.TournamentPage tournamentPage = tournamentService.getTournamentPage(pageable);
     model.addAttribute("tournaments", tournamentPage.tournaments());
@@ -218,7 +216,7 @@ public class AdminController {
 
       tournamentService.save(tournament);
 
-      return "redirect:/admin/panel";
+      return "redirect:/admin/tournaments";
     }
     model.addAttribute("errorMessage", ErrorConstants.TOURNAMENT_NOT_FOUND);
     model.addAttribute("errorCode", ErrorConstants.NOT_FOUND_CODE);
@@ -251,7 +249,7 @@ public class AdminController {
   @PostMapping("/tournaments/process-due")
   public String processDueTournamentsManually() {
     int processed = tournamentAutomationService.processDueUpcomingTournamentsNow();
-    return "redirect:/admin/panel?processed=" + processed;
+    return "redirect:/admin/tournaments?processed=" + processed;
   }
 
   @PostMapping("/tournaments/{id}/run-now")
@@ -274,7 +272,7 @@ public class AdminController {
     } catch (NoSuchElementException e) {
       redirectAttributes.addFlashAttribute("errorMessage", "Tournament not found.");
     }
-    return "redirect:/admin/panel";
+    return "redirect:/admin/tournaments";
   }
 
   private Integer parseMaxPlayers(String value, List<String> errors) {
@@ -333,6 +331,13 @@ public class AdminController {
       @RequestParam(name = "status", required = false) String status,
       Authentication authentication,
       Model model) {
+
+    List<MonthlyUserCount> data = userService.getMonthlyUserCount();
+    byte[] barChart = chartService.generateUserHistory(data);
+
+    String base64Chart = Base64.getEncoder().encodeToString(barChart);
+    model.addAttribute("barChart", base64Chart);
+
     String normalizedQuery = normalizeQuery(query);
     UserStatusFilter statusFilter = UserStatusFilter.fromValue(status);
     User currentAdmin = userService.getCurrentUser(authentication);
@@ -371,6 +376,29 @@ public class AdminController {
       Authentication authentication,
       RedirectAttributes redirectAttributes) {
     return updateBlockedStatus(id, query, status, authentication, redirectAttributes, false);
+  }
+
+  @GetMapping("/bots")
+  public String adminBots(
+      @RequestParam(name = "q", required = false) String query,
+      @RequestParam(name = "visibility", required = false, defaultValue = "all") String visibility,
+      Model model) {
+
+    String normalizedQuery = normalizeQuery(query);
+
+    List<Bot> bots = botService.searchBots(normalizedQuery, visibility);
+
+    model.addAttribute("searchQuery", normalizedQuery);
+
+    model.addAttribute("visibilityFilter", visibility);
+
+    model.addAttribute("visAll", visibility.equals("all"));
+    model.addAttribute("visPublic", visibility.equals("public"));
+    model.addAttribute("visPrivate", visibility.equals("private"));
+    model.addAttribute("resultCount", bots.size());
+    model.addAttribute("bots", bots);
+
+    return "admin-bots";
   }
 
   private String updateBlockedStatus(

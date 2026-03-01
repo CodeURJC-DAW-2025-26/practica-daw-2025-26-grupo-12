@@ -130,6 +130,25 @@ public class BotService {
   }
 
   @Transactional(readOnly = true)
+  public List<Bot> searchBots(String query, String visibility) {
+    boolean hasQuery = query != null && !query.isBlank();
+
+    if ("public".equalsIgnoreCase(visibility)) {
+      return hasQuery
+          ? botRepository.findByNameContainingIgnoreCaseAndIsPublic(query, true)
+          : botRepository.findByIsPublic(true);
+    }
+
+    if ("private".equalsIgnoreCase(visibility)) {
+      return hasQuery
+          ? botRepository.findByNameContainingIgnoreCaseAndIsPublic(query, false)
+          : botRepository.findByIsPublic(false);
+    }
+
+    return hasQuery ? botRepository.findByNameContainingIgnoreCase(query) : botRepository.findAll();
+  }
+
+  @Transactional(readOnly = true)
   public record BotPage(
       List<Bot> bots,
       int nextPage,
