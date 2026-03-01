@@ -412,12 +412,21 @@ public class AdminController {
         user.getId(),
         user.getUsername(),
         user.getEmail(),
+        buildUserProfileHref(user.getUsername()),
         resolveProvider(user.getOauthProvider()),
         user.isBlocked(),
         manageable,
         adminRole,
         hasImage,
         resolveInitial(user.getUsername()));
+  }
+
+  private String buildUserProfileHref(String username) {
+    if (username == null || username.isBlank()) {
+      return "/user/profile";
+    }
+    return "/user/profile?user="
+        + UriUtils.encodeQueryParam(username.trim(), StandardCharsets.UTF_8);
   }
 
   private String resolveInitial(String value) {
@@ -500,6 +509,7 @@ public class AdminController {
       Long id,
       String username,
       String email,
+      String profileHref,
       String provider,
       boolean blocked,
       boolean manageable,
