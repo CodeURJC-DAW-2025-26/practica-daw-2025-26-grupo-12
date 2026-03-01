@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -262,6 +263,17 @@ public class AdminController {
       case NOT_UPCOMING -> "redirect:/admin/tournament/detail?id=" + id + "&runResult=not-upcoming";
       case NOT_FOUND -> "redirect:/admin/tournament/detail?runResult=not-found";
     };
+  }
+
+  @PostMapping("/tournament/{id}/delete")
+  public String deleteTournament(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    try {
+      tournamentService.deleteTournament(id);
+      redirectAttributes.addFlashAttribute("successMessage", "Tournament deleted successfully.");
+    } catch (NoSuchElementException e) {
+      redirectAttributes.addFlashAttribute("errorMessage", "Tournament not found.");
+    }
+    return "redirect:/admin/panel";
   }
 
   private Integer parseMaxPlayers(String value, List<String> errors) {

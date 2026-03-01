@@ -1,22 +1,39 @@
 {{#tournaments}}
 <tr class="admin-tournament-row">
-    <td class="ps-3">
-        <div class="fw-medium">{{name}}</div>
-        <div class="text-secondary small">{{summary}}</div>
-    </td>
-    <td>
-        <span class="badge {{badgeClass}}">{{status}}</span>
-    </td>
-    <td class="text-end pe-3">
-        <div class="d-flex flex-wrap gap-2 justify-content-end">
-            <a href="/tournaments/detail/{{id}}" class="btn btn-outline-muted btn-sm">View</a>
-            <a href="/admin/tournaments/edit/{{id}}" class="btn btn-outline-muted btn-sm">Edit</a>
-        </div>
-    </td>
+	<td class="ps-3">
+		<div class="fw-medium">{{name}}</div>
+		<div class="text-secondary small">{{summary}}</div>
+	</td>
+	<td>
+		<span class="badge {{badgeClass}}">{{status}}</span>
+	</td>
+	<td class="text-end pe-3">
+		<div class="d-flex flex-wrap gap-2 justify-content-end">
+			<a
+				href="/admin/tournament/detail?id={{id}}"
+				class="btn btn-outline-muted btn-sm"
+				>View</a
+			>
+			<a
+				href="/admin/tournament/edit?id={{id}}"
+				class="btn btn-outline-muted btn-sm"
+				>Edit</a
+			>
+			<button
+				type="button"
+				class="btn btn-outline-danger btn-sm"
+				data-bs-toggle="modal"
+				data-bs-target="#deleteTournamentModal"
+				data-tournament-id="{{id}}"
+				data-tournament-name="{{name}}"
+			>
+				Delete
+			</button>
+		</div>
+	</td>
 </tr>
-{{/tournaments}}
-{{#showEmpty}}
+{{/tournaments}} {{#showEmpty}}
 <tr class="admin-tournament-empty-row">
-    <td class="ps-3 text-secondary" colspan="3">No tournaments available.</td>
+	<td class="ps-3 text-secondary" colspan="3">No tournaments available.</td>
 </tr>
 {{/showEmpty}}
