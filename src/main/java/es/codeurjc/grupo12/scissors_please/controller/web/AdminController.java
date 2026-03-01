@@ -159,6 +159,7 @@ public class AdminController {
         tournamentImage.setData(image.getBytes());
       } catch (IOException e) {
         model.addAttribute("errorMessage", ErrorConstants.IMAGE_ERROR_UPLOAD);
+        model.addAttribute("errorCode", ErrorConstants.BAD_REQUEST_CODE);
         return "error";
       }
     }
@@ -178,6 +179,7 @@ public class AdminController {
       return "admin-tournament-edit";
     }
     model.addAttribute("errorMessage", ErrorConstants.TOURNAMENT_NOT_FOUND);
+    model.addAttribute("errorCode", ErrorConstants.NOT_FOUND_CODE);
     return "error";
   }
 
@@ -199,6 +201,7 @@ public class AdminController {
       Tournament tournament = opTournament.get();
       if (!handleImageUpload(tournament, image)) {
         model.addAttribute("errorMessage", ErrorConstants.IMAGE_ERROR_UPLOAD);
+        model.addAttribute("errorCode", ErrorConstants.BAD_REQUEST_CODE);
         return "error";
       }
       tournament.setName(name);
@@ -211,6 +214,7 @@ public class AdminController {
           tournament.setStartDate(LocalDate.parse(startDate));
         } catch (Exception e) {
           model.addAttribute("errorMessage", ErrorConstants.DATE_INVALID);
+          model.addAttribute("errorCode", ErrorConstants.BAD_REQUEST_CODE);
           return "error";
         }
       }
@@ -219,7 +223,8 @@ public class AdminController {
 
       return "redirect:/admin/panel";
     }
-
+    model.addAttribute("errorMessage", ErrorConstants.TOURNAMENT_NOT_FOUND);
+    model.addAttribute("errorCode", ErrorConstants.NOT_FOUND_CODE);
     return "error";
   }
 
