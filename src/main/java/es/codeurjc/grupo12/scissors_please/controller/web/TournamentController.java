@@ -75,6 +75,7 @@ public class TournamentController {
       return "tournament-detail";
     }
     model.addAttribute("errorMessage", ErrorConstants.TOURNAMENT_NOT_FOUND);
+    model.addAttribute("errorCode", ErrorConstants.NOT_FOUND_CODE);
     return "error";
   }
 
@@ -97,6 +98,8 @@ public class TournamentController {
 
     Optional<Tournament> tournamentOp = tournamentService.getTournamentById(id);
     if (tournamentOp.isEmpty()) {
+      model.addAttribute("errorMessage", ErrorConstants.TOURNAMENT_NOT_FOUND);
+      model.addAttribute("errorCode", ErrorConstants.NOT_FOUND_CODE);
       return "error";
     }
 

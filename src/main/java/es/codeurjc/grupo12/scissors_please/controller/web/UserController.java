@@ -85,6 +85,7 @@ public class UserController {
     if (!image.isEmpty()) {
       if (!handleImageUpload(currentUser, image)) {
         model.addAttribute("errorMessage", ErrorConstants.IMAGE_ERROR_UPLOAD);
+        model.addAttribute("errorCode", ErrorConstants.BAD_REQUEST_CODE);
         return "error";
       }
       userService.updateUser(currentUser);
