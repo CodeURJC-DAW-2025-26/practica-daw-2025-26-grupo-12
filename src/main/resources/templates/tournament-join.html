@@ -8,76 +8,92 @@
     {{> components/navbar}}
 
     <div class="container py-5">
+        {{#joinPage}}
         <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
             <div>
-                <p class="text-secondary mb-1 small text-uppercase">Tournament</p>
-                <h1 class="h3 fw-bold mb-0">Join Winter Cup 2026</h1>
+                <p class="text-secondary mb-1 small text-uppercase">Tournament Registration</p>
+                <h1 class="h3 fw-bold mb-0">{{tournament.name}}</h1>
             </div>
             <div class="d-flex flex-wrap gap-2">
-                <a href="/tournaments" class="btn btn-outline-muted btn-sm">Back to Tournaments</a>
+                <a href="/tournaments/detail/{{tournament.id}}" class="btn btn-outline-muted btn-sm">Back to Details</a>
             </div>
         </div>
+
+        {{#errorMessage}}
+        <div class="alert alert-danger mb-4" role="alert">{{errorMessage}}</div>
+        {{/errorMessage}}
+        {{#successMessage}}
+        <div class="alert alert-success mb-4" role="alert">{{successMessage}}</div>
+        {{/successMessage}}
 
         <div class="row g-4">
             <div class="col-lg-7">
                 <div class="card p-4">
                     <h2 class="h5 fw-bold mb-3">Select Your Bot</h2>
-                    <form action="#" method="get">
-                        <div class="mb-3">
-                            <label for="bot" class="form-label text-uppercase small">Bot</label>
-                            <select class="form-select form-control-lg" id="bot" name="bot" required>
-                                <option selected>AlphaBot (ELO 1824)</option>
-                                <option>Randomizer (ELO 1650)</option>
-                                <option>PaperMaster (ELO 1720)</option>
+
+                    {{#availabilityMessage}}
+                    <div class="alert {{availabilityMessageClass}} text-start" role="alert">{{availabilityMessage}}</div>
+                    {{/availabilityMessage}}
+
+                    {{#canSubmit}}
+                    <form action="/tournaments/join/{{tournament.id}}" method="post">
+                        <input type="hidden" name="_csrf" value="{{_csrf.token}}">
+                        <div class="mb-4">
+                            <label for="botId" class="form-label text-uppercase small">Bot</label>
+                            <select class="form-select form-control-lg" id="botId" name="botId" required>
+                                {{#botOptions}}
+                                <option value="{{id}}" {{#selected}}selected{{/selected}}>{{name}} · ELO {{elo}}</option>
+                                {{/botOptions}}
                             </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="strategy" class="form-label text-uppercase small">Strategy Note</label>
-                            <textarea class="form-control form-control-lg" id="strategy" name="strategy" rows="3"
-                                placeholder="Optional note about your playstyle."></textarea>
-                        </div>
-                        <div class="form-check mb-4">
-                            <input class="form-check-input" type="checkbox" id="terms" required>
-                            <label class="form-check-label text-secondary" for="terms">
-                                I accept the tournament rules and fair-play policy.
-                            </label>
                         </div>
                         <div class="d-flex flex-wrap gap-2">
                             <button type="submit" class="btn btn-primary">Confirm Registration</button>
-                            <a href="/tournaments" class="btn btn-outline-muted">Cancel</a>
+                            <a href="/tournaments/detail/{{tournament.id}}" class="btn btn-outline-muted">Cancel</a>
                         </div>
                     </form>
+                    {{/canSubmit}}
+
+                    {{^canSubmit}}
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="/tournaments/detail/{{tournament.id}}" class="btn btn-outline-muted">Back to Details</a>
+                        {{#showCreateBotAction}}
+                        <a href="/bots/create" class="btn btn-primary">Create Bot</a>
+                        {{/showCreateBotAction}}
+                    </div>
+                    {{/canSubmit}}
                 </div>
             </div>
+
             <div class="col-lg-5">
                 <div class="card p-4 mb-4">
                     <h2 class="h5 fw-bold mb-3">Tournament Info</h2>
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             Format
-                            <span class="badge bg-secondary rounded-pill">Single Elimination</span>
+                            <span class="badge bg-secondary rounded-pill">{{format}}</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             Slots
-                            <span class="badge bg-secondary rounded-pill">18/32</span>
+                            <span class="badge bg-secondary rounded-pill">{{participants}}/{{tournament.slots}}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Registration Opens
+                            <span class="badge bg-secondary rounded-pill">{{registrationOpenDate}}</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             Start Date
-                            <span class="badge bg-secondary rounded-pill">Feb 15, 2026</span>
+                            <span class="badge bg-secondary rounded-pill">{{startDate}}</span>
                         </li>
                     </ul>
                 </div>
+
                 <div class="card p-4">
-                    <h2 class="h5 fw-bold mb-3">Rewards</h2>
-                    <p class="text-secondary mb-2">Top 3 bots will get:</p>
-                    <div class="d-flex flex-column gap-2">
-                        <span class="badge bg-secondary">Featured Spot</span>
-                        <span class="badge bg-secondary">ELO Boost</span>
-                        <span class="badge bg-secondary">Exclusive Badge</span>
-                    </div>
+                    <h2 class="h5 fw-bold mb-3">Description</h2>
+                    <p class="text-secondary mb-0">{{tournament.description}}</p>
                 </div>
             </div>
         </div>
+        {{/joinPage}}
     </div>
 
     {{> components/scripts}}
