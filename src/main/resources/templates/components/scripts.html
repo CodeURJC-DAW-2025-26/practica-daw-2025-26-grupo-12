@@ -4,7 +4,7 @@
 
 {{#logged}}
 <div aria-live="polite" aria-atomic="true" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055; pointer-events: none;">
-  <div id="notification-toast-container"></div>
+  <div id="notification-toast-container" class="notification-stack"></div>
 </div>
 
 <script>
@@ -12,8 +12,13 @@
     const eventSource = new EventSource('/api/notifications/subscribe');
 
     eventSource.addEventListener('notification', function (event) {
-      const message = event.data;
-      showToastNotification(message);
+      const payload = parseNotificationPayload(event.data);
+      showToastNotification(payload);
+      if (payload.autoRedirect && payload.redirectUrl) {
+        setTimeout(() => {
+          window.location.href = payload.redirectUrl;
+        }, 800);
+      }
     });
 
     eventSource.addEventListener('connected', function (event) {
@@ -24,25 +29,138 @@
       console.error("SSE Error:", error);
     };
 
-    function showToastNotification(message) {
+    function parseNotificationPayload(rawPayload) {
+      try {
+        return JSON.parse(rawPayload);
+      } catch (error) {
+        return {
+          type: "notification",
+          message: rawPayload,
+          actionLabel: null,
+          actionUrl: null,
+          redirectUrl: null,
+          autoRedirect: false
+        };
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function getNotificationMeta(payload) {
+      switch (payload.type) {
+        case "match_found":
+          return {
+            title: "Match Found",
+            icon: "bi-controller",
+            tone: "success"
+          };
+        case "rematch_request":
+          return {
+            title: "Rematch Request",
+            icon: "bi-arrow-repeat",
+            tone: "action"
+          };
+        case "rematch_ready":
+          return {
+            title: "Rematch Ready",
+            icon: "bi-stars",
+            tone: "success"
+          };
+        default:
+          if (payload.actionLabel && payload.actionUrl) {
+            return {
+              title: "Action Needed",
+              icon: "bi-bell-fill",
+              tone: "action"
+            };
+          }
+
+          if (payload.autoRedirect && payload.redirectUrl) {
+            return {
+              title: "Redirecting",
+              icon: "bi-rocket-takeoff-fill",
+              tone: "success"
+            };
+          }
+
+          return {
+            title: "Notification",
+            icon: "bi-bell-fill",
+            tone: "info"
+          };
+      }
+    }
+
+    function showToastNotification(payload) {
       const container = document.getElementById('notification-toast-container');
+      if (!container) {
+        return;
+      }
+
       const toastId = 'toast-' + Date.now();
-      
+      const meta = getNotificationMeta(payload);
+      const delay = payload.autoRedirect ? 1800 : (payload.actionLabel && payload.actionUrl ? 8000 : 5000);
+      const actionButton = payload.actionLabel && payload.actionUrl
+        ? `<button type="button" class="btn btn-sm btn-primary notification-toast-button" data-action-url="${escapeHtml(payload.actionUrl)}">${escapeHtml(payload.actionLabel)}</button>`
+        : '';
+      const statusChip = payload.autoRedirect && payload.redirectUrl
+        ? '<span class="notification-toast-chip">Opening now</span>'
+        : '';
+
       const toastHTML = `
-        <div id="${toastId}" class="toast align-items-center text-bg-primary border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true" style="pointer-events: auto;">
-          <div class="d-flex">
-            <div class="toast-body">
-              <i class="me-2">🔔</i> ${message}
+        <div
+          id="${toastId}"
+          class="toast notification-toast notification-toast--${meta.tone} border-0"
+          role="alert"
+          aria-live="assertive"
+          aria-atomic="true"
+          data-bs-delay="${delay}"
+          style="pointer-events: auto; --notification-delay: ${delay}ms;"
+        >
+          <div class="toast-body p-0">
+            <div class="notification-toast-inner">
+              <div class="notification-toast-icon" aria-hidden="true">
+                <i class="bi ${meta.icon}"></i>
+              </div>
+              <div class="notification-toast-content">
+                <p class="notification-toast-title mb-1">${escapeHtml(meta.title)}</p>
+                <div class="notification-toast-message">${escapeHtml(payload.message)}</div>
+                ${(actionButton || statusChip) ? `
+                  <div class="notification-toast-actions">
+                    ${statusChip}
+                    ${actionButton}
+                  </div>` : ''}
+              </div>
+              <button
+                type="button"
+                class="btn-close btn-close-white notification-toast-close"
+                data-bs-dismiss="toast"
+                aria-label="Close"
+              ></button>
             </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            <div class="notification-toast-progress" aria-hidden="true"></div>
           </div>
         </div>
       `;
-      
+
       container.insertAdjacentHTML('beforeend', toastHTML);
       const toastElement = document.getElementById(toastId);
-      const toast = new bootstrap.Toast(toastElement, { autohide: true, delay: 5000 });
+      const toast = new bootstrap.Toast(toastElement, { autohide: true, delay });
       toast.show();
+
+      const actionElement = toastElement.querySelector('[data-action-url]');
+      if (actionElement) {
+        actionElement.addEventListener('click', function () {
+          window.location.href = actionElement.getAttribute('data-action-url');
+        });
+      }
       
       toastElement.addEventListener('hidden.bs.toast', function () {
         toastElement.remove();

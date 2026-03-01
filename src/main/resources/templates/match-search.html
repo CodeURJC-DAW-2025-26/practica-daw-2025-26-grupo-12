@@ -4,34 +4,84 @@
 {{> components/head}}
 
 <body class="centered-layout">
-
-    <div class="card glass-card p-4 text-center" style="max-width: 720px; width: 100%;">
+    <div class="card glass-card centered-layout-card--wide p-4 text-center">
         <div class="card-body">
             <div class="auth-header-icon mb-3">🛰️</div>
             <h1 class="h4 fw-bold text-white mb-2">Matchmaking</h1>
-            <p class="text-secondary mb-4">Select your bot and start a real match with a suitable opponent.</p>
+            <p class="text-secondary mb-4">Join the live queue and get paired only against other players who are also searching.</p>
 
             {{#errorMessage}}
             <div class="alert alert-danger text-start" role="alert">{{errorMessage}}</div>
             {{/errorMessage}}
+            {{^searching}}
             {{#successMessage}}
             <div class="alert alert-success text-start" role="alert">{{successMessage}}</div>
             {{/successMessage}}
+            {{/searching}}
 
             {{#hasBots}}
+            {{#searching}}
+            <div class="text-start">
+                <div class="searching-stage p-4 p-md-5 mb-4 text-center">
+                    <p class="text-secondary text-uppercase small mb-3">Searching Now</p>
+                    <h2 class="waiting-bot-name fw-bold text-white mb-3">{{waitingBotName}}</h2>
+                    <div class="waiting-meta d-flex justify-content-center align-items-center gap-3 flex-wrap text-secondary mb-4">
+                        <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle px-3 py-2">ELO {{waitingBotElo}}</span>
+                        <span>Waiting <strong id="matchmaking-wait" class="text-white">{{waitingSeconds}}s</strong></span>
+                    </div>
+                    <p class="waiting-description text-secondary mb-4">{{waitingBotDescription}}</p>
+                    <div class="arena-loader" aria-hidden="true">
+                        <div class="arena-pulse"></div>
+                    </div>
+                    <p class="text-secondary mb-0">
+                        Waiting for another warrior to enter the arena. Matchmaking starts with close ELO rivals and expands over time.
+                    </p>
+                </div>
+                <form method="post" action="/matches/cancel" class="d-flex justify-content-center">
+                    <input type="hidden" name="_csrf" value="{{_csrf.token}}">
+                    <button type="submit" class="btn btn-primary btn-sm px-4">Cancel Search</button>
+                </form>
+            </div>
+            {{/searching}}
+
+            {{^searching}}
             <form method="post" action="/matches/start" class="text-start">
                 <input type="hidden" name="_csrf" value="{{_csrf.token}}">
-                <label for="botId" class="form-label text-uppercase small">Your Bot</label>
-                <select id="botId" name="botId" class="form-select mb-4" required>
-                    {{#botOptions}}
-                    <option value="{{id}}" {{#selected}}selected{{/selected}}>{{name}} (ELO {{elo}})</option>
-                    {{/botOptions}}
-                </select>
+                <div class="bot-picker-card mb-4">
+                    <div class="bot-picker-header">
+                        <div>
+                            <p class="text-secondary text-uppercase small mb-2">Selected Bot</p>
+                            <h2 id="selected-bot-name" class="bot-picker-name fw-bold text-white mb-0">
+                                {{#botOptions}}{{#selected}}{{name}}{{/selected}}{{/botOptions}}
+                            </h2>
+                        </div>
+                        <span id="selected-bot-elo" class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle px-3 py-2">
+                            {{#botOptions}}{{#selected}}ELO {{elo}}{{/selected}}{{/botOptions}}
+                        </span>
+                    </div>
+                    <label for="botId" class="form-label text-uppercase small">Choose Your Fighter</label>
+                    <div class="bot-picker-shell mb-3">
+                        <select id="botId" name="botId" class="bot-picker-select" required>
+                            {{#botOptions}}
+                            <option
+                                value="{{id}}"
+                                data-name="{{name}}"
+                                data-elo="{{elo}}"
+                                {{#selected}}selected{{/selected}}>{{name}} · ELO {{elo}}</option>
+                            {{/botOptions}}
+                        </select>
+                        <i class="bi bi-chevron-down bot-picker-chevron" aria-hidden="true"></i>
+                    </div>
+                    <p class="bot-picker-hint mb-0">
+                        Start with the bot you want to queue. Matchmaking begins with close ELO rivals and widens the search over time.
+                    </p>
+                </div>
                 <div class="d-flex justify-content-center gap-2">
                     <a href="/home" class="btn btn-outline-muted btn-sm px-3">Cancel</a>
                     <button type="submit" class="btn btn-primary btn-sm px-3">Start Match</button>
                 </div>
             </form>
+            {{/searching}}
             {{/hasBots}}
 
             {{^hasBots}}
@@ -45,6 +95,105 @@
             {{/hasBots}}
         </div>
     </div>
+
+    {{#searching}}
+    <script>
+        (function () {
+            const waitElement = document.getElementById("matchmaking-wait");
+            const cancelForm = document.querySelector('form[action="/matches/cancel"]');
+            let waitSeconds = Number("{{waitingSeconds}}") || 0;
+            let allowLeave = false;
+            let waitTimerId;
+            let statusPollId;
+
+            const enableNavigation = () => {
+                allowLeave = true;
+                window.removeEventListener("beforeunload", preventLeave);
+                window.clearInterval(waitTimerId);
+                window.clearInterval(statusPollId);
+            };
+
+            const preventLeave = (event) => {
+                if (allowLeave) {
+                    return;
+                }
+
+                event.preventDefault();
+                event.returnValue = "";
+            };
+
+            const pollMatchmakingStatus = async () => {
+                try {
+                    const response = await fetch("/matches/search/status", {
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest"
+                        }
+                    });
+
+                    if (!response.ok) {
+                        return;
+                    }
+
+                    const status = await response.json();
+                    if (status.matched && status.matchId) {
+                        enableNavigation();
+                        window.location.href = status.redirectUrl || `/matches/battle?id=${status.matchId}`;
+                        return;
+                    }
+
+                    if (!status.searching && !status.matched) {
+                        enableNavigation();
+                        window.location.reload();
+                    }
+                } catch (error) {
+                    console.error("Matchmaking status polling failed", error);
+                }
+            };
+
+            window.addEventListener("beforeunload", preventLeave);
+
+            if (cancelForm) {
+                cancelForm.addEventListener("submit", enableNavigation);
+            }
+
+            waitTimerId = window.setInterval(() => {
+                waitSeconds += 1;
+                if (waitElement) {
+                    waitElement.textContent = `${waitSeconds}s`;
+                }
+            }, 1000);
+
+            statusPollId = window.setInterval(pollMatchmakingStatus, 2000);
+        })();
+    </script>
+    {{/searching}}
+
+    {{^searching}}
+    <script>
+        (function () {
+            const botSelect = document.getElementById("botId");
+            const botName = document.getElementById("selected-bot-name");
+            const botElo = document.getElementById("selected-bot-elo");
+
+            if (!botSelect || !botName || !botElo) {
+                return;
+            }
+
+            const syncSelectedBot = () => {
+                const selectedOption = botSelect.options[botSelect.selectedIndex];
+                if (!selectedOption) {
+                    return;
+                }
+
+                botName.textContent = selectedOption.dataset.name || selectedOption.textContent;
+                botElo.textContent = `ELO ${selectedOption.dataset.elo || ""}`.trim();
+            };
+
+            botSelect.addEventListener("change", syncSelectedBot);
+            syncSelectedBot();
+        })();
+    </script>
+    {{/searching}}
 
 </body>
 

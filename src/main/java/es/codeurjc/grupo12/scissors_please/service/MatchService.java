@@ -3,6 +3,7 @@ package es.codeurjc.grupo12.scissors_please.service;
 import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.Match;
 import es.codeurjc.grupo12.scissors_please.model.Round;
+import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.repository.BotRepository;
 import es.codeurjc.grupo12.scissors_please.repository.MatchRepository;
 import java.time.Duration;
@@ -10,42 +11,272 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @Service
 public class MatchService {
 
   private static final int MAX_PAGE_SIZE = 20;
+  private static final int BASE_ELO_GAP = 120;
+  private static final int ELO_GAP_STEP = 40;
+  private static final int ELO_GAP_STEP_SECONDS = 5;
+  private static final Duration SEARCH_EXPIRATION = Duration.ofMinutes(5);
+  private static final Duration READY_MATCH_EXPIRATION = Duration.ofMinutes(5);
+  private static final Duration REMATCH_INVITATION_EXPIRATION = Duration.ofMinutes(2);
+  private static final Duration MIN_READY_REDIRECT_DELAY = Duration.ofSeconds(1);
   private static final DateTimeFormatter DATE_FORMATTER =
       DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
   private static final List<String> MOVES = List.of("Rock", "Paper", "Scissors");
 
   @Autowired private MatchRepository matchRepository;
   @Autowired private BotRepository botRepository;
+  @Autowired private NotificationService notificationService;
+  @Autowired private UserService userService;
 
-  public MatchStartResult startMatchmaking(Long userId, Long selectedBotId) {
+  private final Object matchmakingMonitor = new Object();
+  private final Map<Long, SearchTicket> searchQueue = new ConcurrentHashMap<>();
+  private final Map<Long, ReadyMatch> readyMatches = new ConcurrentHashMap<>();
+  private final Map<String, RematchInvitation> rematchInvitations = new ConcurrentHashMap<>();
+  private final Map<Long, RematchInvitation> pendingRematchesByRequester =
+      new ConcurrentHashMap<>();
+
+  public MatchStartResult startMatchmaking(Long userId, String username, Long selectedBotId) {
     Bot myBot = resolveMyBot(userId, selectedBotId);
-    Bot opponentBot = resolveOpponentBot(userId, myBot);
+    LocalDateTime now = LocalDateTime.now();
 
-    Match match = new Match();
-    match.setBot1(myBot);
-    match.setBot2(opponentBot);
-    match.setTimestamp(LocalDateTime.now());
-    populateRandomResult(match);
+    synchronized (matchmakingMonitor) {
+      purgeExpiredState(now);
 
-    Match savedMatch = matchRepository.save(match);
-    return new MatchStartResult(
-        savedMatch.getId(), resolveBotName(myBot), resolveBotName(opponentBot));
+      ReadyMatch readyMatch = getValidReadyMatch(userId);
+      if (readyMatch != null) {
+        return MatchStartResult.matched(
+            readyMatch.matchId(), readyMatch.myBotName(), readyMatch.opponentBotName());
+      }
+
+      SearchTicket ticket = new SearchTicket(userId, username, myBot, now);
+      searchQueue.put(userId, ticket);
+
+      ReadyMatch createdMatch = tryMatch(ticket, now);
+      if (createdMatch != null) {
+        return MatchStartResult.matched(
+            createdMatch.matchId(), createdMatch.myBotName(), createdMatch.opponentBotName());
+      }
+
+      return MatchStartResult.searching(resolveBotName(myBot));
+    }
+  }
+
+  public String requestRematch(Long matchId, User requester) {
+    if (requester == null || requester.getId() == null) {
+      throw new IllegalArgumentException("User not authenticated");
+    }
+
+    LocalDateTime now = LocalDateTime.now();
+    synchronized (matchmakingMonitor) {
+      purgeExpiredState(now);
+
+      Match previousMatch = resolveMatch(matchId);
+      RematchParticipants participants =
+          resolveRematchParticipants(previousMatch, requester.getId());
+
+      clearPendingRematchForRequester(requester.getId());
+
+      String invitationId = UUID.randomUUID().toString();
+      RematchInvitation invitation =
+          new RematchInvitation(
+              invitationId,
+              previousMatch.getId(),
+              requester.getId(),
+              requester.getUsername(),
+              participants.requesterBot(),
+              participants.opponentUser().getId(),
+              participants.opponentUser().getUsername(),
+              participants.opponentBot(),
+              previousMatch.getBot1(),
+              previousMatch.getBot2(),
+              now);
+
+      rematchInvitations.put(invitationId, invitation);
+      pendingRematchesByRequester.put(requester.getId(), invitation);
+
+      notificationService.sendNotification(
+          participants.opponentUser().getUsername(),
+          NotificationService.NotificationPayload.action(
+              "rematch_request",
+              requester.getUsername()
+                  + " wants a rematch with the same bots: "
+                  + resolveBotName(participants.requesterBot())
+                  + " vs "
+                  + resolveBotName(participants.opponentBot()),
+              "Accept",
+              "/matches/rematch/accept?id=" + invitationId,
+              null));
+
+      return invitationId;
+    }
+  }
+
+  public String acceptRematch(String invitationId, User acceptingUser) {
+    if (acceptingUser == null || acceptingUser.getId() == null) {
+      throw new IllegalArgumentException("User not authenticated");
+    }
+
+    LocalDateTime now = LocalDateTime.now();
+    synchronized (matchmakingMonitor) {
+      purgeExpiredState(now);
+
+      RematchInvitation invitation = rematchInvitations.get(invitationId);
+      if (invitation == null) {
+        throw new IllegalArgumentException("Rematch invitation is no longer available.");
+      }
+      if (!acceptingUser.getId().equals(invitation.opponentUserId())) {
+        throw new IllegalArgumentException("You cannot accept this rematch invitation.");
+      }
+
+      Match rematch = createRematch(invitation, now);
+      clearPendingRematch(invitation);
+
+      ReadyMatch requesterReady = buildReadyMatchForRematch(invitation, rematch, true, now);
+      ReadyMatch opponentReady = buildReadyMatchForRematch(invitation, rematch, false, now);
+      readyMatches.put(invitation.requesterUserId(), requesterReady);
+      readyMatches.put(invitation.opponentUserId(), opponentReady);
+
+      String redirectUrl = requesterReady.redirectUrl();
+      notificationService.sendNotification(
+          invitation.requesterUsername(),
+          NotificationService.NotificationPayload.redirect(
+              "rematch_ready",
+              acceptingUser.getUsername() + " accepted your rematch.",
+              redirectUrl));
+      notificationService.sendNotification(
+          acceptingUser.getUsername(),
+          NotificationService.NotificationPayload.info(
+              "rematch_ready", "Rematch accepted. Opening results...", redirectUrl));
+
+      return redirectUrl;
+    }
+  }
+
+  public boolean canRequestRematch(Long matchId, Long userId) {
+    if (matchId == null || userId == null) {
+      return false;
+    }
+
+    try {
+      Match match = resolveMatch(matchId);
+      return canOwnExactlyOneSide(match, userId);
+    } catch (IllegalArgumentException exception) {
+      return false;
+    }
+  }
+
+  public MatchmakingStatusView getMatchmakingStatus(Long userId) {
+    LocalDateTime now = LocalDateTime.now();
+
+    synchronized (matchmakingMonitor) {
+      purgeExpiredState(now);
+
+      ReadyMatch readyMatch = getValidReadyMatch(userId);
+      if (readyMatch != null) {
+        if (!isReadyForRedirect(readyMatch, now)) {
+          return MatchmakingStatusView.searching(
+              readyMatch.myBotId(),
+              readyMatch.myBotName(),
+              readyMatch.myBotElo(),
+              readyMatch.myBotDescription(),
+              0,
+              0);
+        }
+        return MatchmakingStatusView.matched(
+            readyMatch.matchId(),
+            readyMatch.redirectUrl(),
+            readyMatch.myBotId(),
+            readyMatch.myBotName(),
+            readyMatch.myBotElo(),
+            readyMatch.myBotDescription(),
+            readyMatch.opponentBotName());
+      }
+
+      RematchInvitation pendingRematch = pendingRematchesByRequester.get(userId);
+      if (pendingRematch != null) {
+        long waitSeconds =
+            Math.max(0, Duration.between(pendingRematch.createdAt(), now).getSeconds());
+        return MatchmakingStatusView.searching(
+            pendingRematch.requesterBot().getId(),
+            resolveBotName(pendingRematch.requesterBot()),
+            resolveBotElo(pendingRematch.requesterBot()),
+            resolveBotDescription(pendingRematch.requesterBot()),
+            waitSeconds,
+            1);
+      }
+
+      SearchTicket ticket = searchQueue.get(userId);
+      if (ticket == null) {
+        return MatchmakingStatusView.idle();
+      }
+
+      long waitSeconds = Math.max(0, Duration.between(ticket.createdAt(), now).getSeconds());
+      int playersSearching = searchQueue.size();
+      return MatchmakingStatusView.searching(
+          ticket.bot().getId(),
+          resolveBotName(ticket.bot()),
+          resolveBotElo(ticket.bot()),
+          resolveBotDescription(ticket.bot()),
+          waitSeconds,
+          playersSearching);
+    }
+  }
+
+  public boolean hasActiveMatchmaking(Long userId) {
+    synchronized (matchmakingMonitor) {
+      purgeExpiredState(LocalDateTime.now());
+      ReadyMatch readyMatch = getValidReadyMatch(userId);
+      return searchQueue.containsKey(userId)
+          || readyMatch != null
+          || pendingRematchesByRequester.containsKey(userId);
+    }
+  }
+
+  public void cancelMatchmaking(Long userId) {
+    synchronized (matchmakingMonitor) {
+      ReadyMatch readyMatch = getValidReadyMatch(userId);
+      if (readyMatch != null) {
+        throw new IllegalArgumentException("Match already found. Opening battle...");
+      }
+      RematchInvitation pendingRematch = pendingRematchesByRequester.remove(userId);
+      if (pendingRematch != null) {
+        rematchInvitations.remove(pendingRematch.id());
+      }
+      searchQueue.remove(userId);
+    }
+  }
+
+  public void acknowledgeReadyMatch(Long userId, Long matchId) {
+    if (matchId == null) {
+      return;
+    }
+
+    synchronized (matchmakingMonitor) {
+      ReadyMatch readyMatch = readyMatches.get(userId);
+      if (readyMatch != null && matchId.equals(readyMatch.matchId())) {
+        readyMatches.remove(userId);
+      }
+    }
   }
 
   public MatchBattleView getMatchBattleView(Long matchId) {
@@ -71,7 +302,7 @@ public class MatchService {
 
     List<MatchRoundView> rounds =
         Optional.ofNullable(match.getRounds()).orElse(List.of()).stream()
-            .sorted(java.util.Comparator.comparingInt(Round::getRoundNumber))
+            .sorted(Comparator.comparingInt(Round::getRoundNumber))
             .map(this::toRoundView)
             .toList();
 
@@ -145,6 +376,222 @@ public class MatchService {
         participationFilter == ParticipationFilter.NOT_PLAYED);
   }
 
+  @Scheduled(fixedDelay = 30000)
+  void cleanupMatchmakingState() {
+    synchronized (matchmakingMonitor) {
+      purgeExpiredState(LocalDateTime.now());
+    }
+  }
+
+  private ReadyMatch tryMatch(SearchTicket requester, LocalDateTime now) {
+    SearchTicket currentRequester = searchQueue.get(requester.userId());
+    if (currentRequester == null) {
+      return null;
+    }
+
+    Optional<SearchTicket> candidate =
+        searchQueue.values().stream()
+            .filter(ticket -> !ticket.userId().equals(currentRequester.userId()))
+            .filter(ticket -> isCandidateCompatible(currentRequester, ticket, now))
+            .min(
+                Comparator.comparingLong(
+                    ticket -> calculateCandidateScore(currentRequester, ticket, now)));
+
+    if (candidate.isEmpty()) {
+      return null;
+    }
+
+    SearchTicket opponent = candidate.get();
+    Match match = createMatch(currentRequester, opponent, now);
+
+    searchQueue.remove(currentRequester.userId());
+    searchQueue.remove(opponent.userId());
+
+    ReadyMatch requesterReady = buildReadyMatch(currentRequester, opponent, match, now);
+    ReadyMatch opponentReady = buildReadyMatch(opponent, currentRequester, match, now);
+    readyMatches.put(currentRequester.userId(), requesterReady);
+    readyMatches.put(opponent.userId(), opponentReady);
+
+    sendMatchFoundNotification(currentRequester, opponent, match.getId());
+    return requesterReady;
+  }
+
+  private Match createMatch(SearchTicket requester, SearchTicket opponent, LocalDateTime now) {
+    SearchTicket first = requester.createdAt().isAfter(opponent.createdAt()) ? opponent : requester;
+    SearchTicket second = first == requester ? opponent : requester;
+
+    Match match = new Match();
+    match.setBot1(first.bot());
+    match.setBot2(second.bot());
+    match.setTimestamp(now);
+    populateRandomResult(match);
+    return matchRepository.save(match);
+  }
+
+  private ReadyMatch buildReadyMatch(
+      SearchTicket ticket, SearchTicket opponent, Match match, LocalDateTime now) {
+    return new ReadyMatch(
+        ticket.userId(),
+        match.getId(),
+        "/matches/battle?id=" + match.getId(),
+        ticket.bot().getId(),
+        resolveBotName(ticket.bot()),
+        resolveBotElo(ticket.bot()),
+        resolveBotDescription(ticket.bot()),
+        resolveBotName(opponent.bot()),
+        now);
+  }
+
+  private void sendMatchFoundNotification(
+      SearchTicket requester, SearchTicket opponent, Long matchId) {
+    notificationService.createAndSendNotification(
+        List.of(requester.username(), opponent.username()),
+        NotificationService.NotificationPayload.info(
+            "match_found",
+            "Match found: "
+                + resolveBotName(requester.bot())
+                + " vs "
+                + resolveBotName(opponent.bot())
+                + " (#"
+                + matchId
+                + ")",
+            null));
+  }
+
+  private Match createRematch(RematchInvitation invitation, LocalDateTime now) {
+    Match match = new Match();
+    match.setBot1(invitation.originalBot1());
+    match.setBot2(invitation.originalBot2());
+    match.setTimestamp(now);
+    populateRandomResult(match);
+    return matchRepository.save(match);
+  }
+
+  private ReadyMatch buildReadyMatchForRematch(
+      RematchInvitation invitation, Match match, boolean requesterSide, LocalDateTime now) {
+    Bot myBot = requesterSide ? invitation.requesterBot() : invitation.opponentBot();
+    Bot opponentBot = requesterSide ? invitation.opponentBot() : invitation.requesterBot();
+    Long userId = requesterSide ? invitation.requesterUserId() : invitation.opponentUserId();
+    return new ReadyMatch(
+        userId,
+        match.getId(),
+        "/matches/battle?id=" + match.getId(),
+        myBot.getId(),
+        resolveBotName(myBot),
+        resolveBotElo(myBot),
+        resolveBotDescription(myBot),
+        resolveBotName(opponentBot),
+        now);
+  }
+
+  private RematchParticipants resolveRematchParticipants(Match match, Long requesterUserId) {
+    boolean requesterOwnsBot1 = isOwnedByUser(match.getBot1(), requesterUserId);
+    boolean requesterOwnsBot2 = isOwnedByUser(match.getBot2(), requesterUserId);
+    if (requesterOwnsBot1 == requesterOwnsBot2) {
+      throw new IllegalArgumentException(
+          "You can only request a rematch from one of your own matches.");
+    }
+
+    Bot requesterBot = requesterOwnsBot1 ? match.getBot1() : match.getBot2();
+    Bot opponentBot = requesterOwnsBot1 ? match.getBot2() : match.getBot1();
+    if (opponentBot == null || opponentBot.getOwnerId() == null) {
+      throw new IllegalArgumentException("The previous opponent is no longer available.");
+    }
+
+    User opponentUser = userService.getUserById(opponentBot.getOwnerId());
+    return new RematchParticipants(requesterBot, opponentBot, opponentUser);
+  }
+
+  private boolean canOwnExactlyOneSide(Match match, Long userId) {
+    return isOwnedByUser(match.getBot1(), userId) ^ isOwnedByUser(match.getBot2(), userId);
+  }
+
+  private boolean isCandidateCompatible(
+      SearchTicket requester, SearchTicket candidate, LocalDateTime now) {
+    if (requester.bot().getId() != null
+        && requester.bot().getId().equals(candidate.bot().getId())) {
+      return false;
+    }
+
+    int eloDifference = Math.abs(resolveBotElo(requester.bot()) - resolveBotElo(candidate.bot()));
+    return eloDifference <= acceptableEloGap(requester, candidate, now);
+  }
+
+  private long calculateCandidateScore(
+      SearchTicket requester, SearchTicket candidate, LocalDateTime now) {
+    long requesterWait = Math.max(0, Duration.between(requester.createdAt(), now).getSeconds());
+    long candidateWait = Math.max(0, Duration.between(candidate.createdAt(), now).getSeconds());
+    int eloDifference = Math.abs(resolveBotElo(requester.bot()) - resolveBotElo(candidate.bot()));
+
+    long waitBonus = Math.min(requesterWait + candidateWait, 180);
+    long fairnessPenalty = Math.abs(requesterWait - candidateWait);
+    return (long) eloDifference * 10L + fairnessPenalty - (waitBonus * 2L);
+  }
+
+  private int acceptableEloGap(SearchTicket requester, SearchTicket candidate, LocalDateTime now) {
+    long requesterWait = Math.max(0, Duration.between(requester.createdAt(), now).getSeconds());
+    long candidateWait = Math.max(0, Duration.between(candidate.createdAt(), now).getSeconds());
+    int requesterGap = dynamicEloGap(requesterWait);
+    int candidateGap = dynamicEloGap(candidateWait);
+    return Math.max(requesterGap, candidateGap);
+  }
+
+  private int dynamicEloGap(long waitSeconds) {
+    long steps = waitSeconds / ELO_GAP_STEP_SECONDS;
+    return BASE_ELO_GAP + (int) steps * ELO_GAP_STEP;
+  }
+
+  private void purgeExpiredState(LocalDateTime now) {
+    searchQueue
+        .entrySet()
+        .removeIf(entry -> isOlderThan(entry.getValue().createdAt(), SEARCH_EXPIRATION, now));
+    readyMatches
+        .entrySet()
+        .removeIf(entry -> isOlderThan(entry.getValue().createdAt(), READY_MATCH_EXPIRATION, now));
+    rematchInvitations.values().stream()
+        .filter(
+            invitation -> isOlderThan(invitation.createdAt(), REMATCH_INVITATION_EXPIRATION, now))
+        .toList()
+        .forEach(this::clearPendingRematch);
+  }
+
+  private boolean isOlderThan(LocalDateTime timestamp, Duration ttl, LocalDateTime now) {
+    return timestamp == null || Duration.between(timestamp, now).compareTo(ttl) > 0;
+  }
+
+  private boolean isReadyForRedirect(ReadyMatch readyMatch, LocalDateTime now) {
+    return readyMatch.createdAt() != null
+        && !Duration.between(readyMatch.createdAt(), now)
+            .minus(MIN_READY_REDIRECT_DELAY)
+            .isNegative();
+  }
+
+  private ReadyMatch getValidReadyMatch(Long userId) {
+    ReadyMatch readyMatch = readyMatches.get(userId);
+    if (readyMatch == null) {
+      return null;
+    }
+
+    if (readyMatch.matchId() == null || !matchRepository.existsById(readyMatch.matchId())) {
+      readyMatches.remove(userId);
+      return null;
+    }
+
+    return readyMatch;
+  }
+
+  private void clearPendingRematchForRequester(Long requesterUserId) {
+    RematchInvitation invitation = pendingRematchesByRequester.remove(requesterUserId);
+    if (invitation != null) {
+      rematchInvitations.remove(invitation.id());
+    }
+  }
+
+  private void clearPendingRematch(RematchInvitation invitation) {
+    rematchInvitations.remove(invitation.id());
+    pendingRematchesByRequester.remove(invitation.requesterUserId());
+  }
+
   private boolean matchesParticipationFilter(
       Long matchId, Set<Long> playedMatchIds, ParticipationFilter participationFilter) {
     boolean played = playedMatchIds.contains(matchId);
@@ -207,7 +654,7 @@ public class MatchService {
   private Bot resolveMyBot(Long userId, Long selectedBotId) {
     List<Bot> userBots = botRepository.findByOwnerId(userId);
     if (userBots.isEmpty()) {
-      throw new IllegalArgumentException("You need at least one bot to start a match.");
+      throw new IllegalArgumentException("You need at least one bot to start matchmaking.");
     }
 
     if (selectedBotId != null) {
@@ -217,37 +664,7 @@ public class MatchService {
           .orElseThrow(() -> new IllegalArgumentException("Selected bot is not available."));
     }
 
-    return userBots.stream().max(java.util.Comparator.comparingInt(Bot::getElo)).orElseThrow();
-  }
-
-  private Bot resolveOpponentBot(Long userId, Bot myBot) {
-    List<Bot> candidates =
-        botRepository.findByIsPublicTrue().stream()
-            .filter(bot -> bot.getOwnerId() != null && !bot.getOwnerId().equals(userId))
-            .filter(bot -> myBot.getId() == null || !myBot.getId().equals(bot.getId()))
-            .toList();
-
-    if (candidates.isEmpty()) {
-      candidates =
-          botRepository.findAll().stream()
-              .filter(bot -> bot.getOwnerId() != null && !bot.getOwnerId().equals(userId))
-              .filter(bot -> myBot.getId() == null || !myBot.getId().equals(bot.getId()))
-              .toList();
-    }
-
-    if (candidates.isEmpty()) {
-      throw new IllegalArgumentException("No opponents available right now.");
-    }
-
-    List<Bot> sortedByEloDistance =
-        candidates.stream()
-            .sorted(
-                java.util.Comparator.comparingInt(
-                    bot -> Math.abs(resolveBotElo(bot) - resolveBotElo(myBot))))
-            .toList();
-    int poolSize = Math.min(3, sortedByEloDistance.size());
-    int randomIndex = ThreadLocalRandom.current().nextInt(poolSize);
-    return sortedByEloDistance.get(randomIndex);
+    return userBots.stream().max(Comparator.comparingInt(Bot::getElo)).orElseThrow();
   }
 
   private void populateRandomResult(Match match) {
@@ -387,6 +804,13 @@ public class MatchService {
     return bot == null ? 0 : bot.getElo();
   }
 
+  private String resolveBotDescription(Bot bot) {
+    if (bot == null || bot.getDescription() == null || bot.getDescription().isBlank()) {
+      return "No description available for this bot yet.";
+    }
+    return bot.getDescription();
+  }
+
   private String resolveResult(Match match) {
     if (match.getResult() != null && !match.getResult().isBlank()) {
       return match.getResult();
@@ -478,7 +902,80 @@ public class MatchService {
       boolean selectedPlayed,
       boolean selectedNotPlayed) {}
 
-  public record MatchStartResult(Long matchId, String myBotName, String opponentBotName) {}
+  public record MatchStartResult(
+      boolean matched, Long matchId, String myBotName, String opponentBotName, boolean searching) {
+    static MatchStartResult matched(Long matchId, String myBotName, String opponentBotName) {
+      return new MatchStartResult(true, matchId, myBotName, opponentBotName, false);
+    }
+
+    static MatchStartResult searching(String myBotName) {
+      return new MatchStartResult(false, null, myBotName, null, true);
+    }
+  }
+
+  public record MatchmakingStatusView(
+      String state,
+      boolean searching,
+      boolean matched,
+      Long matchId,
+      String redirectUrl,
+      Long selectedBotId,
+      String selectedBotName,
+      int selectedBotElo,
+      String selectedBotDescription,
+      String opponentBotName,
+      long waitSeconds,
+      int playersSearching) {
+    static MatchmakingStatusView idle() {
+      return new MatchmakingStatusView(
+          "idle", false, false, null, null, null, null, 0, null, null, 0, 0);
+    }
+
+    static MatchmakingStatusView searching(
+        Long selectedBotId,
+        String selectedBotName,
+        int selectedBotElo,
+        String selectedBotDescription,
+        long waitSeconds,
+        int playersSearching) {
+      return new MatchmakingStatusView(
+          "searching",
+          true,
+          false,
+          null,
+          null,
+          selectedBotId,
+          selectedBotName,
+          selectedBotElo,
+          selectedBotDescription,
+          null,
+          waitSeconds,
+          playersSearching);
+    }
+
+    static MatchmakingStatusView matched(
+        Long matchId,
+        String redirectUrl,
+        Long selectedBotId,
+        String selectedBotName,
+        int selectedBotElo,
+        String selectedBotDescription,
+        String opponentBotName) {
+      return new MatchmakingStatusView(
+          "matched",
+          false,
+          true,
+          matchId,
+          redirectUrl,
+          selectedBotId,
+          selectedBotName,
+          selectedBotElo,
+          selectedBotDescription,
+          opponentBotName,
+          0,
+          0);
+    }
+  }
 
   public record MatchBattleView(
       Long matchId,
@@ -502,6 +999,34 @@ public class MatchService {
       int totalRounds,
       String playedAt,
       List<MatchRoundView> rounds) {}
+
+  private record SearchTicket(Long userId, String username, Bot bot, LocalDateTime createdAt) {}
+
+  private record ReadyMatch(
+      Long userId,
+      Long matchId,
+      String redirectUrl,
+      Long myBotId,
+      String myBotName,
+      int myBotElo,
+      String myBotDescription,
+      String opponentBotName,
+      LocalDateTime createdAt) {}
+
+  private record RematchInvitation(
+      String id,
+      Long originalMatchId,
+      Long requesterUserId,
+      String requesterUsername,
+      Bot requesterBot,
+      Long opponentUserId,
+      String opponentUsername,
+      Bot opponentBot,
+      Bot originalBot1,
+      Bot originalBot2,
+      LocalDateTime createdAt) {}
+
+  private record RematchParticipants(Bot requesterBot, Bot opponentBot, User opponentUser) {}
 
   private enum ParticipationFilter {
     ALL,

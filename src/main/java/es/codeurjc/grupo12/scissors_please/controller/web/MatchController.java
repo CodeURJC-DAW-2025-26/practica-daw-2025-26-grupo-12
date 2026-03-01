@@ -9,6 +9,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -51,10 +53,16 @@ public class MatchController {
   @GetMapping("/stats")
   public String matchStats(
       @RequestParam(name = "id", required = false) Long matchId,
+      Authentication authentication,
       Model model,
       RedirectAttributes redirectAttributes) {
     try {
       MatchService.MatchStatsView matchStats = matchService.getMatchStatsView(matchId);
+      if (isAuthenticated(authentication)) {
+        Long userId = userService.getCurrentUser(authentication).getId();
+        matchService.acknowledgeReadyMatch(userId, matchId);
+        model.addAttribute("canRematch", matchService.canRequestRematch(matchId, userId));
+      }
       model.addAttribute("stats", matchStats);
       model.addAttribute("hasRounds", !matchStats.rounds().isEmpty());
       return "match-stats";
@@ -67,10 +75,13 @@ public class MatchController {
   @GetMapping("/battle")
   public String matchBattle(
       @RequestParam(name = "id", required = false) Long matchId,
+      Authentication authentication,
       Model model,
       RedirectAttributes redirectAttributes) {
     try {
       MatchService.MatchBattleView battleView = matchService.getMatchBattleView(matchId);
+      Long userId = userService.getCurrentUser(authentication).getId();
+      matchService.acknowledgeReadyMatch(userId, matchId);
       model.addAttribute("battle", battleView);
       return "match-battle";
     } catch (IllegalArgumentException exception) {
@@ -85,8 +96,13 @@ public class MatchController {
       @RequestParam(name = "botId", required = false) Long selectedBotId,
       Model model) {
     User currentUser = userService.getCurrentUser(authentication);
+    MatchService.MatchmakingStatusView matchmakingStatus =
+        matchService.getMatchmakingStatus(currentUser.getId());
     List<Bot> userBots = botService.getBotsForUser(currentUser, true);
-    Long effectiveBotId = resolveSelectedBotId(selectedBotId, userBots);
+    Long effectiveBotId =
+        (matchmakingStatus.searching() || matchmakingStatus.matched()) && selectedBotId == null
+            ? resolveSelectedBotId(matchmakingStatus.selectedBotId(), userBots)
+            : resolveSelectedBotId(selectedBotId, userBots);
 
     List<BotOption> botOptions =
         userBots.stream()
@@ -101,6 +117,12 @@ public class MatchController {
             .toList();
     model.addAttribute("hasBots", !botOptions.isEmpty());
     model.addAttribute("botOptions", botOptions);
+    model.addAttribute("searching", matchmakingStatus.searching() || matchmakingStatus.matched());
+    model.addAttribute("waitingBotName", matchmakingStatus.selectedBotName());
+    model.addAttribute("waitingBotElo", matchmakingStatus.selectedBotElo());
+    model.addAttribute("waitingBotDescription", matchmakingStatus.selectedBotDescription());
+    model.addAttribute("waitingSeconds", matchmakingStatus.waitSeconds());
+    model.addAttribute("playersSearching", matchmakingStatus.playersSearching());
     return "match-search";
   }
 
@@ -112,14 +134,67 @@ public class MatchController {
     User currentUser = userService.getCurrentUser(authentication);
     try {
       MatchService.MatchStartResult startResult =
-          matchService.startMatchmaking(currentUser.getId(), botId);
+          matchService.startMatchmaking(currentUser.getId(), currentUser.getUsername(), botId);
+      if (startResult.matched()) {
+        return "redirect:/matches/battle?id=" + startResult.matchId();
+      }
+
       redirectAttributes.addFlashAttribute(
           "successMessage",
-          "Match found: " + startResult.myBotName() + " vs " + startResult.opponentBotName());
-      return "redirect:/matches/battle?id=" + startResult.matchId();
+          "Searching opponent for " + startResult.myBotName() + ". Waiting for another player...");
+      return "redirect:/matches/search";
     } catch (IllegalArgumentException exception) {
       redirectAttributes.addFlashAttribute("errorMessage", exception.getMessage());
       return "redirect:/matches/search";
+    }
+  }
+
+  @PostMapping("/cancel")
+  public String cancelMatchmaking(
+      Authentication authentication, RedirectAttributes redirectAttributes) {
+    Long userId = userService.getCurrentUser(authentication).getId();
+    try {
+      matchService.cancelMatchmaking(userId);
+      redirectAttributes.addFlashAttribute("successMessage", "Matchmaking cancelled.");
+    } catch (IllegalArgumentException exception) {
+      redirectAttributes.addFlashAttribute("errorMessage", exception.getMessage());
+    }
+    return "redirect:/matches/search";
+  }
+
+  @GetMapping("/search/status")
+  @ResponseBody
+  public MatchService.MatchmakingStatusView matchmakingStatus(Authentication authentication) {
+    Long userId = userService.getCurrentUser(authentication).getId();
+    return matchService.getMatchmakingStatus(userId);
+  }
+
+  @GetMapping("/rematch/request")
+  public String requestRematch(
+      Authentication authentication,
+      @RequestParam(name = "id", required = false) Long matchId,
+      RedirectAttributes redirectAttributes) {
+    User currentUser = userService.getCurrentUser(authentication);
+    try {
+      matchService.requestRematch(matchId, currentUser);
+      return "redirect:/matches/search";
+    } catch (IllegalArgumentException exception) {
+      redirectAttributes.addFlashAttribute("errorMessage", exception.getMessage());
+      return "redirect:/matches/stats?id=" + matchId;
+    }
+  }
+
+  @GetMapping("/rematch/accept")
+  public String acceptRematch(
+      Authentication authentication,
+      @RequestParam(name = "id", required = false) String invitationId,
+      RedirectAttributes redirectAttributes) {
+    User currentUser = userService.getCurrentUser(authentication);
+    try {
+      return "redirect:" + matchService.acceptRematch(invitationId, currentUser);
+    } catch (IllegalArgumentException exception) {
+      redirectAttributes.addFlashAttribute("errorMessage", exception.getMessage());
+      return "redirect:/home";
     }
   }
 
@@ -150,6 +225,12 @@ public class MatchController {
       return requestedBotId;
     }
     return userBots.get(0).getId();
+  }
+
+  private boolean isAuthenticated(Authentication authentication) {
+    return authentication != null
+        && authentication.isAuthenticated()
+        && !(authentication instanceof AnonymousAuthenticationToken);
   }
 
   private record BotOption(Long id, String name, int elo, boolean selected) {}

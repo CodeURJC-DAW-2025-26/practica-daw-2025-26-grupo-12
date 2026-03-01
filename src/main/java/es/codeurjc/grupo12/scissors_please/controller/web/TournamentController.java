@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -50,15 +51,15 @@ public class TournamentController {
   public String tournamentDetail(
       Model model, @PathVariable Long id, Authentication authentication) {
 
-    UserType type = resolveUser(userService.getCurrentUser(authentication));
-
-    if (type == null) {
-      return "error";
-    }
+    User currentUser =
+        isAuthenticated(authentication) ? userService.getCurrentUser(authentication) : null;
+    UserType type = resolveUser(currentUser);
     Optional<Tournament> tournamentOp = tournamentService.getTournamentById(id);
     if (tournamentOp.isPresent()) {
       Tournament tournament = tournamentOp.get();
       model.addAttribute("isAdmin", type == UserType.ADMIN);
+      model.addAttribute("logged", currentUser != null);
+      model.addAttribute("canJoin", currentUser != null && type != UserType.ADMIN);
       model.addAttribute("open", true);
       model.addAttribute("hasTournamentPhoto", tournament.getImage() != null);
       model.addAttribute("participants", tournament.getParticipants().size());
@@ -104,21 +105,31 @@ public class TournamentController {
   }
 
   private enum UserType {
+    GUEST,
     USER,
     ADMIN,
   }
 
   private UserType resolveUser(User user) {
+    if (user == null) {
+      return UserType.GUEST;
+    }
     if (hasRole(user, "ADMIN")) {
       return UserType.ADMIN;
     }
     if (hasRole(user, "USER")) {
       return UserType.USER;
     }
-    return null;
+    return UserType.GUEST;
   }
 
   private boolean hasRole(User user, String role) {
     return user.getRoles() != null && user.getRoles().contains(role);
+  }
+
+  private boolean isAuthenticated(Authentication authentication) {
+    return authentication != null
+        && authentication.isAuthenticated()
+        && !(authentication instanceof AnonymousAuthenticationToken);
   }
 }
