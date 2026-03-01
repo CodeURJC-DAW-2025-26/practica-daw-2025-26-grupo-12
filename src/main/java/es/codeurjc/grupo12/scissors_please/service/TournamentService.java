@@ -54,7 +54,6 @@ public class TournamentService {
       int maxPlayers,
       LocalDate registrationStart,
       LocalDate startDate,
-      String format,
       String prize) {
     Tournament tournament = new Tournament();
     tournament.setImage(image);
@@ -63,7 +62,7 @@ public class TournamentService {
     tournament.setSlots(maxPlayers);
     tournament.setStatus(startDate.isAfter(LocalDate.now()) ? "Upcoming" : "In Progress");
     tournament.setDescription(
-        buildDescription(description, maxPlayers, registrationStart, format, prize));
+        buildDescription(description, maxPlayers, registrationStart, prize));
     return tournamentRepository.save(tournament);
   }
 
@@ -472,13 +471,11 @@ public class TournamentService {
       String description,
       int maxPlayers,
       LocalDate registrationStart,
-      String format,
       String prize) {
     List<String> sections = new ArrayList<>();
     if (description != null && !description.isBlank()) {
       sections.add(description);
     }
-    sections.add("Format: " + format);
     sections.add("Max players: " + maxPlayers);
     sections.add("Registration opens: " + registrationStart);
     if (prize != null && !prize.isBlank()) {

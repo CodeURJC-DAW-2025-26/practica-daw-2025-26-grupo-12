@@ -147,8 +147,7 @@ class TournamentServiceTests {
     tournament.setSlots(slots);
     tournament.setStartDate(startDate);
     tournament.setDescription(
-        "Test tournament - Format: Single Elimination - Registration opens: "
-            + registrationOpenDate);
+        "Test tournament");
     tournament.setParticipants(new ArrayList<>(participants));
     tournament.setMatches(new ArrayList<>());
     return tournamentRepository.save(tournament);
