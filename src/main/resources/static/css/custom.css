@@ -582,3 +582,13 @@ body.centered-layout .card.centered-layout-card--wide {
         opacity: 0.75;
     }
 }
+
+.user-avatar-sm {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+}
+
+.object-fit-cover {
+    object-fit: cover;
+}

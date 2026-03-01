@@ -428,6 +428,7 @@ public class AdminController {
     boolean isSameUser = user.getId() != null && user.getId().equals(currentAdmin.getId());
     boolean adminRole = userService.isAdmin(user);
     boolean manageable = !isSameUser && !adminRole;
+    boolean hasImage = user.getImage() != null;
     return new AdminUserView(
         user.getId(),
         user.getUsername(),
@@ -435,7 +436,16 @@ public class AdminController {
         resolveProvider(user.getOauthProvider()),
         user.isBlocked(),
         manageable,
-        adminRole);
+        adminRole,
+        hasImage,
+        resolveInitial(user.getUsername()));
+  }
+
+  private String resolveInitial(String value) {
+    if (value == null || value.isBlank()) {
+      return "?";
+    }
+    return value.substring(0, 1).toUpperCase();
   }
 
   private String resolveProvider(String oauthProvider) {
@@ -514,5 +524,7 @@ public class AdminController {
       String provider,
       boolean blocked,
       boolean manageable,
-      boolean adminRole) {}
+      boolean adminRole,
+      boolean hasImage,
+      String initial) {}
 }

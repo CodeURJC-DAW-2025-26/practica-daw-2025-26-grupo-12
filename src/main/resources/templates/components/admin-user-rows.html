@@ -1,6 +1,20 @@
 {{#users}}
 <tr>
-    <td class="ps-3 fw-semibold">{{username}}</td>
+    <td class="ps-3">
+        <div class="user-avatar-sm">
+            {{#hasImage}}
+            <img src="/user-images/{{id}}" alt="{{username}}"
+                class="rounded-circle object-fit-cover w-100 h-100 shadow-sm border border-secondary border-opacity-25">
+            {{/hasImage}}
+            {{^hasImage}}
+            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold w-100 h-100 shadow-sm border border-secondary border-opacity-25"
+                style="font-size: 1.1rem;">
+                {{initial}}
+            </div>
+            {{/hasImage}}
+        </div>
+    </td>
+    <td class="fw-semibold">{{username}}</td>
     <td>{{email}}</td>
     <td>{{provider}}</td>
     <td>
@@ -39,7 +53,7 @@
 {{/users}}
 {{^users}}
 <tr>
-    <td class="ps-3 text-secondary" colspan="5">
+    <td class="ps-3 text-secondary" colspan="6">
         No users found. Try another search term.
     </td>
 </tr>
