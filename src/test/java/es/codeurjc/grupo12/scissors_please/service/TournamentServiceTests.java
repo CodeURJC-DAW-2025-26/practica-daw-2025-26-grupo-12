@@ -146,8 +146,7 @@ class TournamentServiceTests {
     tournament.setStatus("Upcoming");
     tournament.setSlots(slots);
     tournament.setStartDate(startDate);
-    tournament.setDescription(
-        "Test tournament");
+    tournament.setDescription("Test tournament");
     tournament.setParticipants(new ArrayList<>(participants));
     tournament.setMatches(new ArrayList<>());
     return tournamentRepository.save(tournament);

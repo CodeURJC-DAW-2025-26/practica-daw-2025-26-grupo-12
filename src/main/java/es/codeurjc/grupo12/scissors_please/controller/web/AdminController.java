@@ -147,13 +147,7 @@ public class AdminController {
     if (!errors.isEmpty()) {
       model.addAttribute("errorMessages", errors);
       setCreateFormModel(
-          model,
-          title,
-          maxPlayersRaw,
-          registrationStartRaw,
-          startDateRaw,
-          description,
-          prize);
+          model, title, maxPlayersRaw, registrationStartRaw, startDateRaw, description, prize);
       return "admin-tournament-create";
     }
     Image tournamentImage = null;
@@ -170,13 +164,7 @@ public class AdminController {
     }
 
     tournamentService.createTournament(
-        title,
-        tournamentImage,
-        description,
-        maxPlayers,
-        registrationStart,
-        startDate,
-        prize);
+        title, tournamentImage, description, maxPlayers, registrationStart, startDate, prize);
     return "redirect:/admin/tournaments/create?success";
   }
 

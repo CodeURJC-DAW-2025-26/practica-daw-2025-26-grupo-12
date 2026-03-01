@@ -61,8 +61,7 @@ public class TournamentService {
     tournament.setStartDate(startDate);
     tournament.setSlots(maxPlayers);
     tournament.setStatus(startDate.isAfter(LocalDate.now()) ? "Upcoming" : "In Progress");
-    tournament.setDescription(
-        buildDescription(description, maxPlayers, registrationStart, prize));
+    tournament.setDescription(buildDescription(description, maxPlayers, registrationStart, prize));
     return tournamentRepository.save(tournament);
   }
 
@@ -468,10 +467,7 @@ public class TournamentService {
   }
 
   private String buildDescription(
-      String description,
-      int maxPlayers,
-      LocalDate registrationStart,
-      String prize) {
+      String description, int maxPlayers, LocalDate registrationStart, String prize) {
     List<String> sections = new ArrayList<>();
     if (description != null && !description.isBlank()) {
       sections.add(description);
