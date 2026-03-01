@@ -44,7 +44,6 @@ public class Bot {
   @Column(name = "owner_id", nullable = false)
   private Long ownerId;
 
-  // Just for testing
   private int wins;
   private int losses;
   private int draws;
