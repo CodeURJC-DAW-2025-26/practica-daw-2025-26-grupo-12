@@ -30,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class BotController {
 
   private static final String REDIRECT_MY_BOTS = "redirect:/bots/my-bots";
+  private static final String REDIRECT_ADMIN_BOTS = "redirect:/admin/bots";
 
   @Autowired private BotService botService;
   @Autowired private UserService userService;
@@ -85,9 +86,7 @@ public class BotController {
   @GetMapping("/create")
   public String createBot(Authentication authentication) {
     User currentUser = userService.getCurrentUser(authentication);
-    if (isAdmin(currentUser)) {
-      return REDIRECT_MY_BOTS;
-    }
+    if (isAdmin(currentUser)) return REDIRECT_ADMIN_BOTS;
     return "bot-create";
   }
 
@@ -103,9 +102,7 @@ public class BotController {
       Model model,
       Authentication authentication) {
     User currentUser = userService.getCurrentUser(authentication);
-    if (isAdmin(currentUser)) {
-      return REDIRECT_MY_BOTS;
-    }
+    if (isAdmin(currentUser)) return REDIRECT_ADMIN_BOTS;
     Bot bot = new Bot();
     bot.setName(name);
     bot.setDescription(description);
@@ -126,6 +123,7 @@ public class BotController {
     Bot bot = botService.getBotById(id).orElseThrow();
     if (canManageBot(currentUser, bot)) {
       botService.deleteBot(id);
+      if (isAdmin(currentUser)) return REDIRECT_ADMIN_BOTS;
       return REDIRECT_MY_BOTS;
     }
     model.addAttribute("errorMessage", ErrorConstants.ACCESS_DENIED);
@@ -184,7 +182,9 @@ public class BotController {
       bot.setTags(parseTags(tags));
       botService.updateBot(bot, currentUser);
 
-      return "redirect:/bots/my-bots";
+      if (isAdmin(currentUser)) return REDIRECT_ADMIN_BOTS;
+
+      return REDIRECT_MY_BOTS;
     }
     model.addAttribute("errorMessage", ErrorConstants.BOT_NOT_FOUND);
     model.addAttribute("errorCode", ErrorConstants.NOT_FOUND_CODE);
