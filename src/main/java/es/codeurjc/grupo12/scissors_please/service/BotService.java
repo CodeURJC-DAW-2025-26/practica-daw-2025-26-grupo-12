@@ -99,11 +99,13 @@ public class BotService {
 
   // This methods are identical but conceptually they might be different in a near
   // future
-  public Bot updateBot(Bot bot, User owner) {
-    if (owner.getRoles() != null && owner.getRoles().contains("ADMIN")) {
-      throw new IllegalArgumentException("Admin users cannot own bots");
+  public Bot updateBot(Bot bot, User actingUser) {
+    if (bot.getOwnerId() == null) {
+      if (actingUser.getRoles() != null && actingUser.getRoles().contains("ADMIN")) {
+        throw new IllegalArgumentException("Admin users cannot own bots");
+      }
+      bot.setOwnerId(requireOwnerId(actingUser));
     }
-    bot.setOwnerId(requireOwnerId(owner));
     return botRepository.save(bot);
   }
 

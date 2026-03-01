@@ -120,23 +120,30 @@ public class BotController {
   }
 
   @PostMapping("/{id}/delete")
-  public String deleteBot(@PathVariable Long id, Authentication authentication) {
+  public String deleteBot(@PathVariable Long id, Authentication authentication, Model model) {
     User currentUser = userService.getCurrentUser(authentication);
     Bot bot = botService.getBotById(id).orElseThrow();
     if (canManageBot(currentUser, bot)) {
       botService.deleteBot(id);
+      return REDIRECT_MY_BOTS;
     }
-    return REDIRECT_MY_BOTS;
+    model.addAttribute("errorMessage", ErrorConstants.ACCESS_DENIED);
+    return "error";
   }
 
   @GetMapping("/edit/{id}")
-  public String editBot(@PathVariable Long id, Model model) {
+  public String editBot(@PathVariable Long id, Authentication authentication, Model model) {
+    User currentUser = userService.getCurrentUser(authentication);
     Optional<Bot> opBot = botService.getBotById(id);
     if (opBot.isPresent()) {
       Bot bot = opBot.get();
-      model.addAttribute("initial", bot.getName().charAt(0));
-      model.addAttribute("bot", bot);
-      return "bot-edit";
+      if (canManageBot(currentUser, bot)) {
+        model.addAttribute("initial", bot.getName().charAt(0));
+        model.addAttribute("bot", bot);
+        return "bot-edit";
+      }
+      model.addAttribute("errorMessage", ErrorConstants.ACCESS_DENIED);
+      return "error";
     }
     model.addAttribute("errorMessage", ErrorConstants.BOT_NOT_FOUND);
     return "error";
@@ -155,9 +162,14 @@ public class BotController {
       Model model,
       Authentication authentication) {
 
+    User currentUser = userService.getCurrentUser(authentication);
     Optional<Bot> opBot = botService.getBotById(id);
     if (opBot.isPresent()) {
       Bot bot = opBot.get();
+      if (!canManageBot(currentUser, bot)) {
+        model.addAttribute("errorMessage", ErrorConstants.ACCESS_DENIED);
+        return "error";
+      }
       bot.setName(name);
       bot.setDescription(description != null ? description : "");
       bot.setCode(code != null ? code : "");
@@ -167,7 +179,6 @@ public class BotController {
       }
       bot.setPublic(isPublic);
       bot.setTags(parseTags(tags));
-      User currentUser = userService.getCurrentUser(authentication);
       botService.updateBot(bot, currentUser);
 
       return "redirect:/bots/my-bots";
@@ -177,13 +188,19 @@ public class BotController {
   }
 
   @GetMapping("/detail/{id}")
-  public String botDetail(@PathVariable Long id, Model model) {
+  public String botDetail(@PathVariable Long id, Authentication authentication, Model model) {
+    User currentUser = null;
+    if (authentication != null) {
+      currentUser = userService.getCurrentUser(authentication);
+    }
     Optional<Bot> opBot = botService.getBotById(id);
     if (opBot.isEmpty()) {
       model.addAttribute("errorMessage", ErrorConstants.BOT_NOT_FOUND);
       return "error";
     }
     Bot bot = opBot.get();
+
+    boolean canManage = (currentUser != null) && canManageBot(currentUser, bot);
 
     byte[] pieChartBytes =
         chartService.generateResultsPieChart(bot.getWins(), bot.getLosses(), bot.getDraws());
@@ -213,6 +230,9 @@ public class BotController {
     model.addAttribute("startElo", startElo);
     model.addAttribute("eloTrend", (trend >= 0 ? "+" : "") + trend);
     model.addAttribute("trendClass", trend >= 0 ? "bg-success" : "bg-danger");
+
+    model.addAttribute("canManage", canManage);
+    model.addAttribute("showCode", bot.isPublic() || canManage);
 
     return "bot-detail";
   }
