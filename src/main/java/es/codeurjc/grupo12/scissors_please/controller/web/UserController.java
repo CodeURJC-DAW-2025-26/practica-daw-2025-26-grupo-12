@@ -53,8 +53,8 @@ public class UserController {
         (int) userMatches.stream().filter(match -> "win".equalsIgnoreCase(match.result())).count();
     int winRate = userMatches.isEmpty() ? 0 : (int) Math.round((wins * 100.0) / userMatches.size());
 
-    model.addAttribute("userId", currentUser.getId());
-    model.addAttribute("hasProfilePhoto", currentUser.getImage() != null);
+    model.addAttribute("profileUserId", targetUser.getId());
+    model.addAttribute("hasProfilePhoto", targetUser.getImage() != null);
     model.addAttribute("profileHeading", ownProfile ? "My Profile" : "User Profile");
     model.addAttribute("profileInitial", resolveInitial(targetUser.getUsername()));
     model.addAttribute("profileName", targetUser.getUsername());

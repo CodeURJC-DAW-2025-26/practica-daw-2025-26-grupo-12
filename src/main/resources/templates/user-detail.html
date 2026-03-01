@@ -18,7 +18,7 @@
                     <div class="position-relative mx-auto" style="width: 100px; height: 100px;">
                         <div id="profilePreview">
                             {{#hasProfilePhoto}}
-                            <img src="/user-images/{{userId}}" class="rounded-circle border border-primary"
+                            <img src="/user-images/{{profileUserId}}" class="rounded-circle border border-primary"
                                 style="width: 100px; height: 100px; object-fit: cover;"
                                 onerror="this.parentElement.innerHTML='<div class=&quot;rounded-circle bg-primary d-flex align-items-center justify-content-center text-white display-4 fw-bold&quot; style=&quot;width: 100px; height: 100px;&quot;>{{profileInitial}}</div>'">
                             {{/hasProfilePhoto}}

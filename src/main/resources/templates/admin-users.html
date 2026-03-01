@@ -97,6 +97,31 @@
         </div>
     </div>
 
+    <div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-secondary-bg border border-secondary">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="deleteUserModalLabel">Confirm user deletion</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="delete-user-message" class="mb-0 text-secondary"></p>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-outline-muted" data-bs-dismiss="modal">Cancel</button>
+                    <form id="delete-user-form" method="post">
+                        <input type="hidden" name="_csrf" value="{{_csrf.token}}">
+                        <input id="delete-user-query" type="hidden" name="q" value="">
+                        <input id="delete-user-status" type="hidden" name="status" value="{{statusFilter}}">
+                        <button id="delete-user-submit" type="submit" class="btn btn-danger">Delete user</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{> components/scripts}}
     <script src="/js/admin-users.js"></script>
 </body>

@@ -1,11 +1,19 @@
 package es.codeurjc.grupo12.scissors_please.service;
 
+import es.codeurjc.grupo12.scissors_please.model.Bot;
+import es.codeurjc.grupo12.scissors_please.model.Match;
+import es.codeurjc.grupo12.scissors_please.model.Tournament;
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.repository.BotRepository;
+import es.codeurjc.grupo12.scissors_please.repository.MatchRepository;
+import es.codeurjc.grupo12.scissors_please.repository.TournamentRepository;
 import es.codeurjc.grupo12.scissors_please.repository.UserRepository;
 import es.codeurjc.grupo12.scissors_please.repository.UserRepository.MonthlyUserCount;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -23,6 +31,8 @@ public class UserService {
   @Autowired private PasswordEncoder passwordEncoder;
 
   @Autowired private BotRepository botRepository;
+  @Autowired private MatchRepository matchRepository;
+  @Autowired private TournamentRepository tournamentRepository;
 
   public User registerUser(String username, String email, String password) {
     if (userRepository.findByUsername(username).isPresent()) {
@@ -73,9 +83,23 @@ public class UserService {
     return userRepository.countUsersByMonth();
   }
 
-  public void deleteUser(Long id) {
-    log.info("Deleting user with id: {}", id);
-    userRepository.deleteById(id);
+  public User deleteUser(Long userId, User actingAdmin) {
+    if (actingAdmin == null || actingAdmin.getId() == null || !isAdmin(actingAdmin)) {
+      throw new IllegalArgumentException("An admin account is required to delete users");
+    }
+
+    User targetUser = getUserById(userId);
+    if (targetUser.getId().equals(actingAdmin.getId())) {
+      throw new IllegalArgumentException("You cannot delete your own account");
+    }
+    if (isAdmin(targetUser)) {
+      throw new IllegalArgumentException("Admin accounts cannot be deleted");
+    }
+
+    removeOwnedResources(targetUser);
+    userRepository.delete(targetUser);
+    log.info("Deleted user: {}", targetUser.getUsername());
+    return targetUser;
   }
 
   @Transactional(readOnly = true)
@@ -170,6 +194,101 @@ public class UserService {
     User updatedUser = userRepository.save(targetUser);
     log.info("Updated blocked status for user {}: {}", updatedUser.getUsername(), blocked);
     return updatedUser;
+  }
+
+  private void removeOwnedResources(User user) {
+    if (user.getId() == null) {
+      throw new IllegalArgumentException("User ID is required");
+    }
+
+    List<Bot> ownedBots = new ArrayList<>(botRepository.findByOwnerId(user.getId()));
+    if (ownedBots.isEmpty()) {
+      return;
+    }
+
+    Set<Long> ownedBotIds = collectBotIds(ownedBots);
+    List<Match> matchesToDelete =
+        new ArrayList<>(
+            matchRepository.findDistinctByBot1OwnerIdOrBot2OwnerIdOrderByTimestampDesc(
+                user.getId(), user.getId()));
+    Set<Long> matchIdsToDelete = collectMatchIds(matchesToDelete);
+
+    List<Tournament> tournamentsToUpdate = new ArrayList<>();
+    for (Tournament tournament : tournamentRepository.findAll()) {
+      if (pruneTournamentReferences(tournament, ownedBotIds, matchIdsToDelete)) {
+        tournamentsToUpdate.add(tournament);
+      }
+    }
+
+    if (!tournamentsToUpdate.isEmpty()) {
+      tournamentRepository.saveAll(tournamentsToUpdate);
+      tournamentRepository.flush();
+    }
+
+    if (!matchesToDelete.isEmpty()) {
+      matchRepository.deleteAll(matchesToDelete);
+      matchRepository.flush();
+    }
+
+    botRepository.deleteAll(ownedBots);
+    botRepository.flush();
+  }
+
+  private Set<Long> collectBotIds(List<Bot> bots) {
+    Set<Long> botIds = new LinkedHashSet<>();
+    for (Bot bot : bots) {
+      if (bot != null && bot.getId() != null) {
+        botIds.add(bot.getId());
+      }
+    }
+    return botIds;
+  }
+
+  private Set<Long> collectMatchIds(List<Match> matches) {
+    Set<Long> matchIds = new LinkedHashSet<>();
+    for (Match match : matches) {
+      if (match != null && match.getId() != null) {
+        matchIds.add(match.getId());
+      }
+    }
+    return matchIds;
+  }
+
+  private boolean pruneTournamentReferences(
+      Tournament tournament, Set<Long> ownedBotIds, Set<Long> matchIdsToDelete) {
+    boolean updated = false;
+
+    List<Bot> participants = tournament.getParticipants();
+    if (participants != null) {
+      List<Bot> filteredParticipants = new ArrayList<>();
+      for (Bot participant : participants) {
+        if (participant == null
+            || participant.getId() == null
+            || !ownedBotIds.contains(participant.getId())) {
+          filteredParticipants.add(participant);
+        }
+      }
+      if (filteredParticipants.size() != participants.size()) {
+        tournament.setParticipants(filteredParticipants);
+        updated = true;
+      }
+    }
+
+    List<Match> matches = tournament.getMatches();
+    if (matches != null) {
+      List<Match> filteredMatches = new ArrayList<>();
+      for (Match match : matches) {
+        if (match == null || match.getId() == null || !matchIdsToDelete.contains(match.getId())) {
+          filteredMatches.add(match);
+        }
+      }
+      if (filteredMatches.size() != matches.size()) {
+        tournament.setMatches(filteredMatches);
+        updated = true;
+      }
+    }
+
+    return updated;
   }
 
   @Transactional(readOnly = true)

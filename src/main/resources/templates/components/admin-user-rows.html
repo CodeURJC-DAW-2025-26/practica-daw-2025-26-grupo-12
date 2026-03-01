@@ -26,28 +26,38 @@
         {{/blocked}}
     </td>
     <td class="text-end pe-3">
-        {{#manageable}}
-        {{#blocked}}
-        <button type="button" class="btn btn-outline-muted btn-sm user-lock-toggle-btn" data-bs-toggle="modal"
-            data-bs-target="#toggleUserLockModal" data-user-id="{{id}}" data-user-name="{{username}}"
-            data-user-blocked="{{blocked}}" data-search-query="{{searchQuery}}" data-status-filter="{{statusFilter}}">
-            Unblock
-        </button>
-        {{/blocked}}
-        {{^blocked}}
-        <button type="button" class="btn btn-outline-danger btn-sm user-lock-toggle-btn" data-bs-toggle="modal"
-            data-bs-target="#toggleUserLockModal" data-user-id="{{id}}" data-user-name="{{username}}"
-            data-user-blocked="{{blocked}}" data-search-query="{{searchQuery}}" data-status-filter="{{statusFilter}}">
-            Block
-        </button>
-        {{/blocked}}
-        {{/manageable}}
-        {{^manageable}}
-        <span class="badge bg-secondary">
-            {{#adminRole}}Admin{{/adminRole}}
-            {{^adminRole}}Current user{{/adminRole}}
-        </span>
-        {{/manageable}}
+        <div class="d-flex justify-content-end gap-2 flex-wrap">
+            <a href="{{profileHref}}" class="btn btn-outline-muted btn-sm">View</a>
+            {{#manageable}}
+            {{#blocked}}
+            <button type="button" class="btn btn-outline-muted btn-sm user-lock-toggle-btn" data-bs-toggle="modal"
+                data-bs-target="#toggleUserLockModal" data-user-id="{{id}}" data-user-name="{{username}}"
+                data-user-blocked="{{blocked}}" data-search-query="{{searchQuery}}"
+                data-status-filter="{{statusFilter}}">
+                Unblock
+            </button>
+            {{/blocked}}
+            {{^blocked}}
+            <button type="button" class="btn btn-outline-danger btn-sm user-lock-toggle-btn" data-bs-toggle="modal"
+                data-bs-target="#toggleUserLockModal" data-user-id="{{id}}" data-user-name="{{username}}"
+                data-user-blocked="{{blocked}}" data-search-query="{{searchQuery}}"
+                data-status-filter="{{statusFilter}}">
+                Block
+            </button>
+            {{/blocked}}
+            <button type="button" class="btn btn-danger btn-sm user-delete-btn" data-bs-toggle="modal"
+                data-bs-target="#deleteUserModal" data-user-id="{{id}}" data-user-name="{{username}}"
+                data-search-query="{{searchQuery}}" data-status-filter="{{statusFilter}}">
+                Delete
+            </button>
+            {{/manageable}}
+            {{^manageable}}
+            <span class="badge bg-secondary">
+                {{#adminRole}}Admin{{/adminRole}}
+                {{^adminRole}}Current user{{/adminRole}}
+            </span>
+            {{/manageable}}
+        </div>
     </td>
 </tr>
 {{/users}}

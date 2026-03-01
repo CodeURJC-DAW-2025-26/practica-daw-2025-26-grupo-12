@@ -146,47 +146,73 @@
       });
     }
 
-    const modal = document.getElementById("toggleUserLockModal");
-    if (!modal) {
-      return;
+    const lockModal = document.getElementById("toggleUserLockModal");
+    if (lockModal) {
+      const form = document.getElementById("toggle-user-lock-form");
+      const queryInput = document.getElementById("toggle-user-lock-query");
+      const statusInput = document.getElementById("toggle-user-lock-status");
+      const message = document.getElementById("toggle-user-lock-message");
+      const submitButton = document.getElementById("toggle-user-lock-submit");
+
+      lockModal.addEventListener("show.bs.modal", (event) => {
+        const trigger = event.relatedTarget;
+        if (!trigger) {
+          return;
+        }
+
+        const userId = trigger.getAttribute("data-user-id");
+        const userName = trigger.getAttribute("data-user-name");
+        const userBlocked = trigger.getAttribute("data-user-blocked") === "true";
+        const searchQuery = trigger.getAttribute("data-search-query") || "";
+        const statusFilter = trigger.getAttribute("data-status-filter") || "all";
+        const action = userBlocked ? "unblock" : "block";
+
+        form.action = `/admin/users/${userId}/${action}`;
+        queryInput.value = searchQuery;
+        if (statusInput) {
+          statusInput.value = statusFilter;
+        }
+
+        if (userBlocked) {
+          message.textContent = `Do you want to unblock ${userName}? The user will be able to log in again.`;
+          submitButton.textContent = "Unblock user";
+          submitButton.classList.remove("btn-danger");
+          submitButton.classList.add("btn-primary");
+        } else {
+          message.textContent = `Do you want to block ${userName}? All active sessions will be closed immediately.`;
+          submitButton.textContent = "Block user";
+          submitButton.classList.remove("btn-primary");
+          submitButton.classList.add("btn-danger");
+        }
+      });
     }
 
-    const form = document.getElementById("toggle-user-lock-form");
-    const queryInput = document.getElementById("toggle-user-lock-query");
-    const statusInput = document.getElementById("toggle-user-lock-status");
-    const message = document.getElementById("toggle-user-lock-message");
-    const submitButton = document.getElementById("toggle-user-lock-submit");
+    const deleteModal = document.getElementById("deleteUserModal");
+    if (deleteModal) {
+      const form = document.getElementById("delete-user-form");
+      const queryInput = document.getElementById("delete-user-query");
+      const statusInput = document.getElementById("delete-user-status");
+      const message = document.getElementById("delete-user-message");
 
-    modal.addEventListener("show.bs.modal", (event) => {
-      const trigger = event.relatedTarget;
-      if (!trigger) {
-        return;
-      }
+      deleteModal.addEventListener("show.bs.modal", (event) => {
+        const trigger = event.relatedTarget;
+        if (!trigger) {
+          return;
+        }
 
-      const userId = trigger.getAttribute("data-user-id");
-      const userName = trigger.getAttribute("data-user-name");
-      const userBlocked = trigger.getAttribute("data-user-blocked") === "true";
-      const searchQuery = trigger.getAttribute("data-search-query") || "";
-      const statusFilter = trigger.getAttribute("data-status-filter") || "all";
-      const action = userBlocked ? "unblock" : "block";
+        const userId = trigger.getAttribute("data-user-id");
+        const userName = trigger.getAttribute("data-user-name");
+        const searchQuery = trigger.getAttribute("data-search-query") || "";
+        const statusFilter = trigger.getAttribute("data-status-filter") || "all";
 
-      form.action = `/admin/users/${userId}/${action}`;
-      queryInput.value = searchQuery;
-      if (statusInput) {
-        statusInput.value = statusFilter;
-      }
+        form.action = `/admin/users/${userId}/delete`;
+        queryInput.value = searchQuery;
+        if (statusInput) {
+          statusInput.value = statusFilter;
+        }
 
-      if (userBlocked) {
-        message.textContent = `Do you want to unblock ${userName}? The user will be able to log in again.`;
-        submitButton.textContent = "Unblock user";
-        submitButton.classList.remove("btn-danger");
-        submitButton.classList.add("btn-primary");
-      } else {
-        message.textContent = `Do you want to block ${userName}? All active sessions will be closed immediately.`;
-        submitButton.textContent = "Block user";
-        submitButton.classList.remove("btn-primary");
-        submitButton.classList.add("btn-danger");
-      }
-    });
+        message.textContent = `Do you want to delete ${userName}? This will also remove the user's bots and match history.`;
+      });
+    }
   });
 })();

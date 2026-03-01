@@ -371,6 +371,27 @@ public class AdminController {
     return updateBlockedStatus(id, query, status, authentication, redirectAttributes, false);
   }
 
+  @PostMapping("/users/{id}/delete")
+  public String deleteUser(
+      @PathVariable Long id,
+      @RequestParam(name = "q", required = false) String query,
+      @RequestParam(name = "status", required = false) String status,
+      Authentication authentication,
+      RedirectAttributes redirectAttributes) {
+    String normalizedQuery = normalizeQuery(query);
+    UserStatusFilter statusFilter = UserStatusFilter.fromValue(status);
+    try {
+      User currentAdmin = userService.getCurrentUser(authentication);
+      User deletedUser = userService.deleteUser(id, currentAdmin);
+      activeSessionService.expireSessions(deletedUser);
+      redirectAttributes.addFlashAttribute(
+          "successMessage", "User " + deletedUser.getUsername() + " was deleted successfully.");
+    } catch (IllegalArgumentException exception) {
+      redirectAttributes.addFlashAttribute("errorMessage", exception.getMessage());
+    }
+    return buildUsersRedirect(normalizedQuery, statusFilter);
+  }
+
   private String updateBlockedStatus(
       Long userId,
       String query,
@@ -406,6 +427,9 @@ public class AdminController {
     boolean adminRole = userService.isAdmin(user);
     boolean manageable = !isSameUser && !adminRole;
     boolean hasImage = user.getImage() != null;
+    String profileHref =
+        "/user/profile?user="
+            + UriUtils.encodeQueryParam(user.getUsername(), StandardCharsets.UTF_8);
     return new AdminUserView(
         user.getId(),
         user.getUsername(),
@@ -415,7 +439,8 @@ public class AdminController {
         manageable,
         adminRole,
         hasImage,
-        resolveInitial(user.getUsername()));
+        resolveInitial(user.getUsername()),
+        profileHref);
   }
 
   private String resolveInitial(String value) {
@@ -503,5 +528,6 @@ public class AdminController {
       boolean manageable,
       boolean adminRole,
       boolean hasImage,
-      String initial) {}
+      String initial,
+      String profileHref) {}
 }
