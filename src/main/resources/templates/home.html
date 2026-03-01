@@ -238,19 +238,36 @@
               {{#hasMyTournaments}}
               <div class="list-group list-group-flush">
                 {{#myTournaments}}
-                <div class="list-group-item d-flex flex-column flex-md-row justify-content-between gap-2">
-                  <div>
-                    <h3 class="h6 fw-bold mb-1">{{name}}</h3>
-                    <p class="text-secondary mb-0">{{date}} • <span class="badge {{statusBadgeClass}}">{{status}}</span>
-                    </p>
+                <div class="list-group-item d-flex gap-3">
+                  {{#hasImage}}
+                  <div
+                    class="rounded overflow-hidden bg-light d-flex align-items-center justify-content-center flex-shrink-0"
+                    style="width: 48px; height: 48px;">
+                    <img src="/tournament-images/{{id}}" alt="{{name}}" class="w-100 h-100 object-fit-cover">
                   </div>
-                  <div class="d-flex align-items-start">
-                    {{#actionDisabled}}
-                    <button class="btn btn-outline-muted btn-sm" disabled>{{actionLabel}}</button>
-                    {{/actionDisabled}}
-                    {{^actionDisabled}}
-                    <a href="{{actionHref}}" class="btn btn-outline-muted btn-sm">{{actionLabel}}</a>
-                    {{/actionDisabled}}
+                  {{/hasImage}}
+                  {{^hasImage}}
+                  <div
+                    class="rounded bg-primary d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0"
+                    style="width: 48px; height: 48px;">
+                    T
+                  </div>
+                  {{/hasImage}}
+                  <div class="d-flex flex-column flex-md-row justify-content-between flex-grow-1 gap-2">
+                    <div>
+                      <h3 class="h6 fw-bold mb-1">{{name}}</h3>
+                      <p class="text-secondary mb-0">{{date}} • <span
+                          class="badge {{statusBadgeClass}}">{{status}}</span>
+                      </p>
+                    </div>
+                    <div class="d-flex align-items-start">
+                      {{#actionDisabled}}
+                      <button class="btn btn-outline-muted btn-sm" disabled>{{actionLabel}}</button>
+                      {{/actionDisabled}}
+                      {{^actionDisabled}}
+                      <a href="{{actionHref}}" class="btn btn-outline-muted btn-sm">{{actionLabel}}</a>
+                      {{/actionDisabled}}
+                    </div>
                   </div>
                 </div>
                 {{/myTournaments}}

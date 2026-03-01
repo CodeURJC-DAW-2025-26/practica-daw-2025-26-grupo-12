@@ -111,6 +111,7 @@ public class BotController {
     bot.setDescription(description);
     if (!handleImageUpload(bot, image)) {
       model.addAttribute("errorMessage", ErrorConstants.IMAGE_ERROR_UPLOAD);
+      model.addAttribute("errorCode", ErrorConstants.BAD_REQUEST_CODE);
       return "error";
     }
     bot.setPublic(isPublic);
@@ -146,6 +147,7 @@ public class BotController {
       return "error";
     }
     model.addAttribute("errorMessage", ErrorConstants.BOT_NOT_FOUND);
+    model.addAttribute("errorCode", ErrorConstants.NOT_FOUND_CODE);
     return "error";
   }
 
@@ -175,6 +177,7 @@ public class BotController {
       bot.setCode(code != null ? code : "");
       if (!handleImageUpload(bot, image)) {
         model.addAttribute("errorMessage", ErrorConstants.IMAGE_ERROR_UPLOAD);
+        model.addAttribute("errorCode", ErrorConstants.BOT_NOT_FOUND);
         return "error";
       }
       bot.setPublic(isPublic);
@@ -184,6 +187,7 @@ public class BotController {
       return "redirect:/bots/my-bots";
     }
     model.addAttribute("errorMessage", ErrorConstants.BOT_NOT_FOUND);
+    model.addAttribute("errorCode", ErrorConstants.NOT_FOUND_CODE);
     return "error";
   }
 
@@ -196,6 +200,7 @@ public class BotController {
     Optional<Bot> opBot = botService.getBotById(id);
     if (opBot.isEmpty()) {
       model.addAttribute("errorMessage", ErrorConstants.BOT_NOT_FOUND);
+      model.addAttribute("errorCode", ErrorConstants.NOT_FOUND_CODE);
       return "error";
     }
     Bot bot = opBot.get();

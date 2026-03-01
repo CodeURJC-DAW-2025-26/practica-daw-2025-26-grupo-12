@@ -25,6 +25,19 @@ public class UserService {
   @Autowired private BotRepository botRepository;
 
   public User registerUser(String username, String email, String password) {
+    if (username == null || username.isBlank()) {
+      throw new IllegalArgumentException("Username cannot be empty");
+    }
+    if (email == null || email.isBlank()) {
+      throw new IllegalArgumentException("Email cannot be empty");
+    }
+    if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+      throw new IllegalArgumentException("Invalid email format");
+    }
+    if (password == null || password.isBlank()) {
+      throw new IllegalArgumentException("Password cannot be empty");
+    }
+
     if (userRepository.findByUsername(username).isPresent()) {
       log.warn("Registration attempt with existing username: {}", username);
       throw new IllegalArgumentException("Username already exists");
