@@ -47,18 +47,12 @@ public class AdminController {
   private static final int MAX_TITLE_LENGTH = 80;
   private static final int MAX_DESCRIPTION_LENGTH = 500;
   private static final int MAX_PRIZE_LENGTH = 120;
-  @Autowired
-  private TournamentService tournamentService;
-  @Autowired
-  private ChartService chartService;
-  @Autowired
-  private TournamentAutomationService tournamentAutomationService;
-  @Autowired
-  private UserService userService;
-  @Autowired
-  private ActiveSessionService activeSessionService;
-  @Autowired
-  private BotService botService;
+  @Autowired private TournamentService tournamentService;
+  @Autowired private ChartService chartService;
+  @Autowired private TournamentAutomationService tournamentAutomationService;
+  @Autowired private UserService userService;
+  @Autowired private ActiveSessionService activeSessionService;
+  @Autowired private BotService botService;
 
   @GetMapping("/tournaments")
   public String adminTournaments(
@@ -130,7 +124,8 @@ public class AdminController {
     }
 
     Integer maxPlayers = parseMaxPlayers(maxPlayersRaw, errors);
-    LocalDate registrationStart = parseDate("Registration opens date is invalid.", registrationStartRaw, errors);
+    LocalDate registrationStart =
+        parseDate("Registration opens date is invalid.", registrationStartRaw, errors);
     LocalDate startDate = parseDate("Start date is invalid.", startDateRaw, errors);
 
     if (description.length() > MAX_DESCRIPTION_LENGTH) {
@@ -233,14 +228,15 @@ public class AdminController {
       @RequestParam(required = false) Long id,
       @RequestParam(required = false) String runResult,
       Model model) {
-    TournamentService.AdminTournamentDetail tournament = tournamentService.getAdminTournamentDetail(id);
+    TournamentService.AdminTournamentDetail tournament =
+        tournamentService.getAdminTournamentDetail(id);
     model.addAttribute("tournament", tournament);
     if (runResult != null) {
       switch (runResult) {
         case "executed" ->
-          model.addAttribute("successMessage", "Tournament executed successfully.");
+            model.addAttribute("successMessage", "Tournament executed successfully.");
         case "not-upcoming" ->
-          model.addAttribute("errorMessage", "Only upcoming tournaments can be executed now.");
+            model.addAttribute("errorMessage", "Only upcoming tournaments can be executed now.");
         case "not-found" -> model.addAttribute("errorMessage", "Tournament not found.");
         default -> {
           // no-op
@@ -258,11 +254,12 @@ public class AdminController {
 
   @PostMapping("/tournaments/{id}/run-now")
   public String runTournamentNow(@org.springframework.web.bind.annotation.PathVariable Long id) {
-    TournamentAutomationService.RunNowResult result = tournamentAutomationService.runTournamentNow(id);
+    TournamentAutomationService.RunNowResult result =
+        tournamentAutomationService.runTournamentNow(id);
     return switch (result) {
       case EXECUTED -> "redirect:/admin/tournaments/detail?id=" + id + "&runResult=executed";
       case NOT_UPCOMING ->
-        "redirect:/admin/tournaments/detail?id=" + id + "&runResult=not-upcoming";
+          "redirect:/admin/tournaments/detail?id=" + id + "&runResult=not-upcoming";
       case NOT_FOUND -> "redirect:/admin/tournaments/detail?runResult=not-found";
     };
   }
@@ -415,9 +412,10 @@ public class AdminController {
     UserStatusFilter statusFilter = UserStatusFilter.fromValue(status);
     try {
       User currentAdmin = userService.getCurrentUser(authentication);
-      User targetUser = blocked
-          ? userService.blockUser(userId, currentAdmin)
-          : userService.unblockUser(userId, currentAdmin);
+      User targetUser =
+          blocked
+              ? userService.blockUser(userId, currentAdmin)
+              : userService.unblockUser(userId, currentAdmin);
 
       if (blocked) {
         activeSessionService.expireSessions(targetUser);
@@ -479,9 +477,10 @@ public class AdminController {
 
   private void populateUsersSearchModel(
       Model model, String searchQuery, UserStatusFilter statusFilter, User currentAdmin) {
-    List<AdminUserView> users = userService.searchUsers(searchQuery, statusFilter).stream()
-        .map(user -> toAdminUserView(user, currentAdmin))
-        .toList();
+    List<AdminUserView> users =
+        userService.searchUsers(searchQuery, statusFilter).stream()
+            .map(user -> toAdminUserView(user, currentAdmin))
+            .toList();
 
     model.addAttribute("searchQuery", searchQuery);
     model.addAttribute("statusFilter", statusFilter.value());
@@ -544,6 +543,5 @@ public class AdminController {
       boolean manageable,
       boolean adminRole,
       boolean hasImage,
-      String initial) {
-  }
+      String initial) {}
 }
