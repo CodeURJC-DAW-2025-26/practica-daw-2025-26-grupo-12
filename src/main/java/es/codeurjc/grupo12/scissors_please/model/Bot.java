@@ -10,6 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.OrderColumn;
 import jakarta.persistence.PrePersist;
@@ -37,8 +38,11 @@ public class Bot {
 
   private String name;
   private String description;
+
+  @Lob
+  @Column(columnDefinition = "TEXT")
   private String code = "";
-  private String language;
+
   private boolean isPublic;
   private int elo;
 
