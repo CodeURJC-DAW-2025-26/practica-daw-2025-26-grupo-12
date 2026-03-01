@@ -20,13 +20,16 @@
         </div>
 
         <div class="row g-4">
-            <div class="col-12">
+            <div class="col-lg-8">
                 <div class="card p-4">
                     <h2 class="h5 fw-bold mb-3">Edit Scheduled Tournament</h2>
                     
-                    <form action="/admin/tournaments/edit/{{tournament.id}}" method="post">
+                    <form action="/admin/tournaments/edit/{{tournament.id}}" method="post" enctype="multipart/form-data">
+                        <input type="hidden" name="_csrf" value="{{_csrf.token}}"/>
+                        
+                        <input type="file" id="realTournamentImage" name="image" accept="image/*" class="d-none">
+
                         <div class="row g-3">
-                            
                             <div class="col-md-6">
                                 <label for="name" class="form-label text-uppercase small">Tournament Name</label>
                                 <input type="text" class="form-control form-control-lg" id="name" name="name" 
@@ -48,9 +51,9 @@
                             <div class="col-md-6">
                                 <label for="status" class="form-label text-uppercase small">Status</label>
                                 <select class="form-select form-control-lg" id="status" name="status">
-                                    <option value="Scheduled" {{#tournament.status}}selected{{/tournament.status}}>Scheduled</option>
-                                    <option value="Registration Open">Registration Open</option>
-                                    <option value="Completed">Completed</option>
+                                    <option value="Scheduled" {{#isScheduled}}selected{{/isScheduled}}>Scheduled</option>
+                                    <option value="Registration Open" {{#isOpen}}selected{{/isOpen}}>Registration Open</option>
+                                    <option value="Completed" {{#isCompleted}}selected{{/isCompleted}}>Completed</option>
                                 </select>
                             </div>
 
@@ -64,13 +67,70 @@
                                 <button type="reset" class="btn btn-outline-muted">Reset</button>
                             </div>
                         </div>
-                        <input type="hidden" name="_csrf" value="{{_csrf.token}}"/>
                     </form>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card p-4 text-center">
+                    <h2 class="h5 fw-bold mb-3">Tournament Image</h2>
+                    <div class="mx-auto" style="width: 120px; height: 120px;">
+                        {{#hasTournamentPhoto}}
+                            <img src="/tournament-images/{{tournament.id}}" 
+                                 class="rounded border border-primary w-100 h-100" 
+                                 style="object-fit: cover;" id="previewImg">
+                        {{/hasTournamentPhoto}}
+                        {{^hasTournamentPhoto}}
+                            <div class="rounded bg-primary d-flex align-items-center justify-content-center text-white display-6 fw-bold w-100 h-100">
+                                T
+                            </div>
+                        {{/hasTournamentPhoto}}
+                    </div>
+                    <div id="fileNameDisplay" class="text-info small mt-2"></div>
+                    <button class="btn btn-outline-muted btn-sm mt-3" data-bs-toggle="modal" data-bs-target="#tournamentImageModal">
+                        <span id="btnText">Change Image</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="tournamentImageModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark border border-secondary">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title">Upload Tournament Photo</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input class="form-control" type="file" id="modalFileInput" accept="image/*">
+                    <div class="form-text text-secondary">PNG, JPG max 2MB.</div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-outline-muted" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" id="confirmImageBtn" class="btn btn-primary" data-bs-dismiss="modal">Confirm Selection</button>
                 </div>
             </div>
         </div>
     </div>
 
     {{> components/scripts}}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const modalInput = document.getElementById('modalFileInput');
+            const realInput = document.getElementById('realTournamentImage');
+            const confirmBtn = document.getElementById('confirmImageBtn');
+            const fileNameDisplay = document.getElementById('fileNameDisplay');
+
+            confirmBtn.addEventListener('click', function () {
+                if (modalInput.files.length > 0) {
+                    realInput.files = modalInput.files;
+                    const fileName = modalInput.files[0].name;
+                    fileNameDisplay.textContent = "To upload: " + fileName;
+                }
+            });
+        });
+    </script>
 </body>
 </html>

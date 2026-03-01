@@ -1,5 +1,6 @@
 package es.codeurjc.grupo12.scissors_please.service;
 
+import es.codeurjc.grupo12.scissors_please.model.Image;
 import es.codeurjc.grupo12.scissors_please.model.Tournament;
 import es.codeurjc.grupo12.scissors_please.repository.TournamentRepository;
 import java.time.LocalDate;
@@ -33,6 +34,7 @@ public class TournamentService {
 
   public Tournament createTournament(
       String title,
+      Image image,
       String description,
       int maxPlayers,
       LocalDate registrationStart,
@@ -40,6 +42,7 @@ public class TournamentService {
       String format,
       String prize) {
     Tournament tournament = new Tournament();
+    tournament.setImage(image);
     tournament.setName(title);
     tournament.setStartDate(startDate);
     tournament.setSlots(maxPlayers);

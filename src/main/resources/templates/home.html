@@ -258,8 +258,21 @@
     <div class="container">
       <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4">
         <div class="d-flex align-items-center gap-3">
-          <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold"
-            style="width: 64px; height: 64px; font-size: 1.5rem;">{{currentUserInitial}}</div>
+
+          <div class="position-relative" style="width: 64px; height: 64px;">
+            {{#hasProfilePhoto}}
+            <img src="/user-images/{{profileId}}" class="rounded-circle border border-primary"
+              style="width: 64px; height: 64px; object-fit: cover;"
+              onerror="this.parentElement.innerHTML='<div class=&quot;rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold&quot; style=&quot;width: 64px; height: 64px; font-size: 1.5rem;&quot;>{{currentUserInitial}}</div>'">
+            {{/hasProfilePhoto}}
+
+            {{^hasProfilePhoto}}
+            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold"
+              style="width: 64px; height: 64px; font-size: 1.5rem;">
+              {{currentUserInitial}}
+            </div>
+            {{/hasProfilePhoto}}
+          </div>
           <div>
             <h1 class="h3 fw-bold mb-1">{{currentUsername}}</h1>
             <p class="text-secondary mb-0">
@@ -360,7 +373,8 @@
                 <div class="list-group-item d-flex flex-column flex-md-row justify-content-between gap-2">
                   <div>
                     <h3 class="h6 fw-bold mb-1">{{name}}</h3>
-                    <p class="text-secondary mb-0">{{date}} • <span class="badge {{statusBadgeClass}}">{{status}}</span></p>
+                    <p class="text-secondary mb-0">{{date}} • <span class="badge {{statusBadgeClass}}">{{status}}</span>
+                    </p>
                   </div>
                   <div class="d-flex align-items-start">
                     {{#actionDisabled}}
