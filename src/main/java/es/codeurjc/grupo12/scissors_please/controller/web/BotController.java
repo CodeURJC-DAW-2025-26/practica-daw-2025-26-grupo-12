@@ -39,7 +39,7 @@ public class BotController {
   @GetMapping("/my-bots")
   public String myBotsPage(
       @RequestParam(required = false) String user,
-      @PageableDefault(size = 5) Pageable pageable,
+      @PageableDefault(size = 10) Pageable pageable,
       Authentication authentication,
       Model model) {
     User currentUser = userService.getCurrentUser(authentication);
@@ -65,7 +65,7 @@ public class BotController {
   @GetMapping("/my-bots/page")
   public String myBotsChunk(
       @RequestParam(required = false) String user,
-      @PageableDefault(size = 5) Pageable pageable,
+      @PageableDefault(size = 10) Pageable pageable,
       Authentication authentication,
       Model model) {
     User currentUser = userService.getCurrentUser(authentication);
