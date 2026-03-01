@@ -60,20 +60,6 @@
                     <div class="description-text text-light-emphasis leading-relaxed mb-4">
                         {{tournament.description}}
                     </div>
-
-                    {{#isAdmin}}
-                    <div class="mt-auto pt-4 border-top border-secondary">
-                        <h4 class="h6 fw-bold mb-3 text-secondary uppercase small">Management Actions</h4>
-                        <div class="d-flex flex-wrap gap-2">
-                            <a href="/admin/tournaments/bracket/{{tournament.id}}" class="btn btn-sm btn-outline-info">
-                                <i class="bi bi-diagram-3 me-1"></i> Generate Bracket
-                            </a>
-                            <a href="/admin/tournaments/export/{{tournament.id}}" class="btn btn-sm btn-outline-light">
-                                <i class="bi bi-download me-1"></i> Export Roster (CSV)
-                            </a>
-                        </div>
-                    </div>
-                    {{/isAdmin}}
                 </div>
             </div>
 

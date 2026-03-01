@@ -20,7 +20,7 @@
 
         <div class="row g-4">
             <div class="col-lg-8">
-                <div class="card p-4 shadow-sm">
+                <div class="card p-4 shadow-sm border-secondary">
                     <h2 class="h5 fw-bold mb-3">Bot Settings</h2>
                     <form id="botEditForm" method="post" action="/bots/edit/{{bot.id}}" enctype="multipart/form-data">
                         <input type="hidden" name="_csrf" value="{{_csrf.token}}">
@@ -51,9 +51,9 @@
                                     rows="4">{{bot.description}}</textarea>
                             </div>
                             <div class="col-12">
-                                <label for="code" class="form-label text-uppercase small">Bot Code</label>
-                                <textarea class="form-control form-control-lg font-monospace" id="code" name="code"
-                                    rows="8">{{bot.code}}</textarea>
+                                <label for="code" class="form-label text-uppercase small">Bot Code (Python)</label>
+                                <textarea class="form-control form-control-lg font-monospace text-info bg-black"
+                                    id="code" name="code" rows="12">{{bot.code}}</textarea>
                             </div>
 
                             <div class="col-12 d-flex flex-wrap align-items-center gap-3 mt-4">
@@ -67,13 +67,26 @@
             </div>
 
             <div class="col-lg-4">
+                <div class="card p-4 shadow-sm mb-4 border-primary bg-primary bg-opacity-10">
+                    <h2 class="h5 fw-bold mb-3">Import Script</h2>
+                    <p class="text-secondary small mb-3">Upload a <b>.py</b> file to replace the current code in the
+                        editor.</p>
+                    <input type="file" id="importPythonFile" accept=".py" class="d-none">
+                    <button type="button" class="btn btn-primary w-100 fw-bold"
+                        onclick="document.getElementById('importPythonFile').click()">
+                        Upload .py File
+                    </button>
+                    <div id="importFeedback" class="text-success small mt-2 d-none">
+                        <i class="bi bi-check-lg"></i> Code imported successfully!
+                    </div>
+                </div>
+
                 <div class="card p-4 text-center shadow-sm">
                     <h2 class="h5 fw-bold mb-3 text-start">Bot Image</h2>
-
                     <div id="imageDisplayContainer" class="mx-auto my-3" style="width: 120px; height: 120px;">
                         {{#bot.image}}
                         <img id="mainImagePreview" src="/bot-images/{{bot.id}}"
-                            class="rounded-circle border border-primary border-3 w-100 h-100"
+                            class="rounded-circle border border-primary border-3 w-100 h-100 shadow"
                             style="object-fit: cover;">
                         {{/bot.image}}
 
@@ -83,18 +96,13 @@
                             {{initial}}
                         </div>
                         <img id="mainImagePreview" src="#"
-                            class="rounded-circle border border-primary border-3 w-100 h-100 d-none"
+                            class="rounded-circle border border-primary border-3 w-100 h-100 d-none shadow"
                             style="object-fit: cover;">
                         {{/bot.image}}
                     </div>
-
                     <div id="fileNameDisplay" class="text-info small mb-2"></div>
-
                     <button class="btn btn-outline-muted btn-sm w-100" data-bs-toggle="modal"
-                        data-bs-target="#botImageModal">
-                        <span id="btnText">Change Avatar</span>
-                    </button>
-                    <p class="text-secondary small mt-3 mb-0">Click to upload a new profile picture for your bot.</p>
+                        data-bs-target="#botImageModal">Change Avatar</button>
                 </div>
             </div>
         </div>
@@ -115,7 +123,6 @@
                             style="max-height: 200px; background: transparent;">
                     </div>
                     <input class="form-control" type="file" id="modalFileInput" accept="image/*">
-                    <div class="form-text text-secondary mt-2">PNG, JPG up to 2MB.</div>
                 </div>
                 <div class="modal-footer border-secondary">
                     <button type="button" class="btn btn-outline-muted" data-bs-dismiss="modal">Cancel</button>
@@ -128,11 +135,26 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            const importInput = document.getElementById('importPythonFile');
+            const codeEditor = document.getElementById('code');
+            const feedback = document.getElementById('importFeedback');
+
+            importInput.addEventListener('change', function () {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        codeEditor.value = e.target.result; 
+                        feedback.classList.remove('d-none');
+                        setTimeout(() => feedback.classList.add('d-none'), 3000);
+                    };
+                    reader.readAsText(file);
+                }
+            });
             const modalInput = document.getElementById('modalFileInput');
             const realInput = document.getElementById('realBotImage');
             const confirmBtn = document.getElementById('confirmImageBtn');
             const fileNameDisplay = document.getElementById('fileNameDisplay');
-            const btnText = document.getElementById('btnText');
             const modalPreview = document.getElementById('modalImagePreview');
             const mainPreview = document.getElementById('mainImagePreview');
             const initialsCircle = document.getElementById('initialsCircle');

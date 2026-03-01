@@ -110,9 +110,8 @@ public class UserController {
   }
 
   private ProfileBotView toProfileBotView(Bot bot) {
-    String strategy =
-        bot.getLanguage() == null || bot.getLanguage().isBlank() ? "N/A" : bot.getLanguage();
-    return new ProfileBotView(bot.getName(), strategy, bot.getElo(), bot.isPublic());
+
+    return new ProfileBotView(bot.getName(), bot.getElo(), bot.isPublic());
   }
 
   private String resolveInitial(String value) {
@@ -169,5 +168,5 @@ public class UserController {
     }
   }
 
-  private record ProfileBotView(String name, String strategy, int elo, boolean publicBot) {}
+  private record ProfileBotView(String name, int elo, boolean publicBot) {}
 }
