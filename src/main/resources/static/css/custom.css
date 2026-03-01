@@ -162,6 +162,10 @@ body.centered-layout .card {
     max-width: 380px;
 }
 
+body.centered-layout .card.centered-layout-card--wide {
+    max-width: 720px;
+}
+
 .glass-card {
     background: rgba(30, 41, 59, 0.7);
     backdrop-filter: blur(20px);
@@ -241,11 +245,6 @@ body.centered-layout .card {
 
 .divider:not(:empty)::after {
     margin-left: .5em;
-}
-
-.match-search-card {
-    max-width: 720px;
-    width: 100%;
 }
 
 .searching-stage {
