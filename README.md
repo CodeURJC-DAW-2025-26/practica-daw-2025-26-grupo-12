@@ -314,7 +314,11 @@ Diagramas que muestran cómo se navega entre las diferentes páginas de la aplic
 
 #### **Diagrama de Navegación**
 
-Solo si ha cambiado.
+Diagrama actualizado de navegación de la aplicación para la Práctica 1:
+
+![Diagrama de Navegación P1](images/P1/P1-Scissors%20Please%20-%20Diagrama%20de%20Navegacion.svg)
+
+> Este diagrama resume los principales flujos entre páginas públicas, de usuario autenticado y de administración, incluyendo los recorridos de matchmaking, gestión de bots y torneos.
 
 #### **Capturas de Pantalla Actualizadas**
 
@@ -336,16 +340,31 @@ Solo si han cambiado.
    cd practica-daw-2025-26-grupo-12
    ```
 
-2. **Configuración del entorno**
-   Deberás configurar `mysql` para que la aplicación pueda conectarse a la base de datos. Para ello, deberás crear una base de datos llamada `scissors_please` y configurar la contraseña del usuario `root` en el archivo `src/main/resources/application-mysql.properties`.
+2. **Configurar las variables de entorno**
+   - Crear un archivo `.env` en la raíz del proyecto a partir de `.env.example`.
+   - Revisar ese archivo y ajustar, si es necesario, la conexión a MySQL y la contraseña del keystore SSL.
 
-   Crear un archivo `.env` en la raíz del proyecto con valores reales para las variables especificadas en `.env.example`.
-   
-3. **Compilar e iniciar la aplicación**
+3. **Generar el keystore para HTTPS**
    ```bash
-   mvn clean install
-   mvn spring-boot:run -Dspring-boot.run.profiles=https,mysql -Pmysql
+   chmod +x src/main/resources/generate-keystore.sh
+   ./src/main/resources/generate-keystore.sh
    ```
+   Este script genera el archivo `src/main/resources/keystore.p12`. Si ya existe, no lo sobrescribe.
+
+4. **Crear la base de datos en MySQL**
+   - Crear una base de datos vacía llamada `scissors_please`.
+   - Verificar que las credenciales configuradas en `.env` tienen acceso a esa base de datos.
+
+5. **Compilar e iniciar la aplicación**
+   - La aplicación debe arrancarse con los perfiles `mysql` y `https` activos para usar MySQL como base de datos y habilitar el certificado generado.
+   ```bash
+   ./mvnw clean install
+   ./mvnw spring-boot:run -Dspring-boot.run.profiles=mysql,https
+   ```
+
+6. **Acceder a la aplicación**
+   - Aplicación: `https://localhost:8443`
+   - Redirección HTTP: `http://localhost:8080`
 
 #### **Credenciales de prueba**
 - **Usuario Admin**: usuario: `admin`, contraseña: `admin123`
@@ -355,17 +374,17 @@ Solo si han cambiado.
 
 Diagrama mostrando las entidades, sus campos y relaciones:
 
-![Diagrama Entidad-Relación](images/database-diagram.png)
+![Diagrama Entidad-Relación P1](images/P1/P1-Scissors%20Please%20-%20Entidades%20de%20Base%20de%20Datos.svg)
 
-> [Descripción opcional: Ej: "El diagrama muestra las 4 entidades principales: Usuario, Producto, Pedido y Categoría, con sus respectivos atributos y relaciones 1:N y N:M."]
+> El diagrama refleja las entidades persistentes principales de la aplicación (`User`, `Bot`, `Tournament`, `Match`, `Round` e `Image`), junto con sus relaciones y tablas auxiliares generadas por JPA.
 
 ### **Diagrama de Clases y Templates**
 
 Diagrama de clases de la aplicación con diferenciación por colores o secciones:
 
-![Diagrama de Clases](images/classes-diagram.png)
+![Diagrama de Capas P1](images/P1/P1-Scissors%20Please%20-%20Diagrama%20de%20Capas.svg)
 
-> [Descripción opcional del diagrama y relaciones principales]
+> El diagrama organiza la aplicación por capas (`Presentación`, `Lógica de Negocio`, `Persistencia`, `Dominio` e `Infraestructura`) y muestra las dependencias principales entre controladores, servicios, repositorios y entidades.
 
 ### **Participación de Miembros en la Práctica 1**
 
