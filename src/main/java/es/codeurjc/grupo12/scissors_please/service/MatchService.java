@@ -16,11 +16,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -389,36 +387,38 @@ public class MatchService {
         .findDistinctByBot1OwnerIdOrBot2OwnerIdOrderByTimestampDesc(userId, userId)
         .stream()
         .limit(safeLimit)
-        .map(match -> toUserMatchItem(match, userId, true))
+        .map(match -> toUserMatchItem(match, userId))
         .toList();
   }
 
   public UserRecentMatchSection getUserRecentMatchSection(
       Long userId, String participationFilterParam) {
-    ParticipationFilter participationFilter =
-        ParticipationFilter.fromParam(participationFilterParam);
+    ParticipationFilter filter = ParticipationFilter.fromParam(participationFilterParam);
 
-    List<Match> allMatches = matchRepository.findAllByOrderByTimestampDesc();
-    Set<Long> playedMatchIds =
-        matchRepository
-            .findDistinctByBot1OwnerIdOrBot2OwnerIdOrderByTimestampDesc(userId, userId)
-            .stream()
-            .map(Match::getId)
-            .collect(Collectors.toSet());
+    List<Match> source =
+        (filter == ParticipationFilter.PLAYED)
+            ? matchRepository.findDistinctByBot1OwnerIdOrBot2OwnerIdOrderByTimestampDesc(
+                userId, userId)
+            : matchRepository.findAllByOrderByTimestampDesc().stream().limit(100).toList();
 
     List<UserMatchItem> matches =
-        allMatches.stream()
-            .filter(
-                match ->
-                    matchesParticipationFilter(match.getId(), playedMatchIds, participationFilter))
-            .map(match -> toUserMatchItem(match, userId, playedMatchIds.contains(match.getId())))
+        source.stream()
+            .filter(m -> matchesFilter(m, userId, filter))
+            .map(m -> toUserMatchItem(m, userId))
             .toList();
 
     return new UserRecentMatchSection(
         matches,
-        participationFilter == ParticipationFilter.ALL,
-        participationFilter == ParticipationFilter.PLAYED,
-        participationFilter == ParticipationFilter.NOT_PLAYED);
+        filter == ParticipationFilter.ALL,
+        filter == ParticipationFilter.PLAYED,
+        filter == ParticipationFilter.NOT_PLAYED);
+  }
+
+  private boolean matchesFilter(Match m, Long userId, ParticipationFilter filter) {
+    boolean played = isOwnedByUser(m.getBot1(), userId) || isOwnedByUser(m.getBot2(), userId);
+    return filter == ParticipationFilter.ALL
+        || (filter == ParticipationFilter.PLAYED && played)
+        || (filter == ParticipationFilter.NOT_PLAYED && !played);
   }
 
   @Scheduled(fixedDelay = 30000)
@@ -637,88 +637,42 @@ public class MatchService {
     pendingRematchesByRequester.remove(invitation.requesterUserId());
   }
 
-  private boolean matchesParticipationFilter(
-      Long matchId, Set<Long> playedMatchIds, ParticipationFilter participationFilter) {
-    boolean played = playedMatchIds.contains(matchId);
-    if (participationFilter == ParticipationFilter.PLAYED) {
-      return played;
-    }
-    if (participationFilter == ParticipationFilter.NOT_PLAYED) {
-      return !played;
-    }
-    return true;
-  }
+  private UserMatchItem toUserMatchItem(Match match, Long userId) {
+    Bot b1 = match.getBot1();
+    Bot b2 = match.getBot2();
+    boolean played = isOwnedByUser(b1, userId) || isOwnedByUser(b2, userId);
 
-  private UserMatchItem toUserMatchItem(Match match, Long userId, boolean played) {
-    Bot bot1 = match.getBot1();
-    Bot bot2 = match.getBot2();
+    boolean swap = played && !isOwnedByUser(b1, userId) && isOwnedByUser(b2, userId);
+    Bot myBot = swap ? b2 : b1;
+    Bot oppBot = swap ? b1 : b2;
 
-    Long myBotId = null;
-    String myBotName = "-";
-    Long opponentBotId = null;
-    String opponentName = resolveBotName(bot1) + " vs " + resolveBotName(bot2);
-    String opponentOwnerName = "Unknown";
-    String result = resolveResult(match);
+    String myName = resolveBotName(myBot);
+    String oppName = resolveBotName(oppBot);
+    String oppOwner =
+        (oppBot != null && oppBot.getOwnerId() != null)
+            ? userService.getUserById(oppBot.getOwnerId()).getUsername()
+            : "Unknown";
 
-    if (played) {
-      boolean bot1Owned = isOwnedByUser(bot1, userId);
-      boolean bot2Owned = isOwnedByUser(bot2, userId);
-      if (bot1Owned && !bot2Owned) {
-        myBotId = bot1.getId();
-        myBotName = resolveBotName(bot1);
-        opponentBotId = bot2 != null ? bot2.getId() : null;
-        opponentName = resolveBotName(bot2);
-        opponentOwnerName =
-            bot2 != null && bot2.getOwnerId() != null
-                ? userService.getUserById(bot2.getOwnerId()).getUsername()
-                : "Unknown";
-        result = resolveResultFromScores(match.getBot1Score(), match.getBot2Score());
-      } else if (!bot1Owned && bot2Owned) {
-        myBotId = bot2.getId();
-        myBotName = resolveBotName(bot2);
-        opponentBotId = bot1 != null ? bot1.getId() : null;
-        opponentName = resolveBotName(bot1);
-        opponentOwnerName =
-            bot1 != null && bot1.getOwnerId() != null
-                ? userService.getUserById(bot1.getOwnerId()).getUsername()
-                : "Unknown";
-        result = resolveResultFromScores(match.getBot2Score(), match.getBot1Score());
-      } else if (bot1Owned) {
-        myBotId = bot1.getId();
-        myBotName = resolveBotName(bot1);
-        opponentBotId = bot2 != null ? bot2.getId() : null;
-        opponentName = resolveBotName(bot2);
-        opponentOwnerName =
-            bot2 != null && bot2.getOwnerId() != null
-                ? userService.getUserById(bot2.getOwnerId()).getUsername()
-                : "Unknown";
-        result = resolveResult(match);
-      }
-    }
-
-    String participationLabel = played ? "Played" : "Not Played";
-    String participationBadgeClass =
-        played ? "bg-secondary" : "bg-dark border border-secondary text-secondary";
+    String res =
+        (played && swap)
+            ? resolveResultFromScores(match.getBot2Score(), match.getBot1Score())
+            : resolveResult(match);
 
     return new UserMatchItem(
         match.getId(),
-        myBotId,
-        myBotName,
-        bot1 != null && isOwnedByUser(bot1, userId)
-            ? (bot1.getImage() != null)
-            : (bot2 != null && isOwnedByUser(bot2, userId) && bot2.getImage() != null),
-        opponentBotId,
-        opponentName,
-        opponentOwnerName,
-        bot1 != null && !isOwnedByUser(bot1, userId)
-            ? (bot1.getImage() != null)
-            : (bot2 != null && !isOwnedByUser(bot2, userId) && bot2.getImage() != null),
-        result,
-        resolveBadgeClass(result),
+        (myBot != null) ? myBot.getId() : null,
+        myName,
+        (myBot != null && myBot.isHasImage()),
+        (oppBot != null) ? oppBot.getId() : null,
+        oppName,
+        oppOwner,
+        (oppBot != null && oppBot.isHasImage()),
+        res,
+        resolveBadgeClass(res),
         formatDate(match.getTimestamp()),
         played,
-        participationLabel,
-        participationBadgeClass,
+        played ? "Played" : "Not Played",
+        played ? "bg-secondary" : "bg-dark border border-secondary text-secondary",
         "/matches/stats?id=" + match.getId());
   }
 
@@ -1160,8 +1114,8 @@ public class MatchService {
     NOT_PLAYED;
 
     static ParticipationFilter fromParam(String value) {
-      if (value == null) {
-        return ALL;
+      if (value == null || value.isBlank()) {
+        return PLAYED;
       }
 
       String normalizedValue = value.trim().toLowerCase(Locale.ROOT);
@@ -1171,7 +1125,10 @@ public class MatchService {
       if ("not-played".equals(normalizedValue) || "not_played".equals(normalizedValue)) {
         return NOT_PLAYED;
       }
-      return ALL;
+      if ("all".equals(normalizedValue)) {
+        return ALL;
+      }
+      return PLAYED;
     }
   }
 }
