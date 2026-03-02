@@ -422,6 +422,27 @@ public class AdminController {
     model.addAttribute("size", Math.max(pageable.getPageSize(), 1));
   }
 
+  @PostMapping("/users/{id}/delete")
+  public String deleteUser(
+      @PathVariable Long id,
+      @RequestParam(name = "q", required = false) String query,
+      @RequestParam(required = false) String status,
+      Authentication authentication,
+      RedirectAttributes redirectAttributes) {
+    String normalizedQuery = normalizeQuery(query);
+    UserStatusFilter statusFilter = UserStatusFilter.fromValue(status);
+    try {
+      User currentAdmin = userService.getCurrentUser(authentication);
+      User targetUser = userService.deleteUser(id, currentAdmin);
+      activeSessionService.expireSessions(targetUser);
+      redirectAttributes.addFlashAttribute(
+          "successMessage", "User " + targetUser.getUsername() + " was deleted successfully.");
+    } catch (IllegalArgumentException exception) {
+      redirectAttributes.addFlashAttribute("errorMessage", exception.getMessage());
+    }
+    return buildUsersRedirect(normalizedQuery, statusFilter);
+  }
+
   private String updateBlockedStatus(
       Long userId,
       String query,

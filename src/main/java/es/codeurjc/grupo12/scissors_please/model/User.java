@@ -58,6 +58,9 @@ public class User {
   @Column(nullable = false, columnDefinition = "boolean default false")
   private boolean blocked = false;
 
+  @Column(name = "delete_date")
+  private LocalDateTime deleteDate;
+
   @ElementCollection(fetch = jakarta.persistence.FetchType.EAGER)
   @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
   @Column(name = "role")

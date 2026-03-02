@@ -33,18 +33,23 @@
             {{#manageable}}
             {{#blocked}}
             <button type="button" class="btn btn-outline-muted btn-sm user-lock-toggle-btn" data-bs-toggle="modal"
-                data-bs-target="#toggleUserLockModal" data-user-id="{{id}}" data-user-name="{{username}}"
+                data-bs-target="#userActionModal" data-user-id="{{id}}" data-user-name="{{username}}"
                 data-user-blocked="{{blocked}}" data-search-query="{{searchQuery}}" data-status-filter="{{statusFilter}}">
                 Unblock
             </button>
             {{/blocked}}
             {{^blocked}}
             <button type="button" class="btn btn-outline-danger btn-sm user-lock-toggle-btn" data-bs-toggle="modal"
-                data-bs-target="#toggleUserLockModal" data-user-id="{{id}}" data-user-name="{{username}}"
+                data-bs-target="#userActionModal" data-user-id="{{id}}" data-user-name="{{username}}"
                 data-user-blocked="{{blocked}}" data-search-query="{{searchQuery}}" data-status-filter="{{statusFilter}}">
                 Block
             </button>
             {{/blocked}}
+            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
+                data-bs-target="#userActionModal" data-user-id="{{id}}" data-user-name="{{username}}"
+                data-user-action="delete" data-search-query="{{searchQuery}}" data-status-filter="{{statusFilter}}">
+                Delete
+            </button>
             {{/manageable}}
             {{^manageable}}
             <span class="badge bg-secondary">

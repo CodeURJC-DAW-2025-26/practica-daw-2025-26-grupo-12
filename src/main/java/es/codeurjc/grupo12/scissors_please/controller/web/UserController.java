@@ -9,6 +9,7 @@ import es.codeurjc.grupo12.scissors_please.service.MatchService;
 import es.codeurjc.grupo12.scissors_please.service.UserService;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -27,6 +28,8 @@ public class UserController {
 
   private static final int TOP_BOTS_LIMIT = 5;
   private static final int RECENT_MATCHES_LIMIT = 5;
+  private static final DateTimeFormatter DELETE_DATE_FORMAT =
+      DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
   @Autowired private UserService userService;
   @Autowired private BotService botService;
@@ -37,6 +40,11 @@ public class UserController {
       @RequestParam(required = false) String user, Authentication authentication, Model model) {
     User currentUser = userService.getCurrentUser(authentication);
     User targetUser = resolveTargetUser(user, currentUser);
+    if (targetUser == null) {
+      model.addAttribute("errorMessage", "The user is no longer in the database.");
+      model.addAttribute("errorCode", ErrorConstants.NOT_FOUND_CODE);
+      return "error";
+    }
 
     boolean ownProfile = isOwnProfile(currentUser, targetUser);
     boolean includePrivateBots = ownProfile || userService.isAdmin(currentUser);
@@ -61,6 +69,8 @@ public class UserController {
     model.addAttribute("profileEmail", targetUser.getEmail());
     model.addAttribute("providerLabel", resolveProvider(targetUser.getOauthProvider()));
     model.addAttribute("rolesLabel", resolveRoles(targetUser.getRoles()));
+    model.addAttribute("profileDeleted", targetUser.getDeleteDate() != null);
+    model.addAttribute("profileDeleteDate", formatDeleteDate(targetUser));
     model.addAttribute("showPhotoActions", ownProfile);
     model.addAttribute("showBackToMyProfile", !ownProfile);
     model.addAttribute("myProfileHref", "/user/profile");
@@ -98,7 +108,7 @@ public class UserController {
     if (username == null || username.isBlank()) {
       return currentUser;
     }
-    return userService.findByUsername(username.trim()).orElse(currentUser);
+    return userService.findByUsername(username.trim()).orElse(null);
   }
 
   private boolean isOwnProfile(User currentUser, User targetUser) {
@@ -145,6 +155,13 @@ public class UserController {
     String encodedUsername =
         UriUtils.encodeQueryParam(targetUser.getUsername(), StandardCharsets.UTF_8);
     return "/bots/my-bots?user=" + encodedUsername;
+  }
+
+  private String formatDeleteDate(User user) {
+    if (user.getDeleteDate() == null) {
+      return "";
+    }
+    return user.getDeleteDate().format(DELETE_DATE_FORMAT);
   }
 
   private boolean handleImageUpload(User user, MultipartFile imageFile) {
