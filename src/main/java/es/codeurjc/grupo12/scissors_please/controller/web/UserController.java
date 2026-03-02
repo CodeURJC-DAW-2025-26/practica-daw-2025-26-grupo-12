@@ -38,7 +38,13 @@ public class UserController {
   @GetMapping("/profile")
   public String userProfile(
       @RequestParam(required = false) String user, Authentication authentication, Model model) {
-    User currentUser = userService.getCurrentUser(authentication);
+    User currentUser = null;
+    try {
+      if (authentication != null && authentication.isAuthenticated()) {
+        currentUser = userService.getCurrentUser(authentication);
+      }
+    } catch (Exception e) {
+    }
     User targetUser = resolveTargetUser(user, currentUser);
     if (targetUser == null) {
       model.addAttribute("errorMessage", "The user is no longer in the database.");
@@ -47,7 +53,8 @@ public class UserController {
     }
 
     boolean ownProfile = isOwnProfile(currentUser, targetUser);
-    boolean includePrivateBots = ownProfile || userService.isAdmin(currentUser);
+    boolean includePrivateBots =
+        currentUser != null && (ownProfile || userService.isAdmin(currentUser));
 
     List<Bot> allBots = botService.getBotsForUser(targetUser, includePrivateBots);
     List<ProfileBotView> topBots =
@@ -61,8 +68,9 @@ public class UserController {
         (int) userMatches.stream().filter(match -> "win".equalsIgnoreCase(match.result())).count();
     int winRate = userMatches.isEmpty() ? 0 : (int) Math.round((wins * 100.0) / userMatches.size());
 
-    model.addAttribute("userId", currentUser.getId());
-    model.addAttribute("hasProfilePhoto", currentUser.getImage() != null);
+    model.addAttribute("userId", targetUser.getId());
+    model.addAttribute("loggedIn", currentUser != null);
+    model.addAttribute("hasProfilePhoto", targetUser.getImage() != null);
     model.addAttribute("profileHeading", ownProfile ? "My Profile" : "User Profile");
     model.addAttribute("profileInitial", resolveInitial(targetUser.getUsername()));
     model.addAttribute("profileName", targetUser.getUsername());
@@ -72,7 +80,7 @@ public class UserController {
     model.addAttribute("profileDeleted", targetUser.getDeleteDate() != null);
     model.addAttribute("profileDeleteDate", formatDeleteDate(targetUser));
     model.addAttribute("showPhotoActions", ownProfile);
-    model.addAttribute("showBackToMyProfile", !ownProfile);
+    model.addAttribute("showBackToMyProfile", !ownProfile && currentUser != null);
     model.addAttribute("myProfileHref", "/user/profile");
     model.addAttribute("botsPageHref", buildBotsPageHref(currentUser, targetUser));
 
@@ -112,7 +120,9 @@ public class UserController {
   }
 
   private boolean isOwnProfile(User currentUser, User targetUser) {
-    return targetUser.getId() != null && targetUser.getId().equals(currentUser.getId());
+    return currentUser != null
+        && targetUser.getId() != null
+        && targetUser.getId().equals(currentUser.getId());
   }
 
   private Long requireUserId(User user) {
