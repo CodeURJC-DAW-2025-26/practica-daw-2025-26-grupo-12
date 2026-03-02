@@ -30,6 +30,7 @@ public class TournamentAutomationService {
 
   @Autowired private TournamentRepository tournamentRepository;
   @Autowired private BotRepository botRepository;
+  @Autowired private BotService botService;
 
   public enum RunNowResult {
     EXECUTED,
@@ -144,10 +145,8 @@ public class TournamentAutomationService {
     Collections.shuffle(currentRound);
 
     List<Match> matches = new ArrayList<>();
-    int round = 1;
     while (currentRound.size() > 1) {
       List<Bot> nextRound = new ArrayList<>();
-      int matchInRound = 1;
 
       for (int i = 0; i < currentRound.size(); i += 2) {
         Bot bot1 = currentRound.get(i);
@@ -168,13 +167,12 @@ public class TournamentAutomationService {
         match.setBot2Score(bot1Wins ? 0 : 1);
         match.setResult(bot1Wins ? "Win" : "Loss");
         match.setRounds(new ArrayList<>());
-        match.setTimestamp(LocalDateTime.now().plusMinutes((long) round * 100 + matchInRound));
+        match.setTimestamp(LocalDateTime.now());
         matches.add(match);
-        matchInRound++;
+        botService.recordMatchResult(bot1, bot2, match.getBot1Score(), match.getBot2Score());
       }
 
       currentRound = nextRound;
-      round++;
     }
 
     Bot winner = currentRound.get(0);
