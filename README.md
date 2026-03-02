@@ -383,35 +383,21 @@ Diagrama de clases de la aplicación con diferenciación por colores o secciones
 
 ---
 
-#### **Alumno 2 - [Nombre Completo]**
+#### **Alumno 2 - Marcelo Atanasio Domínguez Mateo**
 
-[Descripción de las tareas y responsabilidades principales del alumno en el proyecto]
+Principalmente me he encargado de la parte de autenticación, tanto por credenciales como su integración por OAuth. También he implementado el sistema de notificación en tiempo real, el borrado de bots y torneos, la implementación de algoritmos avanzados como el de ELO y partidas destacadas. Además, también he participado trasversalmente a lo largo de todo el proyecto en corrección de errores y mejoras generales. 
 
 | Nº    | Commits      | Files      |
 |:------------: |:------------:| :------------:|
-|1| [Descripción commit 1](URL_commit_1)  | [Archivo1](URL_archivo_1)   |
-|2| [Descripción commit 2](URL_commit_2)  | [Archivo2](URL_archivo_2)   |
-|3| [Descripción commit 3](URL_commit_3)  | [Archivo3](URL_archivo_3)   |
-|4| [Descripción commit 4](URL_commit_4)  | [Archivo4](URL_archivo_4)   |
-|5| [Descripción commit 5](URL_commit_5)  | [Archivo5](URL_archivo_5)   |
+|1| [Implement credential based authentication](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/184e5e3)  | [SecurityConfig.java](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/src/main/java/es/codeurjc/grupo12/scissors_please/security/SecurityConfig.java)   |
+|2| [Add OAuth2.0 integration with Google Cloud](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/e3d73b1)  | [UserService.java](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/src/main/java/es/codeurjc/grupo12/scissors_please/service/UserService.java)   |
+|3| [Create notification infra for rt updates](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/bb6c690)  | [CustomOAuth2UserService.java](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/src/main/java/es/codeurjc/grupo12/scissors_please/security/CustomOAuth2UserService.java)   |
+|4| [Soft delete bots](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/852c80f)  | [NotificationService.java](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/src/main/java/es/codeurjc/grupo12/scissors_please/service/NotificationService.java)  |
+|5| [Update elo post match](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/1d74d20a)  | [BotService.java](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/src/main/java/es/codeurjc/grupo12/scissors_please/service/BotService.java)   |
 
 ---
 
 #### **Alumno 3 - [Nombre Completo]**
-
-[Descripción de las tareas y responsabilidades principales del alumno en el proyecto]
-
-| Nº    | Commits      | Files      |
-|:------------: |:------------:| :------------:|
-|1| [Descripción commit 1](URL_commit_1)  | [Archivo1](URL_archivo_1)   |
-|2| [Descripción commit 2](URL_commit_2)  | [Archivo2](URL_archivo_2)   |
-|3| [Descripción commit 3](URL_commit_3)  | [Archivo3](URL_archivo_3)   |
-|4| [Descripción commit 4](URL_commit_4)  | [Archivo4](URL_archivo_4)   |
-|5| [Descripción commit 5](URL_commit_5)  | [Archivo5](URL_archivo_5)   |
-
----
-
-#### **Alumno 4 - [Nombre Completo]**
 
 [Descripción de las tareas y responsabilidades principales del alumno en el proyecto]
 
