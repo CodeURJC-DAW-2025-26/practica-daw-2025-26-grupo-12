@@ -410,7 +410,7 @@ public class TournamentService {
     String label = rawStatus.isBlank() ? "Unknown" : rawStatus;
     String badgeClass = "bg-secondary";
     String actionLabel = "View";
-    String actionHref = "/tournaments/detail";
+    String actionHref = "/tournaments/detail/"+tournament.getId();
     boolean actionDisabled = false;
 
     if (statusLower.contains("progress")) {
@@ -421,7 +421,7 @@ public class TournamentService {
     } else if (statusLower.contains("finish") || statusLower.contains("complete")) {
       badgeClass = "bg-success";
       actionLabel = "View Results";
-      actionHref = "/tournaments/results";
+      actionHref = "/tournaments/detail/"+tournament.getId();
     } else if (statusLower.contains("upcoming")) {
       badgeClass = "bg-info text-dark";
       actionLabel = "Details";
