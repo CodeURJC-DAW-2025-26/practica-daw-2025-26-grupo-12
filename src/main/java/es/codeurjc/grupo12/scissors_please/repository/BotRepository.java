@@ -11,41 +11,45 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BotRepository extends JpaRepository<Bot, Long> {
-  List<Bot> findByIsPublicTrue();
+  List<Bot> findByDeletedFalse();
 
-  List<Bot> findByOwnerId(Long ownerId);
+  List<Bot> findByIsPublicTrueAndDeletedFalse();
 
-  List<Bot> findByOwnerIdAndIsPublicTrue(Long ownerId);
+  List<Bot> findByOwnerIdAndDeletedFalse(Long ownerId);
 
-  List<Bot> findByNameContainingIgnoreCase(String name);
+  List<Bot> findByOwnerIdAndIsPublicTrueAndDeletedFalse(Long ownerId);
 
-  List<Bot> findByNameContainingIgnoreCaseAndIsPublic(String name, boolean isPublic);
+  List<Bot> findByNameContainingIgnoreCaseAndDeletedFalse(String name);
 
-  List<Bot> findByIsPublic(boolean isPublic);
+  List<Bot> findByNameContainingIgnoreCaseAndIsPublicAndDeletedFalse(String name, boolean isPublic);
 
-  Page<Bot> findAllByOrderByIdDesc(Pageable pageable);
+  List<Bot> findByIsPublicAndDeletedFalse(boolean isPublic);
 
-  Page<Bot> findByNameContainingIgnoreCaseOrderByIdDesc(String name, Pageable pageable);
+  Page<Bot> findAllByDeletedFalseOrderByIdDesc(Pageable pageable);
 
-  Page<Bot> findByNameContainingIgnoreCaseAndIsPublicOrderByIdDesc(
+  Page<Bot> findByNameContainingIgnoreCaseAndDeletedFalseOrderByIdDesc(
+      String name, Pageable pageable);
+
+  Page<Bot> findByNameContainingIgnoreCaseAndIsPublicAndDeletedFalseOrderByIdDesc(
       String name, boolean isPublic, Pageable pageable);
 
-  Page<Bot> findByIsPublicOrderByIdDesc(boolean isPublic, Pageable pageable);
+  Page<Bot> findByIsPublicAndDeletedFalseOrderByIdDesc(boolean isPublic, Pageable pageable);
 
-  Page<Bot> findByOwnerIdOrderByIdDesc(Long ownerId, Pageable pageable);
+  Page<Bot> findByOwnerIdAndDeletedFalseOrderByIdDesc(Long ownerId, Pageable pageable);
 
-  Page<Bot> findByOwnerIdAndIsPublicTrueOrderByIdDesc(Long ownerId, Pageable pageable);
+  Page<Bot> findByOwnerIdAndIsPublicTrueAndDeletedFalseOrderByIdDesc(
+      Long ownerId, Pageable pageable);
 
   @Query(
-      "SELECT COUNT(b) + 1 FROM Bot b WHERE b.isPublic = true AND b.elo > (SELECT b2.elo FROM Bot b2 WHERE b2.id = :botId)")
+      "SELECT COUNT(b) + 1 FROM Bot b WHERE b.deleted = false AND b.isPublic = true AND b.elo > (SELECT b2.elo FROM Bot b2 WHERE b2.id = :botId)")
   Long findRankingPositionById(@Param("botId") Long botId);
 
   @Query(
       "SELECT SUM(b.wins) as totalWins, SUM(b.losses) as totalLosses, "
-          + "SUM(b.draws) as totalDraws FROM Bot b WHERE b.ownerId = :ownerId")
+          + "SUM(b.draws) as totalDraws FROM Bot b WHERE b.deleted = false AND b.ownerId = :ownerId")
   StatsProjection aggregateStatsByOwnerId(@Param("ownerId") Long ownerId);
 
-  @Query("SELECT MAX(b.elo) FROM Bot b WHERE b.ownerId = :ownerId")
+  @Query("SELECT MAX(b.elo) FROM Bot b WHERE b.deleted = false AND b.ownerId = :ownerId")
   Integer findMaxEloByOwnerId(@Param("ownerId") Long ownerId);
 
   public interface StatsProjection {

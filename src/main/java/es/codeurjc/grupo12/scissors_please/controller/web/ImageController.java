@@ -3,7 +3,7 @@ package es.codeurjc.grupo12.scissors_please.controller.web;
 import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.Tournament;
 import es.codeurjc.grupo12.scissors_please.model.User;
-import es.codeurjc.grupo12.scissors_please.service.BotService;
+import es.codeurjc.grupo12.scissors_please.repository.BotRepository;
 import es.codeurjc.grupo12.scissors_please.service.TournamentService;
 import es.codeurjc.grupo12.scissors_please.service.UserService;
 import java.io.ByteArrayInputStream;
@@ -20,13 +20,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 @Controller
 public class ImageController {
 
-  @Autowired private BotService botService;
+  @Autowired private BotRepository botRepository;
   @Autowired private UserService userService;
   @Autowired private TournamentService tournamentService;
 
   @GetMapping("/bot-images/{id}")
   public ResponseEntity<byte[]> getBotImage(@PathVariable Long id) {
-    Optional<Bot> opBot = botService.getBotById(id);
+    Optional<Bot> opBot = botRepository.findById(id);
 
     if (opBot.isPresent() && opBot.get().getImage() != null) {
       byte[] imageBytes = opBot.get().getImage().getData();

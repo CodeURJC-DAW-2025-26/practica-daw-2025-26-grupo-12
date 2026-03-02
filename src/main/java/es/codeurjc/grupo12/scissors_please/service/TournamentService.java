@@ -102,7 +102,7 @@ public class TournamentService {
         currentUser != null
             && participantList != null
             && participantList.stream()
-                .filter(bot -> bot != null)
+                .filter(bot -> bot != null && !bot.isDeleted())
                 .anyMatch(
                     bot ->
                         currentUser.getId() != null
@@ -489,7 +489,7 @@ public class TournamentService {
     if (currentUser == null || currentUser.getId() == null || isAdmin(currentUser)) {
       return List.of();
     }
-    return botRepository.findByOwnerId(currentUser.getId()).stream()
+    return botRepository.findByOwnerIdAndDeletedFalse(currentUser.getId()).stream()
         .sorted(Comparator.comparingInt(Bot::getElo).reversed())
         .toList();
   }
@@ -522,7 +522,7 @@ public class TournamentService {
 
     Set<Long> participantIds = new LinkedHashSet<>();
     for (Bot participant : participants) {
-      if (participant != null && participant.getId() != null) {
+      if (participant != null && participant.getId() != null && !participant.isDeleted()) {
         participantIds.add(participant.getId());
       }
     }

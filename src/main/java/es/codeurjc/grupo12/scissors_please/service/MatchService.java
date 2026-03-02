@@ -727,7 +727,7 @@ public class MatchService {
   }
 
   private Bot resolveMyBot(Long userId, Long selectedBotId) {
-    List<Bot> userBots = botRepository.findByOwnerId(userId);
+    List<Bot> userBots = botRepository.findByOwnerIdAndDeletedFalse(userId);
     if (userBots.isEmpty()) {
       throw new IllegalArgumentException("You need at least one bot to start matchmaking.");
     }
