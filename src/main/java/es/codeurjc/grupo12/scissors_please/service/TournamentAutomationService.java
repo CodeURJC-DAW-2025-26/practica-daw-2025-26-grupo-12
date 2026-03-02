@@ -109,18 +109,19 @@ public class TournamentAutomationService {
   }
 
   private List<Bot> resolveParticipants(Tournament tournament) {
-    List<Bot> participants = deduplicateById(tournament.getParticipants());
+    List<Bot> participants =
+        deduplicateById(tournament.getParticipants()).stream().filter(b -> !b.isDeleted()).toList();
     if (participants.size() >= 2) {
       return participants;
     }
 
-    List<Bot> publicBots = deduplicateById(botRepository.findByIsPublicTrue());
+    List<Bot> publicBots = deduplicateById(botRepository.findByIsPublicTrueAndDeletedFalse());
     if (publicBots.size() >= 2) {
       tournament.setParticipants(publicBots);
       return publicBots;
     }
 
-    List<Bot> allBots = deduplicateById(botRepository.findAll());
+    List<Bot> allBots = deduplicateById(botRepository.findByDeletedFalse());
     tournament.setParticipants(allBots);
     return allBots;
   }

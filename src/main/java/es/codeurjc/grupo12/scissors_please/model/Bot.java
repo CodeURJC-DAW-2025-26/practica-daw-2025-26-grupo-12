@@ -45,6 +45,7 @@ public class Bot {
 
   private boolean isPublic;
   private int elo = 1500;
+  private boolean deleted = false;
 
   @Column(name = "owner_id", nullable = false)
   private Long ownerId;

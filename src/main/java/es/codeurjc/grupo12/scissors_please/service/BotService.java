@@ -31,8 +31,9 @@ public class BotService {
 
     Page<Bot> pageResult =
         includePrivate
-            ? botRepository.findByOwnerIdOrderByIdDesc(ownerId, safePageable)
-            : botRepository.findByOwnerIdAndIsPublicTrueOrderByIdDesc(ownerId, safePageable);
+            ? botRepository.findByOwnerIdAndDeletedFalseOrderByIdDesc(ownerId, safePageable)
+            : botRepository.findByOwnerIdAndIsPublicTrueAndDeletedFalseOrderByIdDesc(
+                ownerId, safePageable);
 
     List<Bot> bots = pageResult.getContent();
     long totalElements = pageResult.getTotalElements();
@@ -55,21 +56,21 @@ public class BotService {
     if ("public".equalsIgnoreCase(visibility)) {
       pageResult =
           hasQuery
-              ? botRepository.findByNameContainingIgnoreCaseAndIsPublicOrderByIdDesc(
+              ? botRepository.findByNameContainingIgnoreCaseAndIsPublicAndDeletedFalseOrderByIdDesc(
                   normalizedQuery, true, safePageable)
-              : botRepository.findByIsPublicOrderByIdDesc(true, safePageable);
+              : botRepository.findByIsPublicAndDeletedFalseOrderByIdDesc(true, safePageable);
     } else if ("private".equalsIgnoreCase(visibility)) {
       pageResult =
           hasQuery
-              ? botRepository.findByNameContainingIgnoreCaseAndIsPublicOrderByIdDesc(
+              ? botRepository.findByNameContainingIgnoreCaseAndIsPublicAndDeletedFalseOrderByIdDesc(
                   normalizedQuery, false, safePageable)
-              : botRepository.findByIsPublicOrderByIdDesc(false, safePageable);
+              : botRepository.findByIsPublicAndDeletedFalseOrderByIdDesc(false, safePageable);
     } else {
       pageResult =
           hasQuery
-              ? botRepository.findByNameContainingIgnoreCaseOrderByIdDesc(
+              ? botRepository.findByNameContainingIgnoreCaseAndDeletedFalseOrderByIdDesc(
                   normalizedQuery, safePageable)
-              : botRepository.findAllByOrderByIdDesc(safePageable);
+              : botRepository.findAllByDeletedFalseOrderByIdDesc(safePageable);
     }
 
     List<Bot> bots = pageResult.getContent();
@@ -84,10 +85,10 @@ public class BotService {
   public List<Bot> getBotsForUser(User user, boolean includePrivate) {
     Long ownerId = requireOwnerId(user);
     if (includePrivate) {
-      return new ArrayList<>(botRepository.findByOwnerId(ownerId));
+      return new ArrayList<>(botRepository.findByOwnerIdAndDeletedFalse(ownerId));
     }
 
-    return new ArrayList<>(botRepository.findByOwnerIdAndIsPublicTrue(ownerId));
+    return new ArrayList<>(botRepository.findByOwnerIdAndIsPublicTrueAndDeletedFalse(ownerId));
   }
 
   @Transactional(readOnly = true)
@@ -151,7 +152,7 @@ public class BotService {
   @Transactional(readOnly = true)
   public UserGlobalRanking getUserGlobalRanking(User user) {
     Long ownerId = requireOwnerId(user);
-    List<Bot> allBots = botRepository.findAll();
+    List<Bot> allBots = botRepository.findByDeletedFalse();
     Map<Long, Integer> bestEloByOwner = new HashMap<>();
 
     for (Bot bot : allBots) {
@@ -194,12 +195,16 @@ public class BotService {
   }
 
   public void deleteBot(Long id) {
-    botRepository.deleteById(id);
+    Optional<Bot> bot = botRepository.findById(id);
+    if (bot.isPresent()) {
+      bot.get().setDeleted(true);
+      botRepository.save(bot.get());
+    }
   }
 
   @Transactional(readOnly = true)
   public Optional<Bot> getBotById(Long id) {
-    return botRepository.findById(id);
+    return botRepository.findById(id).filter(bot -> !bot.isDeleted());
   }
 
   private Long requireOwnerId(User user) {
@@ -219,17 +224,19 @@ public class BotService {
 
     if ("public".equalsIgnoreCase(visibility)) {
       return hasQuery
-          ? botRepository.findByNameContainingIgnoreCaseAndIsPublic(query, true)
-          : botRepository.findByIsPublic(true);
+          ? botRepository.findByNameContainingIgnoreCaseAndIsPublicAndDeletedFalse(query, true)
+          : botRepository.findByIsPublicAndDeletedFalse(true);
     }
 
     if ("private".equalsIgnoreCase(visibility)) {
       return hasQuery
-          ? botRepository.findByNameContainingIgnoreCaseAndIsPublic(query, false)
-          : botRepository.findByIsPublic(false);
+          ? botRepository.findByNameContainingIgnoreCaseAndIsPublicAndDeletedFalse(query, false)
+          : botRepository.findByIsPublicAndDeletedFalse(false);
     }
 
-    return hasQuery ? botRepository.findByNameContainingIgnoreCase(query) : botRepository.findAll();
+    return hasQuery
+        ? botRepository.findByNameContainingIgnoreCaseAndDeletedFalse(query)
+        : botRepository.findAllByDeletedFalseOrderByIdDesc(null).getContent();
   }
 
   @Transactional(readOnly = true)
