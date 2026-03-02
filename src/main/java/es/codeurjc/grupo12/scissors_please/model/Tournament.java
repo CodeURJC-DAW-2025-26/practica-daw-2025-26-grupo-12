@@ -7,6 +7,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -36,7 +37,7 @@ public class Tournament {
 
   private LocalDate startDate;
   private int slots;
-  @OneToMany private List<Bot> participants;
+  @ManyToMany private List<Bot> participants;
 
   @OneToMany(cascade = CascadeType.ALL)
   private List<Match> matches;
