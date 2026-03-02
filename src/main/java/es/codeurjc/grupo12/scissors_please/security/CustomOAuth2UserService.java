@@ -37,9 +37,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     User user =
         userRepository
-            .findByEmail(email)
+            .findByEmailAndDeleteDateIsNull(email)
             .orElseGet(
                 () -> {
+                  if (userRepository.findByEmail(email).isPresent()) {
+                    throw new OAuth2AuthenticationException(
+                        new OAuth2Error("deleted_user"), "User account has been deleted");
+                  }
                   log.info("Creating new user from OAuth2 provider: {}", email);
                   User newUser = new User();
                   newUser.setEmail(email);
@@ -47,6 +51,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                   newUser.setOauthProvider(provider);
                   newUser.setPassword(null);
                   newUser.setBlocked(false);
+                  newUser.setDeleteDate(null);
                   newUser.setRoles(List.of("USER"));
                   return userRepository.save(newUser);
                 });

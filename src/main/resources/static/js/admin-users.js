@@ -198,16 +198,16 @@
       });
     }
 
-    const modal = document.getElementById("toggleUserLockModal");
+    const modal = document.getElementById("userActionModal");
     if (!modal) {
       return;
     }
 
-    const form = document.getElementById("toggle-user-lock-form");
-    const queryInput = document.getElementById("toggle-user-lock-query");
-    const statusInput = document.getElementById("toggle-user-lock-status");
-    const message = document.getElementById("toggle-user-lock-message");
-    const submitButton = document.getElementById("toggle-user-lock-submit");
+    const form = document.getElementById("user-action-form");
+    const queryInput = document.getElementById("user-action-query");
+    const statusInput = document.getElementById("user-action-status");
+    const message = document.getElementById("user-action-message");
+    const submitButton = document.getElementById("user-action-submit");
 
     modal.addEventListener("show.bs.modal", (event) => {
       const trigger = event.relatedTarget;
@@ -217,10 +217,11 @@
 
       const userId = trigger.getAttribute("data-user-id");
       const userName = trigger.getAttribute("data-user-name");
+      const userAction = trigger.getAttribute("data-user-action");
       const userBlocked = trigger.getAttribute("data-user-blocked") === "true";
       const searchQuery = trigger.getAttribute("data-search-query") || "";
       const statusFilter = trigger.getAttribute("data-status-filter") || "all";
-      const action = userBlocked ? "unblock" : "block";
+      const action = userAction || (userBlocked ? "unblock" : "block");
 
       form.action = `/admin/users/${userId}/${action}`;
       queryInput.value = searchQuery;
@@ -228,7 +229,12 @@
         statusInput.value = statusFilter;
       }
 
-      if (userBlocked) {
+      if (action === "delete") {
+        message.textContent = `Do you want to delete ${userName}? This action cannot be undone.`;
+        submitButton.textContent = "Delete user";
+        submitButton.classList.remove("btn-primary");
+        submitButton.classList.add("btn-danger");
+      } else if (userBlocked) {
         message.textContent = `Do you want to unblock ${userName}? The user will be able to log in again.`;
         submitButton.textContent = "Unblock user";
         submitButton.classList.remove("btn-danger");

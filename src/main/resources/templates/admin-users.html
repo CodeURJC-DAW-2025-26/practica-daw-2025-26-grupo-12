@@ -101,25 +101,25 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="toggleUserLockModal" tabindex="-1" aria-labelledby="toggleUserLockModalLabel"
+    <div class="modal fade" id="userActionModal" tabindex="-1" aria-labelledby="userActionModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content bg-secondary-bg border border-secondary">
                 <div class="modal-header border-secondary">
-                    <h5 class="modal-title" id="toggleUserLockModalLabel">Confirm account change</h5>
+                    <h5 class="modal-title" id="userActionModalLabel">Confirm action</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p id="toggle-user-lock-message" class="mb-0 text-secondary"></p>
+                    <p id="user-action-message" class="mb-0 text-secondary"></p>
                 </div>
                 <div class="modal-footer border-secondary">
                     <button type="button" class="btn btn-outline-muted" data-bs-dismiss="modal">Cancel</button>
-                    <form id="toggle-user-lock-form" method="post">
+                    <form id="user-action-form" method="post">
                         <input type="hidden" name="_csrf" value="{{_csrf.token}}">
-                        <input id="toggle-user-lock-query" type="hidden" name="q" value="">
-                        <input id="toggle-user-lock-status" type="hidden" name="status" value="{{statusFilter}}">
-                        <button id="toggle-user-lock-submit" type="submit" class="btn btn-danger">Block</button>
+                        <input id="user-action-query" type="hidden" name="q" value="">
+                        <input id="user-action-status" type="hidden" name="status" value="{{statusFilter}}">
+                        <button id="user-action-submit" type="submit" class="btn btn-danger">Block</button>
                     </form>
                 </div>
             </div>

@@ -4,6 +4,7 @@ import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.repository.BotRepository;
 import es.codeurjc.grupo12.scissors_please.repository.UserRepository;
 import es.codeurjc.grupo12.scissors_please.repository.UserRepository.MonthlyUserCount;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
@@ -55,9 +56,13 @@ public class UserService {
     if (normalizedQuery.isBlank()) {
       pageResult =
           switch (effectiveStatusFilter) {
-            case ALL -> userRepository.findAllByOrderByUsernameAsc(safePageable);
-            case BLOCKED -> userRepository.findByBlockedOrderByUsernameAsc(true, safePageable);
-            case ACTIVE -> userRepository.findByBlockedOrderByUsernameAsc(false, safePageable);
+            case ALL -> userRepository.findAllByDeleteDateIsNullOrderByUsernameAsc(safePageable);
+            case BLOCKED ->
+                userRepository.findByBlockedAndDeleteDateIsNullOrderByUsernameAsc(
+                    true, safePageable);
+            case ACTIVE ->
+                userRepository.findByBlockedAndDeleteDateIsNullOrderByUsernameAsc(
+                    false, safePageable);
           };
     } else {
       pageResult =
@@ -123,11 +128,21 @@ public class UserService {
 
   @Transactional(readOnly = true)
   public Optional<User> findByUsername(String username) {
-    return userRepository.findByUsername(username);
+    return userRepository.findByUsernameAndDeleteDateIsNull(username);
   }
 
   @Transactional(readOnly = true)
   public Optional<User> findByEmail(String email) {
+    return userRepository.findByEmailAndDeleteDateIsNull(email);
+  }
+
+  @Transactional(readOnly = true)
+  public Optional<User> findByUsernameIncludingDeleted(String username) {
+    return userRepository.findByUsername(username);
+  }
+
+  @Transactional(readOnly = true)
+  public Optional<User> findByEmailIncludingDeleted(String email) {
     return userRepository.findByEmail(email);
   }
 
@@ -135,6 +150,14 @@ public class UserService {
   public User getUserById(Long id) {
     return userRepository
         .findById(id)
+        .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + id));
+  }
+
+  @Transactional(readOnly = true)
+  public User getUserByIdExcludingDeleted(Long id) {
+    return userRepository
+        .findById(id)
+        .filter(user -> user.getDeleteDate() == null)
         .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + id));
   }
 
@@ -147,14 +170,9 @@ public class UserService {
     return userRepository.countUsersByMonth();
   }
 
-  public void deleteUser(Long id) {
-    log.info("Deleting user with id: {}", id);
-    userRepository.deleteById(id);
-  }
-
   @Transactional(readOnly = true)
   public List<User> getAllUsers() {
-    return userRepository.findAll();
+    return userRepository.findAllByDeleteDateIsNull();
   }
 
   @Transactional(readOnly = true)
@@ -168,9 +186,11 @@ public class UserService {
         statusFilter == null ? UserStatusFilter.ALL : statusFilter;
     if (query == null || query.isBlank()) {
       return switch (effectiveStatusFilter) {
-        case ALL -> userRepository.findTop25ByOrderByUsernameAsc();
-        case BLOCKED -> userRepository.findTop25ByBlockedOrderByUsernameAsc(true);
-        case ACTIVE -> userRepository.findTop25ByBlockedOrderByUsernameAsc(false);
+        case ALL -> userRepository.findTop25ByDeleteDateIsNullOrderByUsernameAsc();
+        case BLOCKED ->
+            userRepository.findTop25ByDeleteDateIsNullAndBlockedOrderByUsernameAsc(true);
+        case ACTIVE ->
+            userRepository.findTop25ByDeleteDateIsNullAndBlockedOrderByUsernameAsc(false);
       };
     }
 
@@ -178,15 +198,15 @@ public class UserService {
     return switch (effectiveStatusFilter) {
       case ALL ->
           userRepository
-              .findTop25ByUsernameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrderByUsernameAsc(
+              .findTop25ByDeleteDateIsNullAndUsernameContainingIgnoreCaseOrDeleteDateIsNullAndEmailContainingIgnoreCaseOrderByUsernameAsc(
                   normalizedQuery, normalizedQuery);
       case BLOCKED ->
           userRepository
-              .findTop25ByBlockedAndUsernameContainingIgnoreCaseOrBlockedAndEmailContainingIgnoreCaseOrderByUsernameAsc(
+              .findTop25ByDeleteDateIsNullAndBlockedAndUsernameContainingIgnoreCaseOrDeleteDateIsNullAndBlockedAndEmailContainingIgnoreCaseOrderByUsernameAsc(
                   true, normalizedQuery, true, normalizedQuery);
       case ACTIVE ->
           userRepository
-              .findTop25ByBlockedAndUsernameContainingIgnoreCaseOrBlockedAndEmailContainingIgnoreCaseOrderByUsernameAsc(
+              .findTop25ByDeleteDateIsNullAndBlockedAndUsernameContainingIgnoreCaseOrDeleteDateIsNullAndBlockedAndEmailContainingIgnoreCaseOrderByUsernameAsc(
                   false, normalizedQuery, false, normalizedQuery);
     };
   }
@@ -197,7 +217,8 @@ public class UserService {
       throw new IllegalArgumentException("User not authenticated");
     }
 
-    Optional<User> byUsername = userRepository.findByUsername(authentication.getName());
+    Optional<User> byUsername =
+        userRepository.findByUsernameAndDeleteDateIsNull(authentication.getName());
     if (byUsername.isPresent()) {
       return byUsername.get();
     }
@@ -207,7 +228,7 @@ public class UserService {
       Object emailAttribute = oauth2User.getAttributes().get("email");
       if (emailAttribute != null) {
         return userRepository
-            .findByEmail(emailAttribute.toString())
+            .findByEmailAndDeleteDateIsNull(emailAttribute.toString())
             .orElseThrow(() -> new IllegalArgumentException("User not found with email"));
       }
     }
@@ -227,8 +248,23 @@ public class UserService {
     return changeBlockedStatus(userId, actingAdmin, false);
   }
 
+  public User deleteUser(Long userId, User actingAdmin) {
+    User targetUser = getUserByIdExcludingDeleted(userId);
+    if (targetUser.getId().equals(actingAdmin.getId())) {
+      throw new IllegalArgumentException("You cannot delete your own account");
+    }
+    if (isAdmin(targetUser)) {
+      throw new IllegalArgumentException("Admin accounts cannot be deleted");
+    }
+
+    if (targetUser.getDeleteDate() == null) {
+      markUserAsDeleted(targetUser);
+    }
+    return targetUser;
+  }
+
   private User changeBlockedStatus(Long userId, User actingAdmin, boolean blocked) {
-    User targetUser = getUserById(userId);
+    User targetUser = getUserByIdExcludingDeleted(userId);
     if (targetUser.getId().equals(actingAdmin.getId())) {
       throw new IllegalArgumentException("You cannot block your own account");
     }
@@ -244,6 +280,14 @@ public class UserService {
     User updatedUser = userRepository.save(targetUser);
     log.info("Updated blocked status for user {}: {}", updatedUser.getUsername(), blocked);
     return updatedUser;
+  }
+
+  private User markUserAsDeleted(User targetUser) {
+    targetUser.setDeleteDate(LocalDateTime.now());
+    targetUser.setBlocked(true);
+    User deletedUser = userRepository.save(targetUser);
+    log.info("Logically deleted user {}", deletedUser.getUsername());
+    return deletedUser;
   }
 
   @Transactional(readOnly = true)

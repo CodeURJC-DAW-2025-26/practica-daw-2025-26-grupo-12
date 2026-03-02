@@ -39,6 +39,11 @@
                     <p class="text-secondary mb-0">
                         {{profileEmail}} • Provider: {{providerLabel}} • Roles: {{rolesLabel}}
                     </p>
+                    {{#profileDeleted}}
+                    <p class="text-danger small mb-0 mt-2">
+                        This user was deleted on {{profileDeleteDate}}.
+                    </p>
+                    {{/profileDeleted}}
                 </div>
 
                 <div class="col-md-auto d-flex gap-2">
