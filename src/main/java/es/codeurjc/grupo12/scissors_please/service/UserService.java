@@ -103,6 +103,9 @@ public class UserService {
     if (password == null || password.isBlank()) {
       throw new IllegalArgumentException("Password cannot be empty");
     }
+    if (password.length() < 8) {
+      throw new IllegalArgumentException("Password must be at least 8 characters long");
+    }
 
     if (userRepository.findByUsername(username).isPresent()) {
       log.warn("Registration attempt with existing username: {}", username);
