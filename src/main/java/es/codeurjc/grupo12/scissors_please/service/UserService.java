@@ -1,13 +1,9 @@
 package es.codeurjc.grupo12.scissors_please.service;
 
-import es.codeurjc.grupo12.scissors_please.model.User;
-import es.codeurjc.grupo12.scissors_please.repository.BotRepository;
-import es.codeurjc.grupo12.scissors_please.repository.UserRepository;
-import es.codeurjc.grupo12.scissors_please.repository.UserRepository.MonthlyUserCount;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,6 +13,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import es.codeurjc.grupo12.scissors_please.model.User;
+import es.codeurjc.grupo12.scissors_please.repository.BotRepository;
+import es.codeurjc.grupo12.scissors_please.repository.UserRepository;
+import es.codeurjc.grupo12.scissors_please.repository.UserRepository.MonthlyUserCount;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Transactional
@@ -56,9 +58,9 @@ public class UserService {
     if (normalizedQuery.isBlank()) {
       pageResult =
           switch (effectiveStatusFilter) {
-            case ALL -> userRepository.findAllByOrderByUsernameAsc(safePageable);
-            case BLOCKED -> userRepository.findByBlockedOrderByUsernameAsc(true, safePageable);
-            case ACTIVE -> userRepository.findByBlockedOrderByUsernameAsc(false, safePageable);
+            case ALL -> userRepository.findAllByDeleteDateIsNullOrderByUsernameAsc(safePageable);
+            case BLOCKED -> userRepository.findByBlockedAndDeleteDateIsNullOrderByUsernameAsc(true, safePageable);
+            case ACTIVE -> userRepository.findByBlockedAndDeleteDateIsNullOrderByUsernameAsc(false, safePageable);
           };
     } else {
       pageResult =

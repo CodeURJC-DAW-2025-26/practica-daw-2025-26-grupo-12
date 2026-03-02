@@ -1,13 +1,15 @@
 package es.codeurjc.grupo12.scissors_please.repository;
 
-import es.codeurjc.grupo12.scissors_please.model.User;
 import java.util.List;
 import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+
+import es.codeurjc.grupo12.scissors_please.model.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -33,12 +35,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
       findTop25ByDeleteDateIsNullAndBlockedAndUsernameContainingIgnoreCaseOrDeleteDateIsNullAndBlockedAndEmailContainingIgnoreCaseOrderByUsernameAsc(
           boolean usernameBlocked, String usernameQuery, boolean emailBlocked, String emailQuery);
 
-  Page<User> findAllByOrderByUsernameAsc(Pageable pageable);
+  Page<User> findAllByDeleteDateIsNullOrderByUsernameAsc(Pageable pageable);
 
   Page<User> findByUsernameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrderByUsernameAsc(
       String usernameQuery, String emailQuery, Pageable pageable);
 
-  Page<User> findByBlockedOrderByUsernameAsc(boolean blocked, Pageable pageable);
+  Page<User> findByBlockedAndDeleteDateIsNullOrderByUsernameAsc(boolean blocked, Pageable pageable);
 
   Page<User>
       findByBlockedAndUsernameContainingIgnoreCaseOrBlockedAndEmailContainingIgnoreCaseOrderByUsernameAsc(
