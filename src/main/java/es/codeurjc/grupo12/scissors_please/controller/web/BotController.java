@@ -189,6 +189,7 @@ public class BotController {
       bot.setTags(parseTags(tags));
       botService.updateBot(bot, currentUser);
 
+      if (isAdmin(currentUser)) return REDIRECT_ADMIN_BOTS;
       return REDIRECT_MY_BOTS;
     }
     model.addAttribute("errorMessage", ErrorConstants.BOT_NOT_FOUND);
