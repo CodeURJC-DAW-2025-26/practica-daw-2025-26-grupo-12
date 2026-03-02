@@ -44,7 +44,7 @@ public class Bot {
   private String code = "";
 
   private boolean isPublic;
-  private int elo;
+  private int elo = 1500;
 
   @Column(name = "owner_id", nullable = false)
   private Long ownerId;
@@ -76,6 +76,9 @@ public class Bot {
     wins = 0;
     losses = 0;
     draws = 0;
+    if (eloHistory.isEmpty()) {
+      eloHistory.add(this.elo);
+    }
     createdAt = LocalDateTime.now();
     updatedAt = LocalDateTime.now();
   }

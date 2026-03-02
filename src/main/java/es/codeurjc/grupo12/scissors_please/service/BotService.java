@@ -102,6 +102,52 @@ public class BotService {
     return new ArrayList<>(bots.subList(0, end));
   }
 
+  @Transactional
+  public void recordMatchResult(Bot b1, Bot b2, int score1, int score2) {
+    if (b1 == null || b2 == null || b1.getId() == null || b2.getId() == null) {
+      return;
+    }
+
+    Bot bot1 = botRepository.findById(b1.getId()).orElseThrow();
+    Bot bot2 = botRepository.findById(b2.getId()).orElseThrow();
+
+    double s1;
+    double s2;
+
+    if (score1 > score2) {
+      s1 = 1.0;
+      s2 = 0.0;
+      bot1.setWins(bot1.getWins() + 1);
+      bot2.setLosses(bot2.getLosses() + 1);
+    } else if (score1 < score2) {
+      s1 = 0.0;
+      s2 = 1.0;
+      bot1.setLosses(bot1.getLosses() + 1);
+      bot2.setWins(bot2.getWins() + 1);
+    } else {
+      s1 = 0.5;
+      s2 = 0.5;
+      bot1.setDraws(bot1.getDraws() + 1);
+      bot2.setDraws(bot2.getDraws() + 1);
+    }
+
+    int r1 = bot1.getElo();
+    int r2 = bot2.getElo();
+
+    double e1 = 1.0 / (1.0 + Math.pow(10, (r2 - r1) / 400.0));
+    double e2 = 1.0 / (1.0 + Math.pow(10, (r1 - r2) / 400.0));
+
+    int k = 32;
+    int newR1 = (int) Math.round(r1 + k * (s1 - e1));
+    int newR2 = (int) Math.round(r2 + k * (s2 - e2));
+
+    bot1.updateElo(newR1);
+    bot2.updateElo(newR2);
+
+    botRepository.save(bot1);
+    botRepository.save(bot2);
+  }
+
   @Transactional(readOnly = true)
   public UserGlobalRanking getUserGlobalRanking(User user) {
     Long ownerId = requireOwnerId(user);

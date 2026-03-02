@@ -47,6 +47,7 @@ public class MatchService {
   @Autowired private BotRepository botRepository;
   @Autowired private NotificationService notificationService;
   @Autowired private UserService userService;
+  @Autowired private BotService botService;
 
   private final Object matchmakingMonitor = new Object();
   private final Map<Long, SearchTicket> searchQueue = new ConcurrentHashMap<>();
@@ -755,6 +756,8 @@ public class MatchService {
         bot1Wins ? resolveBotName(match.getBot1()) : resolveBotName(match.getBot2());
     match.setResult(winnerName + " Wins");
     match.setRounds(generateRounds(bot1Score, bot2Score));
+
+    botService.recordMatchResult(match.getBot1(), match.getBot2(), bot1Score, bot2Score);
   }
 
   private List<Round> generateRounds(int bot1Wins, int bot2Wins) {
