@@ -696,7 +696,7 @@ public class MatchService {
     return userBots.stream().max(Comparator.comparingInt(Bot::getElo)).orElseThrow();
   }
 
-  private void populateRandomResult(Match match) {
+  public void populateRandomResult(Match match) {
     boolean bot1Wins = ThreadLocalRandom.current().nextBoolean();
     int losingScore = ThreadLocalRandom.current().nextInt(6, 10);
     int winningScore = losingScore + ThreadLocalRandom.current().nextInt(1, 4);
