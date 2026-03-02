@@ -388,17 +388,17 @@ Diagrama de clases de la aplicación con diferenciación por colores o secciones
 
 ### **Participación de Miembros en la Práctica 1**
 
-#### **Alumno 1 - [Nombre Completo]**
+#### **Alumno 1 - Jorge Cimadevilla Aniz**
 
-[Descripción de las tareas y responsabilidades principales del alumno en el proyecto]
+Principalmente me he encargado de la arquitectura funcional de la aplicación en la parte de torneos, matchmaking y administración, además de la configuración HTTPS y la documentación visual del proyecto. También he trabajado en filtros dinámicos del panel de administración, automatización de torneos y flujos completos de inscripción y revancha.
 
 | Nº    | Commits      | Files      |
 |:------------: |:------------:| :------------:|
-|1| [Descripción commit 1](URL_commit_1)  | [Archivo1](URL_archivo_1)   |
-|2| [Descripción commit 2](URL_commit_2)  | [Archivo2](URL_archivo_2)   |
-|3| [Descripción commit 3](URL_commit_3)  | [Archivo3](URL_archivo_3)   |
-|4| [Descripción commit 4](URL_commit_4)  | [Archivo4](URL_archivo_4)   |
-|5| [Descripción commit 5](URL_commit_5)  | [Archivo5](URL_archivo_5)   |
+|1| [Proper https config with automatic redirect (https profile)](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/279b18e)  | [HttpsRedirectConfig.java](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/src/main/java/es/codeurjc/grupo12/scissors_please/config/HttpsRedirectConfig.java)   |
+|2| [Admin users panel with live filters](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/86191fd)  | [AdminController.java](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/src/main/java/es/codeurjc/grupo12/scissors_please/controller/web/AdminController.java)   |
+|3| [Automate tournament execution daily](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/6dbd154)  | [TournamentAutomationService.java](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/src/main/java/es/codeurjc/grupo12/scissors_please/service/TournamentAutomationService.java)   |
+|4| [Tournament registration flow](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/72d27d0)  | [TournamentService.java](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/src/main/java/es/codeurjc/grupo12/scissors_please/service/TournamentService.java)   |
+|5| [Matchmaking queue and rematch flow](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/2814ebf)  | [MatchService.java](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/src/main/java/es/codeurjc/grupo12/scissors_please/service/MatchService.java)   |
 
 ---
 
