@@ -9,6 +9,7 @@ import es.codeurjc.grupo12.scissors_please.repository.BotRepository;
 import es.codeurjc.grupo12.scissors_please.repository.MatchRepository;
 import es.codeurjc.grupo12.scissors_please.repository.TournamentRepository;
 import es.codeurjc.grupo12.scissors_please.repository.UserRepository;
+import es.codeurjc.grupo12.scissors_please.service.MatchService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -38,6 +39,7 @@ public class DataInitializer {
       UserRepository userRepository,
       BotRepository botRepository,
       MatchRepository matchRepository,
+      MatchService matchService,
       TournamentRepository tournamentRepository,
       PasswordEncoder passwordEncoder) {
     return args -> {
@@ -112,7 +114,6 @@ public class DataInitializer {
         }
 
         List<Bot> bots = new ArrayList<>();
-        String[] languages = {"Python", "JavaScript", "Java"};
         int botIndex = 1;
 
         for (User owner : owners) {
@@ -151,28 +152,11 @@ public class DataInitializer {
           Bot bot1 = bots.get((i - 1) % bots.size());
           Bot bot2 = bots.get(i % bots.size());
 
-          int bot1Score = (i % 3) + 1;
-          int bot2Score = ((i + 1) % 3) + 1;
-          String result;
-
-          if (i % 5 == 0) {
-            bot1Score = 2;
-            bot2Score = 2;
-            result = "Draw";
-          } else if (bot1Score > bot2Score) {
-            result = "Win";
-          } else {
-            result = "Loss";
-          }
-
           Match match = new Match();
           match.setBot1(bot1);
           match.setBot2(bot2);
-          match.setBot1Score(bot1Score);
-          match.setBot2Score(bot2Score);
-          match.setResult(result);
-          match.setTimestamp(baseTimestamp.minusMinutes(i * 15L));
-          match.setRounds(new ArrayList<>());
+          match.setTimestamp(baseTimestamp);
+          matchService.populateRandomResult(match);
           matches.add(match);
         }
 
