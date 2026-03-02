@@ -321,8 +321,22 @@ Diagrama actualizado de navegación de la aplicación para la Práctica 1:
 > Este diagrama resume los principales flujos entre páginas públicas, de usuario autenticado y de administración, incluyendo los recorridos de matchmaking, gestión de bots y torneos.
 
 #### **Capturas de Pantalla Actualizadas**
+Algunas de las capturas que han cambiado son las siguientes:
+#### **1. bot-edit.html**
+![bot-edit.html](images/screenshots/P1/P1-bot-edit.png)
 
-Solo si han cambiado.
+#### **2. match-battle.html**
+![match-battle.html](images/screenshots/P1/P1-match-battle.png)
+
+#### **3. my-tournaments-auth.html**
+![my-tournaments-auth.html](images/screenshots/P1/P1-my-tournaments-auth.png)
+
+#### **4. tournament-join.html**
+![tournament-join.html](images/screenshots/P1/P1-tournament-join.png)
+
+
+#### **5. user-detail-auth.html**
+![user-detail-auth.html](images/screenshots/P1/P1-user-detail-auth.png)
 
 ### **Instrucciones de Ejecución**
 
@@ -416,17 +430,16 @@ Principalmente me he encargado de la parte de autenticación, tanto por credenci
 
 ---
 
-#### **Alumno 3 - [Nombre Completo]**
-
-[Descripción de las tareas y responsabilidades principales del alumno en el proyecto]
+#### **Alumno 3 - Alejandro García Prada**
+Me he encargado de la página de detalle de la mayoría de las entidades. Además me he encargado de algunos formularios, de las gráficas y de las páginas de error. Támbien me he encargado de la lógica de las imágenes.
 
 | Nº    | Commits      | Files      |
 |:------------: |:------------:| :------------:|
-|1| [Descripción commit 1](URL_commit_1)  | [Archivo1](URL_archivo_1)   |
-|2| [Descripción commit 2](URL_commit_2)  | [Archivo2](URL_archivo_2)   |
-|3| [Descripción commit 3](URL_commit_3)  | [Archivo3](URL_archivo_3)   |
-|4| [Descripción commit 4](URL_commit_4)  | [Archivo4](URL_archivo_4)   |
-|5| [Descripción commit 5](URL_commit_5)  | [Archivo5](URL_archivo_5)   |
+|1| [user statistics chart](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/b288c0c)  | [CharService.java](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/src/main/java/es/codeurjc/grupo12/scissors_please/service/ChartService.java)   |
+|2| [Tournament images](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/5092dbe)  | [AdminController.java](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/src/main/java/es/codeurjc/grupo12/scissors_please/controller/AdminController.java)   |
+|3| [Import.py](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/9e9e075950119122ab2183bdf9c44dcaa13925d4)  | [bot-edit.html](src/main/resources/templates/bot-edit.html)   |
+|4| [charts](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/79619605f140bfffd3d1f541be2d4ac7849c0aa1)  | [ChartService.java](src/main/java/es/codeurjc/grupo12/scissors_please/service/ChartService.java)   |
+|5| [bot edit](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/28bbbd283e66d73368c78a97bf5579011abbbdde)  | [BotController.java](src/main/java/es/codeurjc/grupo12/scissors_please/controller/web/BotController.java)   |
 
 ---
 
