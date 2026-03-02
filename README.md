@@ -332,15 +332,24 @@ Solo si han cambiado.
 
 1. **Clonar el repositorio**
    ```bash
-   git clone https://github.com/[usuario]/[nombre-repositorio].git
-   cd [nombre-repositorio]
+   git clone --depth 1 https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12
+   cd practica-daw-2025-26-grupo-12
    ```
 
-2. **AQUÍ INDICAR LO SIGUIENTES PASOS**
+2. **Configuración del entorno**
+   Deberás configurar `mysql` para que la aplicación pueda conectarse a la base de datos. Para ello, deberás crear una base de datos llamada `scissors_please` y configurar la contraseña del usuario `root` en el archivo `src/main/resources/application-mysql.properties`.
+
+   Crear un archivo `.env` en la raíz del proyecto con valores reales para las variables especificadas en `.env.example`.
+   
+3. **Compilar e iniciar la aplicación**
+   ```bash
+   mvn clean install
+   mvn spring-boot:run -Dspring-boot.run.profiles=https,mysql -Pmysql
+   ```
 
 #### **Credenciales de prueba**
-- **Usuario Admin**: usuario: `admin`, contraseña: `admin`
-- **Usuario Registrado**: usuario: `user`, contraseña: `user`
+- **Usuario Admin**: usuario: `admin`, contraseña: `admin123`
+- **Usuario Registrado**: usuario: `user`, contraseña: `user123`
 
 ### **Diagrama de Entidades de Base de Datos**
 
