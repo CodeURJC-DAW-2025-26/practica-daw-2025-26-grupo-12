@@ -133,11 +133,21 @@
                             <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
                                 <div>
                                     <div class="fw-semibold">
+                                        {{#myBotId}}
                                         <a href="/bots/detail/{{myBotId}}"
                                             class="text-white text-decoration-none hover-link">{{myBotName}}</a>
+                                        {{/myBotId}}
+                                        {{^myBotId}}
+                                        <span class="text-white">{{myBotName}}</span>
+                                        {{/myBotId}}
                                         <span class="text-secondary opacity-50 mx-1">vs</span>
+                                        {{#opponentBotId}}
                                         <a href="/bots/detail/{{opponentBotId}}"
                                             class="text-white text-decoration-none hover-link">{{opponentName}}</a>
+                                        {{/opponentBotId}}
+                                        {{^opponentBotId}}
+                                        <span class="text-white">{{opponentName}}</span>
+                                        {{/opponentBotId}}
                                         <span class="text-secondary opacity-50 small"> (by <a
                                                 href="/user/profile?user={{opponentOwnerName}}"
                                                 class="text-secondary text-decoration-none hover-link">{{opponentOwnerName}}</a>)</span>
