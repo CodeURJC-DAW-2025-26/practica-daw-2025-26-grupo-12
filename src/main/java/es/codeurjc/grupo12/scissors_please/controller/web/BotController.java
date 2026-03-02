@@ -42,8 +42,19 @@ public class BotController {
       @PageableDefault(size = 10) Pageable pageable,
       Authentication authentication,
       Model model) {
-    User currentUser = userService.getCurrentUser(authentication);
+    User currentUser = null;
+    try {
+      if (authentication != null && authentication.isAuthenticated()) {
+        currentUser = userService.getCurrentUser(authentication);
+      }
+    } catch (Exception e) {
+    }
     User targetUser = resolveTargetUser(user, currentUser);
+    if (targetUser == null) {
+      model.addAttribute("errorMessage", "The user is no longer in the database.");
+      model.addAttribute("errorCode", ErrorConstants.NOT_FOUND_CODE);
+      return "error";
+    }
     boolean showPrivate = canViewPrivate(currentUser, targetUser);
     List<Bot> bots = botService.getBotsForUser(targetUser, showPrivate);
     int bestElo = bots.stream().mapToInt(Bot::getElo).max().orElse(0);
@@ -63,7 +74,9 @@ public class BotController {
     model.addAttribute("totalElements", 0);
     model.addAttribute(
         "userQuery",
-        targetUser.getUsername().equals(currentUser.getUsername()) ? "" : targetUser.getUsername());
+        (currentUser != null && targetUser.getUsername().equals(currentUser.getUsername()))
+            ? ""
+            : targetUser.getUsername());
     return "my-bots";
   }
 
@@ -73,8 +86,17 @@ public class BotController {
       @PageableDefault(size = 10) Pageable pageable,
       Authentication authentication,
       Model model) {
-    User currentUser = userService.getCurrentUser(authentication);
+    User currentUser = null;
+    try {
+      if (authentication != null && authentication.isAuthenticated()) {
+        currentUser = userService.getCurrentUser(authentication);
+      }
+    } catch (Exception e) {
+    }
     User targetUser = resolveTargetUser(user, currentUser);
+    if (targetUser == null) {
+      return "components/bot-page-chunk";
+    }
     boolean showPrivate = canViewPrivate(currentUser, targetUser);
     BotService.BotPage botPage = botService.getBotPage(targetUser, showPrivate, pageable);
     model.addAttribute("bots", botPage.bots());
@@ -264,9 +286,10 @@ public class BotController {
   }
 
   private User resolveTargetUser(String user, User currentUser) {
-    return user == null || user.isBlank()
-        ? currentUser
-        : userService.findByUsername(user).orElse(currentUser);
+    if (user != null && !user.isBlank()) {
+      return userService.findByUsername(user).orElse(null);
+    }
+    return currentUser;
   }
 
   private boolean canManageBot(User currentUser, Bot bot) {
@@ -275,6 +298,7 @@ public class BotController {
   }
 
   private boolean canViewPrivate(User currentUser, User targetUser) {
+    if (currentUser == null || targetUser == null) return false;
     return isAdmin(currentUser) || targetUser.getUsername().equals(currentUser.getUsername());
   }
 
