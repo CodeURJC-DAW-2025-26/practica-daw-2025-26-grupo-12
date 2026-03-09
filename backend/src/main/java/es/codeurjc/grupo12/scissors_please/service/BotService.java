@@ -1,5 +1,10 @@
 package es.codeurjc.grupo12.scissors_please.service;
 
+import es.codeurjc.grupo12.scissors_please.common.pagination.PageResult;
+import es.codeurjc.grupo12.scissors_please.common.pagination.PageableUtils;
+import es.codeurjc.grupo12.scissors_please.config.ErrorConstants;
+import es.codeurjc.grupo12.scissors_please.exception.BotAccessDeniedException;
+import es.codeurjc.grupo12.scissors_please.exception.BotNotFoundException;
 import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.repository.BotRepository;
@@ -11,43 +16,133 @@ import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @Transactional
 public class BotService {
   private static final int MAX_PAGE_SIZE = 20;
   @Autowired private BotRepository botRepository;
+  @Autowired private UserService userService;
+  @Autowired private ImageService imageService;
 
-  @Transactional(readOnly = true)
-  public BotPage getBotPage(User user, boolean includePrivate, Pageable pageable) {
-    Long ownerId = requireOwnerId(user);
-    int safePage = Math.max(pageable.getPageNumber(), 0);
-    int safeSize = Math.min(Math.max(pageable.getPageSize(), 1), MAX_PAGE_SIZE);
-    Pageable safePageable = PageRequest.of(safePage, safeSize);
+  public boolean canManageBot(User user, Bot bot) {
+    if (user == null || bot == null) {
+      return false;
+    }
+    if (userService.isAdmin(user)) {
+      return true;
+    }
+    return bot.getOwnerId().equals(user.getId());
+  }
 
-    Page<Bot> pageResult =
-        includePrivate
-            ? botRepository.findByOwnerIdAndDeletedFalseOrderByIdDesc(ownerId, safePageable)
-            : botRepository.findByOwnerIdAndIsPublicTrueAndDeletedFalseOrderByIdDesc(
-                ownerId, safePageable);
+  public Bot getUserBot(Optional<User> requesterUser, Long botId) {
+    Bot bot =
+        botRepository
+            .findById(botId)
+            .orElseThrow(() -> new BotNotFoundException(ErrorConstants.BOT_NOT_FOUND));
 
-    List<Bot> bots = pageResult.getContent();
-    long totalElements = pageResult.getTotalElements();
-    int fromItem = bots.isEmpty() ? 0 : (safePage * safeSize) + 1;
-    int toItem = bots.isEmpty() ? 0 : fromItem + bots.size() - 1;
+    if (bot.isDeleted()) {
+      throw new BotNotFoundException(ErrorConstants.BOT_NOT_FOUND);
+    }
 
-    return new BotPage(bots, safePage + 1, pageResult.hasNext(), totalElements, fromItem, toItem);
+    if (bot.isPublic()) {
+      return bot;
+    }
+
+    if (requesterUser.isEmpty()) {
+      throw new BotAccessDeniedException(ErrorConstants.ACCESS_DENIED);
+    }
+
+    User targetUser = userService.getUserById(bot.getOwnerId());
+
+    if (userService.canViewPrivateBots(requesterUser.get(), targetUser)) {
+      return bot;
+    }
+
+    throw new BotAccessDeniedException(ErrorConstants.ACCESS_DENIED);
   }
 
   @Transactional(readOnly = true)
-  public BotPage getAdminBotPage(String query, String visibility, Pageable pageable) {
-    int safePage = Math.max(pageable.getPageNumber(), 0);
-    int safeSize = Math.min(Math.max(pageable.getPageSize(), 1), MAX_PAGE_SIZE);
-    Pageable safePageable = PageRequest.of(safePage, safeSize);
+  public Bot getEditableBotOrThrow(Long botId, User actingUser) {
+    Bot bot =
+        getBotById(botId).orElseThrow(() -> new BotNotFoundException(ErrorConstants.BOT_NOT_FOUND));
+
+    if (userService.isAdmin(actingUser)) {
+      return bot;
+    }
+
+    Long actingUserId = requireOwnerId(actingUser);
+    if (bot.getOwnerId() == null || !bot.getOwnerId().equals(actingUserId)) {
+      throw new BotAccessDeniedException(ErrorConstants.ACCESS_DENIED);
+    }
+
+    return bot;
+  }
+
+  @Transactional(readOnly = true)
+  public PageResult<Bot> getUserBots(Optional<Long> requesterId, Long targetId, Pageable pageable) {
+
+    User targetUser = userService.getUserById(targetId);
+    if (targetUser == null) throw new IllegalArgumentException("Target user does not exist");
+
+    User requesterUser = requesterId.map(userService::getUserById).orElse(null);
+    if (requesterId.isPresent() && requesterUser == null)
+      throw new IllegalArgumentException("Requester user does not exist");
+
+    boolean canViewPrivate = userService.canViewPrivateBots(requesterUser, targetUser);
+
+    return getBotPage(targetUser, canViewPrivate, pageable);
+  }
+
+  @Transactional(readOnly = true)
+  public List<Bot> getBotsForUser(User user, boolean includePrivate) {
+    Long ownerId = requireOwnerId(user);
+    if (includePrivate) {
+      return new ArrayList<>(botRepository.findByOwnerIdAndDeletedFalse(ownerId));
+    }
+
+    return new ArrayList<>(botRepository.findByOwnerIdAndIsPublicTrueAndDeletedFalse(ownerId));
+  }
+
+  @Transactional(readOnly = true)
+  public List<Bot> getTopBotsForUser(User user, boolean includePrivate, int limit) {
+    if (limit <= 0) {
+      return new ArrayList<>();
+    }
+
+    List<Bot> bots = getBotsForUser(user, includePrivate);
+    bots.sort(Comparator.comparingInt(Bot::getElo).reversed());
+    int end = Math.min(limit, bots.size());
+    return new ArrayList<>(bots.subList(0, end));
+  }
+
+  @Transactional(readOnly = true)
+  public int getMaxEloForUser(Long userId) {
+    Integer maxElo = botRepository.findMaxEloByOwnerId(userId);
+    return (maxElo != null) ? maxElo : 0;
+  }
+
+  @Transactional(readOnly = true)
+  public int getTotalBotsForUser(Long userId) {
+    return botRepository.countByOwnerId(userId);
+  }
+
+  @Transactional(readOnly = true)
+  public Long getLatestBotIdForUser(Long userId) {
+    Page<Bot> pageResult =
+        botRepository.findByOwnerIdAndDeletedFalseOrderByIdDesc(userId, Pageable.ofSize(1));
+    return pageResult.hasContent() ? pageResult.getContent().get(0).getId() : null;
+  }
+
+  @Transactional(readOnly = true)
+  public PageResult<Bot> getAdminBotPage(String query, String visibility, Pageable pageable) {
+    Pageable safePageable = PageableUtils.sanitize(pageable, MAX_PAGE_SIZE);
+    int safePage = safePageable.getPageNumber();
+    int safeSize = safePageable.getPageSize();
 
     String normalizedQuery = (query != null) ? query.trim() : "";
     boolean hasQuery = !normalizedQuery.isBlank();
@@ -78,29 +173,88 @@ public class BotService {
     int fromItem = bots.isEmpty() ? 0 : (safePage * safeSize) + 1;
     int toItem = bots.isEmpty() ? 0 : fromItem + bots.size() - 1;
 
-    return new BotPage(bots, safePage + 1, pageResult.hasNext(), totalElements, fromItem, toItem);
+    return new PageResult<>(
+        bots, safePage + 1, pageResult.hasNext(), totalElements, fromItem, toItem);
   }
 
   @Transactional(readOnly = true)
-  public List<Bot> getBotsForUser(User user, boolean includePrivate) {
+  public Long findRankingPositionById(Long id) {
+    return botRepository.findRankingPositionById(id);
+  }
+
+  @Transactional(readOnly = true)
+  public UserGlobalRanking getUserGlobalRanking(User user) {
     Long ownerId = requireOwnerId(user);
-    if (includePrivate) {
-      return new ArrayList<>(botRepository.findByOwnerIdAndDeletedFalse(ownerId));
+    List<Bot> allBots = botRepository.findByDeletedFalse();
+    Map<Long, Integer> bestEloByOwner = new HashMap<>();
+
+    for (Bot bot : allBots) {
+      Long botOwnerId = bot.getOwnerId();
+      if (botOwnerId == null) {
+        continue;
+      }
+      bestEloByOwner.merge(botOwnerId, bot.getElo(), Math::max);
     }
 
-    return new ArrayList<>(botRepository.findByOwnerIdAndIsPublicTrueAndDeletedFalse(ownerId));
+    Integer userBestElo = bestEloByOwner.get(ownerId);
+    if (userBestElo == null) {
+      return new UserGlobalRanking(false, 0, bestEloByOwner.size(), 0);
+    }
+
+    long usersWithHigherElo =
+        bestEloByOwner.values().stream().filter(elo -> elo > userBestElo).count();
+    int rank = (int) usersWithHigherElo + 1;
+    return new UserGlobalRanking(true, rank, bestEloByOwner.size(), userBestElo);
   }
 
-  @Transactional(readOnly = true)
-  public List<Bot> getTopBotsForUser(User user, boolean includePrivate, int limit) {
-    if (limit <= 0) {
-      return new ArrayList<>();
-    }
+  public Bot createBot(
+      User actingUser,
+      String name,
+      String description,
+      String tags,
+      MultipartFile image,
+      boolean isPublic) {
+    Bot bot = new Bot();
 
-    List<Bot> bots = getBotsForUser(user, includePrivate);
-    bots.sort(Comparator.comparingInt(Bot::getElo).reversed());
-    int end = Math.min(limit, bots.size());
-    return new ArrayList<>(bots.subList(0, end));
+    bot.setName(name);
+    bot.setDescription(description);
+    bot.setOwnerId(requireOwnerId(actingUser));
+    bot.setPublic(isPublic);
+    bot.setTags(parseTags(tags));
+    imageService.handleImageUpload(bot, image);
+
+    return botRepository.save(bot);
+  }
+
+  public Bot updateBot(
+      User actingUser,
+      long botId,
+      String name,
+      String description,
+      String code,
+      MultipartFile image,
+      String tags,
+      boolean isPublic) {
+    Bot bot = getEditableBotOrThrow(botId, actingUser);
+
+    bot.setName(name != null ? name : "");
+    bot.setDescription(description != null ? description : "");
+    bot.setCode(code != null ? code : "");
+    bot.setTags(parseTags(tags));
+    bot.setPublic(isPublic);
+    imageService.handleImageUpload(bot, image);
+
+    return botRepository.save(bot);
+  }
+
+  public void deleteBot(User requester, Long botId) {
+    Bot bot = botRepository.findById(botId).orElseThrow();
+    if (canManageBot(requester, bot)) {
+      bot.setDeleted(true);
+      botRepository.save(bot);
+    } else {
+      throw new BotAccessDeniedException(ErrorConstants.ACCESS_DENIED);
+    }
   }
 
   @Transactional
@@ -150,60 +304,20 @@ public class BotService {
   }
 
   @Transactional(readOnly = true)
-  public UserGlobalRanking getUserGlobalRanking(User user) {
+  private PageResult<Bot> getBotPage(User user, boolean includePrivate, Pageable pageable) {
     Long ownerId = requireOwnerId(user);
-    List<Bot> allBots = botRepository.findByDeletedFalse();
-    Map<Long, Integer> bestEloByOwner = new HashMap<>();
+    Pageable safePageable = PageableUtils.sanitize(pageable, MAX_PAGE_SIZE);
 
-    for (Bot bot : allBots) {
-      Long botOwnerId = bot.getOwnerId();
-      if (botOwnerId == null) {
-        continue;
-      }
-      bestEloByOwner.merge(botOwnerId, bot.getElo(), Math::max);
-    }
+    Page<Bot> pageResult =
+        includePrivate
+            ? botRepository.findByOwnerIdAndDeletedFalseOrderByIdDesc(ownerId, safePageable)
+            : botRepository.findByOwnerIdAndIsPublicTrueAndDeletedFalseOrderByIdDesc(
+                ownerId, safePageable);
 
-    Integer userBestElo = bestEloByOwner.get(ownerId);
-    if (userBestElo == null) {
-      return new UserGlobalRanking(false, 0, bestEloByOwner.size(), 0);
-    }
-
-    long usersWithHigherElo =
-        bestEloByOwner.values().stream().filter(elo -> elo > userBestElo).count();
-    int rank = (int) usersWithHigherElo + 1;
-    return new UserGlobalRanking(true, rank, bestEloByOwner.size(), userBestElo);
+    return PageResult.from(pageResult);
   }
 
-  public Bot createBot(Bot bot, User owner) {
-    if (owner.getRoles() != null && owner.getRoles().contains("ADMIN")) {
-      throw new IllegalArgumentException("Admin users cannot own bots");
-    }
-    bot.setOwnerId(requireOwnerId(owner));
-    return botRepository.save(bot);
-  }
-
-  // This methods are identical but conceptually they might be different in a near
-  // future
-  public Bot updateBot(Bot bot, User actingUser) {
-    if (bot.getOwnerId() == null) {
-      if (actingUser.getRoles() != null && actingUser.getRoles().contains("ADMIN")) {
-        throw new IllegalArgumentException("Admin users cannot own bots");
-      }
-      bot.setOwnerId(requireOwnerId(actingUser));
-    }
-    return botRepository.save(bot);
-  }
-
-  public void deleteBot(Long id) {
-    Optional<Bot> bot = botRepository.findById(id);
-    if (bot.isPresent()) {
-      bot.get().setDeleted(true);
-      botRepository.save(bot.get());
-    }
-  }
-
-  @Transactional(readOnly = true)
-  public Optional<Bot> getBotById(Long id) {
+  private Optional<Bot> getBotById(Long id) {
     return botRepository.findById(id).filter(bot -> !bot.isDeleted());
   }
 
@@ -214,39 +328,19 @@ public class BotService {
     return user.getId();
   }
 
-  public Long findRankingPositionById(Long id) {
-    return botRepository.findRankingPositionById(id);
-  }
-
-  @Transactional(readOnly = true)
-  public List<Bot> searchBots(String query, String visibility) {
-    boolean hasQuery = query != null && !query.isBlank();
-
-    if ("public".equalsIgnoreCase(visibility)) {
-      return hasQuery
-          ? botRepository.findByNameContainingIgnoreCaseAndIsPublicAndDeletedFalse(query, true)
-          : botRepository.findByIsPublicAndDeletedFalse(true);
+  private List<String> parseTags(String tags) {
+    if (tags == null || tags.isBlank()) {
+      return new ArrayList<>();
     }
-
-    if ("private".equalsIgnoreCase(visibility)) {
-      return hasQuery
-          ? botRepository.findByNameContainingIgnoreCaseAndIsPublicAndDeletedFalse(query, false)
-          : botRepository.findByIsPublicAndDeletedFalse(false);
+    List<String> parsedTags = new ArrayList<>();
+    for (String tag : tags.split(",")) {
+      String trimmedTag = tag.trim();
+      if (!trimmedTag.isEmpty()) {
+        parsedTags.add(trimmedTag);
+      }
     }
-
-    return hasQuery
-        ? botRepository.findByNameContainingIgnoreCaseAndDeletedFalse(query)
-        : botRepository.findAllByDeletedFalseOrderByIdDesc(null).getContent();
+    return parsedTags;
   }
-
-  @Transactional(readOnly = true)
-  public record BotPage(
-      List<Bot> bots,
-      int nextPage,
-      boolean hasMore,
-      long totalElements,
-      int fromItem,
-      int toItem) {}
 
   public record UserGlobalRanking(boolean ranked, int rank, int totalUsers, int bestElo) {}
 }

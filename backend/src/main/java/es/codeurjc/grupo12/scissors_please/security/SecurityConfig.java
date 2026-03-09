@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.session.SessionRegistry;
@@ -11,11 +12,44 @@ import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
+  private static final String[] NON_USER_ROUTES = {
+    "/",
+    "/home",
+    "/login",
+    "/sign-up",
+    "/register",
+    "/css/**",
+    "/js/**",
+    "/images/**",
+    "/tournament-images/**",
+    "/bot-images/**",
+    "/user-images/**",
+    "/h2-console/**",
+    "/matches/list",
+    "/matches/list/page",
+    "/matches/stats",
+    "/tournaments",
+    "/tournaments/page",
+    "/tournaments/detail/**",
+    "/tournaments/results"
+  };
+
+  private static final String[] USER_ROUTES = {"/user/profile"};
+
+  private static final String[] USER_AND_NOT_ADMIN_ROUTES = {
+    "/bots/my-bots", "/bots/my-bots/page", "/bots/create", "/bots"
+  };
+
+  private static final String[] USER_OR_ADMIN_BOT_ROUTES = {"/bots/*", "/bots/*/edit"};
+
+  private static final String[] ADMIN_ROUTES = {"/admin/**", "/api/admin/**"};
 
   @Autowired private CustomOAuth2UserService customOAuth2UserService;
   @Autowired private LoginFailureHandler loginFailureHandler;
@@ -41,38 +75,20 @@ public class SecurityConfig {
         .authorizeHttpRequests(
             authz ->
                 authz
-                    .requestMatchers(
-                        "/",
-                        "/home",
-                        "/login",
-                        "/sign-up",
-                        "/register",
-                        "/css/**",
-                        "/js/**",
-                        "/images/**",
-                        "/tournament-images/**",
-                        "/bot-images/**",
-                        "/user-images/**",
-                        "/h2-console/**")
+                    .requestMatchers(NON_USER_ROUTES)
                     .permitAll()
-                    .requestMatchers(
-                        HttpMethod.GET,
-                        "/matches/list",
-                        "/matches/list/page",
-                        "/matches/stats",
-                        "/tournaments",
-                        "/tournaments/page",
-                        "/tournaments/detail/**",
-                        "/tournaments/results",
-                        "/bots/detail/**",
-                        "/bots/my-bots",
-                        "/bots/my-bots/page",
-                        "/user/profile")
+                    .requestMatchers(ADMIN_ROUTES)
+                    .hasRole("ADMIN")
+                    .requestMatchers(USER_AND_NOT_ADMIN_ROUTES)
+                    .access(
+                        new WebExpressionAuthorizationManager(
+                            "hasRole('USER') and !hasRole('ADMIN')"))
+                    .requestMatchers(HttpMethod.GET, "/bots/*")
                     .permitAll()
-                    .requestMatchers("/admin/**")
-                    .hasRole("ADMIN")
-                    .requestMatchers("/api/admin/**")
-                    .hasRole("ADMIN")
+                    .requestMatchers(USER_OR_ADMIN_BOT_ROUTES)
+                    .hasAnyRole("USER", "ADMIN")
+                    .requestMatchers(USER_ROUTES)
+                    .hasRole("USER")
                     .anyRequest()
                     .authenticated())
         .formLogin(

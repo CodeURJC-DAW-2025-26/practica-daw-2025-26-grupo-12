@@ -1,6 +1,8 @@
 package es.codeurjc.grupo12.scissors_please.controller.web;
 
+import es.codeurjc.grupo12.scissors_please.common.pagination.PageResult;
 import es.codeurjc.grupo12.scissors_please.config.ErrorConstants;
+import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.Image;
 import es.codeurjc.grupo12.scissors_please.model.Tournament;
 import es.codeurjc.grupo12.scissors_please.model.TournamentStatus;
@@ -404,7 +406,7 @@ public class AdminController {
 
   private void populateBotsSearchModel(
       Model model, String searchQuery, String visibility, Pageable pageable) {
-    BotService.BotPage botPage = botService.getAdminBotPage(searchQuery, visibility, pageable);
+    PageResult<Bot> botPage = botService.getAdminBotPage(searchQuery, visibility, pageable);
 
     model.addAttribute("searchQuery", searchQuery);
     model.addAttribute("visibilityFilter", visibility);
@@ -412,7 +414,7 @@ public class AdminController {
     model.addAttribute("visPublic", visibility.equals("public"));
     model.addAttribute("visPrivate", visibility.equals("private"));
 
-    model.addAttribute("bots", botPage.bots());
+    model.addAttribute("bots", botPage.items());
     model.addAttribute("nextPage", botPage.nextPage());
     model.addAttribute("hasMore", botPage.hasMore());
     model.addAttribute("totalElements", botPage.totalElements());

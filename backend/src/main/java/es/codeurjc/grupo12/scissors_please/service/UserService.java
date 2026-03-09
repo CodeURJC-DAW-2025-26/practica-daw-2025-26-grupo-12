@@ -37,6 +37,15 @@ public class UserService {
       int fromItem,
       int toItem) {}
 
+  public boolean canViewPrivateBots(User requester, User target) {
+    if (requester == null || target == null) return false;
+
+    boolean isOwner = requester.getId() != null && requester.getId().equals(target.getId());
+    boolean isAdmin = requester.getRoles() != null && requester.getRoles().contains("ADMIN");
+
+    return isOwner || isAdmin;
+  }
+
   @Transactional(readOnly = true)
   public UserPage getUserPage(Pageable pageable) {
     return getUserPage("", UserStatusFilter.ALL, pageable);

@@ -22,7 +22,7 @@
             <div class="col-lg-8">
                 <div class="card p-4">
                     <h2 class="h5 fw-bold mb-3">Bot Details</h2>
-                    <form id="botCreateForm" method="post" action="/bots/create" enctype="multipart/form-data">
+                    <form id="botCreateForm" method="post" action="/bots" enctype="multipart/form-data">
                         <input type="hidden" name="_csrf" value="{{_csrf.token}}">
 
                         <input type="file" id="realBotImage" name="image" accept="image/*" class="d-none">
