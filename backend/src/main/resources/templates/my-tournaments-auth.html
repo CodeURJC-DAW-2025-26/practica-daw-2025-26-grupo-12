@@ -13,12 +13,19 @@
                 <p class="text-secondary mb-1 small text-uppercase">Season 2026</p>
                 <h1 class="h3 fw-bold mb-0">My Tournaments</h1>
             </div>
-            <form class="d-flex flex-column flex-md-row gap-2" method="get" action="/tournaments/my-tournaments">
-                <div class="input-group input-group-sm">
-                    <span class="input-group-text">Search</span>
-                    <input type="text" class="form-control" name="q" value="{{search}}" placeholder="Tournament name">
+        </div>
+
+        <div class="card p-4 mb-4">
+            <form id="my-tournament-search-form" method="get" action="/tournaments/my-tournaments" class="row g-3 align-items-center">
+                <div class="col-lg-9">
+                    <label for="my-tournament-search" class="form-label text-uppercase small mb-1">Search tournaments</label>
+                    <input id="my-tournament-search" type="search" name="q" class="form-control"
+                        placeholder="Search by tournament name..." value="{{search}}" autocomplete="off">
                 </div>
-                <button class="btn btn-outline-muted btn-sm" type="submit">Apply</button>
+                <div class="col-lg-3 d-grid d-lg-flex justify-content-lg-end gap-2">
+                    <button type="submit" class="btn btn-primary btn-sm px-3 mt-lg-4">Search</button>
+                    <a href="/tournaments/my-tournaments" class="btn btn-outline-muted btn-sm px-3 mt-lg-4">Clear</a>
+                </div>
             </form>
         </div>
 

@@ -3,6 +3,7 @@ package es.codeurjc.grupo12.scissors_please.service;
 import es.codeurjc.grupo12.scissors_please.common.pagination.PageableUtils;
 import es.codeurjc.grupo12.scissors_please.config.ErrorConstants;
 import es.codeurjc.grupo12.scissors_please.exception.BotAccessDeniedException;
+import es.codeurjc.grupo12.scissors_please.exception.BotImageUploadException;
 import es.codeurjc.grupo12.scissors_please.exception.BotNotFoundException;
 import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.User;
@@ -212,7 +213,9 @@ public class BotService {
     bot.setOwnerId(requireOwnerId(actingUser));
     bot.setPublic(isPublic);
     bot.setTags(parseTags(tags));
-    imageService.handleImageUpload(bot, image);
+    if (!imageService.handleImageUpload(bot, image)) {
+      throw new BotImageUploadException(ErrorConstants.IMAGE_ERROR_UPLOAD);
+    }
 
     return botRepository.save(bot);
   }
@@ -233,7 +236,9 @@ public class BotService {
     bot.setCode(code != null ? code : "");
     bot.setTags(parseTags(tags));
     bot.setPublic(isPublic);
-    imageService.handleImageUpload(bot, image);
+    if (!imageService.handleImageUpload(bot, image)) {
+      throw new BotImageUploadException(ErrorConstants.IMAGE_ERROR_UPLOAD);
+    }
 
     return botRepository.save(bot);
   }

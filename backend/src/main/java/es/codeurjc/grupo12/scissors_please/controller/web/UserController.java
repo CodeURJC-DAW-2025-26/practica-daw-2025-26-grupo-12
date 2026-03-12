@@ -53,20 +53,8 @@ public class UserController {
     }
 
     boolean ownProfile = isOwnProfile(currentUser, targetUser);
-    boolean includePrivateBots =
-        currentUser != null && (ownProfile || userService.isAdmin(currentUser));
-
-    List<Bot> allBots = botService.getBotsForUser(targetUser, includePrivateBots);
-    List<ProfileBotView> topBots =
-        botService.getTopBotsForUser(targetUser, includePrivateBots, TOP_BOTS_LIMIT).stream()
-            .map(this::toProfileBotView)
-            .toList();
-
-    List<MatchService.UserMatchItem> userMatches =
-        matchService.getUserHomeMatches(requireUserId(targetUser), Integer.MAX_VALUE);
-    int wins =
-        (int) userMatches.stream().filter(match -> "win".equalsIgnoreCase(match.result())).count();
-    int winRate = userMatches.isEmpty() ? 0 : (int) Math.round((wins * 100.0) / userMatches.size());
+    boolean isAdmin = currentUser != null && userService.isAdmin(currentUser);
+    boolean includePrivateBots = currentUser != null && ownProfile;
 
     model.addAttribute("userId", targetUser.getId());
     model.addAttribute("loggedIn", currentUser != null);
@@ -82,14 +70,32 @@ public class UserController {
     model.addAttribute("showPhotoActions", ownProfile);
     model.addAttribute("showBackToMyProfile", !ownProfile && currentUser != null);
     model.addAttribute("myProfileHref", "/user/profile");
-    model.addAttribute("botsPageHref", buildBotsPageHref(currentUser, targetUser));
+    model.addAttribute("isAdmin", isAdmin);
 
-    model.addAttribute("totalBots", allBots.size());
-    model.addAttribute("totalMatches", userMatches.size());
-    model.addAttribute("winRate", winRate);
-    model.addAttribute("wins", wins);
-    model.addAttribute("topBots", topBots);
-    model.addAttribute("recentMatches", userMatches.stream().limit(RECENT_MATCHES_LIMIT).toList());
+    if (!isAdmin) {
+      model.addAttribute("botsPageHref", buildBotsPageHref(currentUser, targetUser));
+
+      List<Bot> allBots = botService.getBotsForUser(targetUser, includePrivateBots);
+      List<ProfileBotView> topBots =
+          botService.getTopBotsForUser(targetUser, includePrivateBots, TOP_BOTS_LIMIT).stream()
+              .map(this::toProfileBotView)
+              .toList();
+      List<MatchService.UserMatchItem> userMatches =
+          matchService.getUserHomeMatches(requireUserId(targetUser), Integer.MAX_VALUE);
+      int wins =
+          (int)
+              userMatches.stream().filter(match -> "win".equalsIgnoreCase(match.result())).count();
+      int winRate =
+          userMatches.isEmpty() ? 0 : (int) Math.round((wins * 100.0) / userMatches.size());
+
+      model.addAttribute("totalBots", allBots.size());
+      model.addAttribute("totalMatches", userMatches.size());
+      model.addAttribute("winRate", winRate);
+      model.addAttribute("wins", wins);
+      model.addAttribute("topBots", topBots);
+      model.addAttribute(
+          "recentMatches", userMatches.stream().limit(RECENT_MATCHES_LIMIT).toList());
+    }
 
     return "user-detail";
   }

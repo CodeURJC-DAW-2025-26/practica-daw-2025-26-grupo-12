@@ -6,6 +6,9 @@ import es.codeurjc.grupo12.scissors_please.service.BotService;
 import es.codeurjc.grupo12.scissors_please.service.ChartService;
 import es.codeurjc.grupo12.scissors_please.service.UserService;
 import java.util.Base64;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -137,46 +140,94 @@ public class BotController {
 
   @GetMapping("/my-bots")
   public String myBotsPage(
-      @PageableDefault(size = 10) Pageable pageable, Authentication authentication, Model model) {
+      @RequestParam(required = false) String user,
+      @PageableDefault(size = 10) Pageable pageable,
+      Authentication authentication,
+      Model model) {
     User currentUser = userService.getCurrentUser(authentication);
+    User targetUser = resolveTargetUser(user, currentUser);
+    if (targetUser == null) {
+      return "error";
+    }
 
-    int bestElo = botService.getMaxEloForUser(currentUser.getId());
-    int totalBots = botService.getTotalBotsForUser(currentUser.getId());
-    Long latestBotId = botService.getLatestBotIdForUser(currentUser.getId());
+    boolean canManage = userService.canViewPrivateBots(currentUser, targetUser);
+    boolean ownBotsView =
+        targetUser.getId() != null && targetUser.getId().equals(currentUser.getId());
+    List<Bot> visibleBots = botService.getBotsForUser(targetUser, canManage);
+
+    int bestElo = visibleBots.stream().mapToInt(Bot::getElo).max().orElse(0);
+    int totalBots = visibleBots.size();
+    Long latestBotId =
+        visibleBots.stream()
+            .map(Bot::getId)
+            .filter(Objects::nonNull)
+            .max(Comparator.naturalOrder())
+            .orElse(null);
 
     model.addAttribute("latestBotId", latestBotId);
     model.addAttribute("hasLatestBot", latestBotId != null);
     model.addAttribute("totalBots", totalBots);
     model.addAttribute("bestElo", bestElo);
-    model.addAttribute("username", currentUser.getUsername());
+    model.addAttribute("username", targetUser.getUsername());
+    model.addAttribute("canManage", canManage);
+    model.addAttribute("ownBotsView", ownBotsView);
     model.addAttribute("size", Math.max(pageable.getPageSize(), 1));
     model.addAttribute("fromItem", 0);
     model.addAttribute("toItem", 0);
     model.addAttribute("totalElements", 0);
+    model.addAttribute(
+        "userQuery",
+        targetUser.getId() != null && targetUser.getId().equals(currentUser.getId())
+            ? ""
+            : targetUser.getUsername());
     return "my-bots";
   }
 
   @GetMapping("/my-bots/page")
   public String myBotsChunk(
-      @PageableDefault(size = 5) Pageable pageable, Authentication authentication, Model model) {
+      @RequestParam(required = false) String user,
+      @PageableDefault(size = 5) Pageable pageable,
+      Authentication authentication,
+      Model model) {
 
     User currentUser = userService.getCurrentUser(authentication);
+    User targetUser = resolveTargetUser(user, currentUser);
+    if (targetUser == null) {
+      model.addAttribute("bots", List.of());
+      model.addAttribute("showEmpty", true);
+      model.addAttribute("canManage", false);
+      model.addAttribute("nextPage", 1);
+      model.addAttribute("hasMore", false);
+      model.addAttribute("totalElements", 0);
+      model.addAttribute("fromItem", 0);
+      model.addAttribute("toItem", 0);
+      return "components/bot-page-chunk";
+    }
+
+    boolean canManage = userService.canViewPrivateBots(currentUser, targetUser);
 
     Page<Bot> botPage =
-        botService.getUserBots(Optional.of(currentUser.getId()), currentUser.getId(), pageable);
+        botService.getUserBots(Optional.of(currentUser.getId()), targetUser.getId(), pageable);
 
     int fromItem = botPage.isEmpty() ? 0 : (int) botPage.getPageable().getOffset() + 1;
     int toItem = botPage.isEmpty() ? 0 : fromItem + botPage.getNumberOfElements() - 1;
 
     model.addAttribute("bots", botPage.getContent());
     model.addAttribute("showEmpty", pageable.getPageNumber() == 0 && botPage.isEmpty());
-    model.addAttribute("canManage", true);
+    model.addAttribute("canManage", canManage);
     model.addAttribute("nextPage", botPage.getNumber() + 1);
     model.addAttribute("hasMore", botPage.hasNext());
     model.addAttribute("totalElements", botPage.getTotalElements());
     model.addAttribute("fromItem", fromItem);
     model.addAttribute("toItem", toItem);
     return "components/bot-page-chunk";
+  }
+
+  private User resolveTargetUser(String username, User currentUser) {
+    if (username == null || username.isBlank()) {
+      return currentUser;
+    }
+    return userService.findByUsername(username.trim()).orElse(null);
   }
 
   private boolean isAuthenticated(Authentication authentication) {

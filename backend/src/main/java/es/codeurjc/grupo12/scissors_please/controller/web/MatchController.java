@@ -207,19 +207,12 @@ public class MatchController {
   }
 
   @GetMapping("/recent")
-  public String recentMatches(
-      Authentication authentication,
-      @RequestParam(name = "participation", required = false) String participationFilter,
-      Model model) {
+  public String recentMatches(Authentication authentication, Model model) {
     Long userId = userService.getCurrentUser(authentication).getId();
-    MatchService.UserRecentMatchSection section =
-        matchService.getUserRecentMatchSection(userId, participationFilter);
+    MatchService.UserRecentMatchSection section = matchService.getUserRecentMatchSection(userId);
 
     model.addAttribute("matches", section.matches());
     model.addAttribute("hasMatches", !section.matches().isEmpty());
-    model.addAttribute("selectedAll", section.selectedAll());
-    model.addAttribute("selectedPlayed", section.selectedPlayed());
-    model.addAttribute("selectedNotPlayed", section.selectedNotPlayed());
     return "recent-matches";
   }
 

@@ -107,6 +107,7 @@
                             <div class="col-6">
                                 <form id="deleteBotForm" method="post" action="">
                                     <input type="hidden" name="_csrf" value="{{_csrf.token}}">
+                                    <input type="hidden" name="_method" value="delete">
                                     <input type="hidden" name="q" value="{{searchQuery}}">
                                     <input type="hidden" name="visibility" value="{{visibilityFilter}}">
                                     <button type="submit" class="btn btn-danger w-100 py-2 fw-medium">Delete Forever</button>

@@ -39,11 +39,6 @@ public class UserService {
   }
 
   @Transactional(readOnly = true)
-  public Page<User> getUserPage(Pageable pageable) {
-    return getUserPage("", UserStatusFilter.ALL, pageable);
-  }
-
-  @Transactional(readOnly = true)
   public Page<User> getUserPage(String query, UserStatusFilter statusFilter, Pageable pageable) {
     int safePage = Math.max(pageable.getPageNumber(), 0);
     int safeSize = Math.min(Math.max(pageable.getPageSize(), 1), MAX_PAGE_SIZE);
@@ -124,21 +119,6 @@ public class UserService {
   }
 
   @Transactional(readOnly = true)
-  public Optional<User> findByEmail(String email) {
-    return userRepository.findByEmailAndDeleteDateIsNull(email);
-  }
-
-  @Transactional(readOnly = true)
-  public Optional<User> findByUsernameIncludingDeleted(String username) {
-    return userRepository.findByUsername(username);
-  }
-
-  @Transactional(readOnly = true)
-  public Optional<User> findByEmailIncludingDeleted(String email) {
-    return userRepository.findByEmail(email);
-  }
-
-  @Transactional(readOnly = true)
   public User getUserById(Long id) {
     return userRepository
         .findById(id)
@@ -160,47 +140,6 @@ public class UserService {
 
   public List<MonthlyUserCount> getMonthlyUserCount() {
     return userRepository.countUsersByMonth();
-  }
-
-  @Transactional(readOnly = true)
-  public List<User> getAllUsers() {
-    return userRepository.findAllByDeleteDateIsNull();
-  }
-
-  @Transactional(readOnly = true)
-  public List<User> searchUsers(String query) {
-    return searchUsers(query, UserStatusFilter.ALL);
-  }
-
-  @Transactional(readOnly = true)
-  public List<User> searchUsers(String query, UserStatusFilter statusFilter) {
-    UserStatusFilter effectiveStatusFilter =
-        statusFilter == null ? UserStatusFilter.ALL : statusFilter;
-    if (query == null || query.isBlank()) {
-      return switch (effectiveStatusFilter) {
-        case ALL -> userRepository.findTop25ByDeleteDateIsNullOrderByUsernameAsc();
-        case BLOCKED ->
-            userRepository.findTop25ByDeleteDateIsNullAndBlockedOrderByUsernameAsc(true);
-        case ACTIVE ->
-            userRepository.findTop25ByDeleteDateIsNullAndBlockedOrderByUsernameAsc(false);
-      };
-    }
-
-    String normalizedQuery = query.trim();
-    return switch (effectiveStatusFilter) {
-      case ALL ->
-          userRepository
-              .findTop25ByDeleteDateIsNullAndUsernameContainingIgnoreCaseOrDeleteDateIsNullAndEmailContainingIgnoreCaseOrderByUsernameAsc(
-                  normalizedQuery, normalizedQuery);
-      case BLOCKED ->
-          userRepository
-              .findTop25ByDeleteDateIsNullAndBlockedAndUsernameContainingIgnoreCaseOrDeleteDateIsNullAndBlockedAndEmailContainingIgnoreCaseOrderByUsernameAsc(
-                  true, normalizedQuery, true, normalizedQuery);
-      case ACTIVE ->
-          userRepository
-              .findTop25ByDeleteDateIsNullAndBlockedAndUsernameContainingIgnoreCaseOrDeleteDateIsNullAndBlockedAndEmailContainingIgnoreCaseOrderByUsernameAsc(
-                  false, normalizedQuery, false, normalizedQuery);
-    };
   }
 
   @Transactional(readOnly = true)

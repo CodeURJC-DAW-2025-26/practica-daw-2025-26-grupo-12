@@ -58,10 +58,13 @@
                     <a href="{{myProfileHref}}" class="btn btn-outline-muted btn-sm">My Profile</a>
                     {{/showBackToMyProfile}}
 
+                    {{^isAdmin}}
                     <a href="{{botsPageHref}}" class="btn btn-primary btn-sm">View Bots</a>
+                    {{/isAdmin}}
                 </div>
             </div>
 
+            {{^isAdmin}}
             <div class="row g-4 mb-5">
                 <div class="col-md-4">
                     <div class="card p-3 stat-card h-100">
@@ -85,7 +88,9 @@
                     </div>
                 </div>
             </div>
+            {{/isAdmin}}
 
+            {{^isAdmin}}
             <div class="row g-4">
                 <div class="col-lg-7">
                     <div class="card p-4">
@@ -167,6 +172,7 @@
                     </div>
                 </div>
             </div>
+            {{/isAdmin}}
         </div>
     </form>
 

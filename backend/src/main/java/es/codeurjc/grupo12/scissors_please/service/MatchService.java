@@ -385,34 +385,15 @@ public class MatchService {
         .toList();
   }
 
-  public UserRecentMatchSection getUserRecentMatchSection(
-      Long userId, String participationFilterParam) {
-    ParticipationFilter filter = ParticipationFilter.fromParam(participationFilterParam);
-
-    List<Match> source =
-        (filter == ParticipationFilter.PLAYED)
-            ? matchRepository.findDistinctByBot1OwnerIdOrBot2OwnerIdOrderByTimestampDesc(
-                userId, userId)
-            : matchRepository.findAllByOrderByTimestampDesc().stream().limit(100).toList();
-
+  public UserRecentMatchSection getUserRecentMatchSection(Long userId) {
     List<UserMatchItem> matches =
-        source.stream()
-            .filter(m -> matchesFilter(m, userId, filter))
+        matchRepository
+            .findDistinctByBot1OwnerIdOrBot2OwnerIdOrderByTimestampDesc(userId, userId)
+            .stream()
             .map(m -> toUserMatchItem(m, userId))
             .toList();
 
-    return new UserRecentMatchSection(
-        matches,
-        filter == ParticipationFilter.ALL,
-        filter == ParticipationFilter.PLAYED,
-        filter == ParticipationFilter.NOT_PLAYED);
-  }
-
-  private boolean matchesFilter(Match m, Long userId, ParticipationFilter filter) {
-    boolean played = isOwnedByUser(m.getBot1(), userId) || isOwnedByUser(m.getBot2(), userId);
-    return filter == ParticipationFilter.ALL
-        || (filter == ParticipationFilter.PLAYED && played)
-        || (filter == ParticipationFilter.NOT_PLAYED && !played);
+    return new UserRecentMatchSection(matches);
   }
 
   @Scheduled(fixedDelay = 30000)
@@ -664,9 +645,6 @@ public class MatchService {
         res,
         resolveBadgeClass(res),
         formatDate(match.getTimestamp()),
-        played,
-        played ? "Played" : "Not Played",
-        played ? "bg-secondary" : "bg-dark border border-secondary text-secondary",
         "/matches/stats?id=" + match.getId());
   }
 
@@ -947,16 +925,9 @@ public class MatchService {
       String result,
       String resultBadgeClass,
       String date,
-      boolean played,
-      String participationLabel,
-      String participationBadgeClass,
       String actionHref) {}
 
-  public record UserRecentMatchSection(
-      List<UserMatchItem> matches,
-      boolean selectedAll,
-      boolean selectedPlayed,
-      boolean selectedNotPlayed) {}
+  public record UserRecentMatchSection(List<UserMatchItem> matches) {}
 
   public record MatchStartResult(
       boolean matched, Long matchId, String myBotName, String opponentBotName, boolean searching) {
@@ -1093,28 +1064,4 @@ public class MatchService {
       LocalDateTime createdAt) {}
 
   private record RematchParticipants(Bot requesterBot, Bot opponentBot, User opponentUser) {}
-
-  private enum ParticipationFilter {
-    ALL,
-    PLAYED,
-    NOT_PLAYED;
-
-    static ParticipationFilter fromParam(String value) {
-      if (value == null || value.isBlank()) {
-        return PLAYED;
-      }
-
-      String normalizedValue = value.trim().toLowerCase(Locale.ROOT);
-      if ("played".equals(normalizedValue)) {
-        return PLAYED;
-      }
-      if ("not-played".equals(normalizedValue) || "not_played".equals(normalizedValue)) {
-        return NOT_PLAYED;
-      }
-      if ("all".equals(normalizedValue)) {
-        return ALL;
-      }
-      return PLAYED;
-    }
-  }
 }

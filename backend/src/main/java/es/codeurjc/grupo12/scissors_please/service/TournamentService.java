@@ -262,10 +262,6 @@ public class TournamentService {
     return new JoinTournamentResult(JoinTournamentStatus.JOINED, "Bot registered successfully.");
   }
 
-  public Page<TournamentListItem> getTournamentPage(Pageable pageable) {
-    return getTournamentPage(null, pageable);
-  }
-
   public Page<TournamentListItem> getTournamentPage(String query, Pageable pageable) {
     int safePage = Math.max(pageable.getPageNumber(), 0);
     int safeSize = Math.min(Math.max(pageable.getPageSize(), 1), MAX_PAGE_SIZE);
@@ -290,7 +286,7 @@ public class TournamentService {
         .findDistinctByParticipantsOwnerIdOrderByStartDateAsc(userId)
         .stream()
         .limit(safeLimit)
-        .map(tournament -> toUserTournamentItem(tournament, true))
+        .map(this::toUserTournamentItem)
         .toList();
   }
 
@@ -303,7 +299,7 @@ public class TournamentService {
     List<UserTournamentItem> tournaments =
         registeredTournaments.stream()
             .filter(tournament -> matchesQuery(tournament, normalizedQuery))
-            .map(tournament -> toUserTournamentItem(tournament, true))
+            .map(this::toUserTournamentItem)
             .toList();
 
     String search = query == null ? "" : query.trim();
@@ -322,12 +318,8 @@ public class TournamentService {
     return query == null ? "" : query.trim().toLowerCase();
   }
 
-  private UserTournamentItem toUserTournamentItem(Tournament tournament, boolean isRegistered) {
+  private UserTournamentItem toUserTournamentItem(Tournament tournament) {
     TournamentListItem listItem = toListItem(tournament);
-
-    String registrationLabel = isRegistered ? "Registered" : "Not Registered";
-    String registrationBadgeClass =
-        isRegistered ? "bg-secondary" : "bg-dark border border-secondary text-secondary";
 
     return new UserTournamentItem(
         listItem.id(),
@@ -339,10 +331,7 @@ public class TournamentService {
         listItem.actionLabel(),
         listItem.actionHref(),
         listItem.actionDisabled(),
-        listItem.hasImage(),
-        isRegistered,
-        registrationLabel,
-        registrationBadgeClass);
+        listItem.hasImage());
   }
 
   private String formatDate(LocalDate startDate) {
@@ -544,10 +533,7 @@ public class TournamentService {
       String actionLabel,
       String actionHref,
       boolean actionDisabled,
-      boolean hasImage,
-      boolean registered,
-      String registrationLabel,
-      String registrationBadgeClass) {}
+      boolean hasImage) {}
 
   public record UserTournamentSection(List<UserTournamentItem> tournaments, String search) {}
 

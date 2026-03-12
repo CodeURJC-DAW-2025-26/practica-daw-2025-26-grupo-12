@@ -2,6 +2,7 @@ package es.codeurjc.grupo12.scissors_please.controller.advice;
 
 import es.codeurjc.grupo12.scissors_please.config.ErrorConstants;
 import es.codeurjc.grupo12.scissors_please.exception.BotAccessDeniedException;
+import es.codeurjc.grupo12.scissors_please.exception.BotImageUploadException;
 import es.codeurjc.grupo12.scissors_please.exception.BotNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -41,6 +42,15 @@ public class GlobalControllerAdvice {
     response.setStatus(HttpStatus.FORBIDDEN.value());
     model.addAttribute("errorMessage", exception.getMessage());
     model.addAttribute("errorCode", ErrorConstants.FORBIDDEN_CODE);
+    return "error";
+  }
+
+  @ExceptionHandler(BotImageUploadException.class)
+  public String handleBotImageUploadError(
+      BotImageUploadException exception, Model model, HttpServletResponse response) {
+    response.setStatus(HttpStatus.BAD_REQUEST.value());
+    model.addAttribute("errorMessage", exception.getMessage());
+    model.addAttribute("errorCode", ErrorConstants.BAD_REQUEST_CODE);
     return "error";
   }
 

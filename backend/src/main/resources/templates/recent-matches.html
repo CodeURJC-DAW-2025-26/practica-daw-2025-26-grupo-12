@@ -10,14 +10,6 @@
     <div class="container py-5">
         <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
             <h1 class="h3 fw-bold mb-0">My Recent Matches</h1>
-            <form method="get" action="/matches/recent" class="d-flex gap-2 align-items-center">
-                <select class="form-select form-select-sm" name="participation">
-                    <option value="all" {{#selectedAll}}selected{{/selectedAll}}>Participation: All</option>
-                    <option value="played" {{#selectedPlayed}}selected{{/selectedPlayed}}>Played</option>
-                    <option value="not-played" {{#selectedNotPlayed}}selected{{/selectedNotPlayed}}>Not Played</option>
-                </select>
-                <button type="submit" class="btn btn-outline-muted btn-sm">Apply</button>
-            </form>
         </div>
 
         <div class="card border-secondary shadow-sm">
@@ -25,10 +17,8 @@
                 <table class="table mb-0 align-middle text-nowrap">
                     <thead>
                         <tr class="text-secondary small text-uppercase">
-                            <th scope="col" class="ps-4">Match ID</th>
                             <th scope="col">My Bot</th>
                             <th scope="col">Opponent</th>
-                            <th scope="col">Participation</th>
                             <th scope="col">Result</th>
                             <th scope="col">Date</th>
                             <th scope="col" class="text-end pe-4">Action</th>
@@ -38,7 +28,6 @@
                         {{#hasMatches}}
                         {{#matches}}
                         <tr>
-                            <td class="ps-4 text-secondary">#{{id}}</td>
                             <td>
                                 <div class="d-flex align-items-center">
                                     <div class="position-relative me-2" style="width: 24px; height: 24px;">
@@ -60,9 +49,7 @@
                                         {{^myBotId}}
                                         <span class="text-white">{{myBotName}}</span>
                                         {{/myBotId}}
-                                        {{#played}}
                                         <span class="small text-secondary">by You</span>
-                                        {{/played}}
                                     </div>
                                 </div>
                             </td>
@@ -94,9 +81,6 @@
                                     </div>
                                 </div>
                             </td>
-                            <td><span
-                                    class="badge {{participationBadgeClass}} rounded-pill px-3">{{participationLabel}}</span>
-                            </td>
                             <td><span class="badge {{resultBadgeClass}} rounded-pill px-3">{{result}}</span></td>
                             <td class="text-secondary">{{date}}</td>
                             <td class="text-end pe-4">
@@ -107,7 +91,7 @@
                         {{/hasMatches}}
                         {{^hasMatches}}
                         <tr>
-                            <td class="ps-4 text-secondary" colspan="7">No matches found with the selected filter.</td>
+                            <td class="ps-4 text-secondary" colspan="5">No recent matches available.</td>
                         </tr>
                         {{/hasMatches}}
                     </tbody>

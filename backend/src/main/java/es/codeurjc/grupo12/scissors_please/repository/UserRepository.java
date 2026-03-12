@@ -20,20 +20,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
   Optional<User> findByEmailAndDeleteDateIsNull(String email);
 
-  List<User> findAllByDeleteDateIsNull();
-
-  List<User> findTop25ByDeleteDateIsNullOrderByUsernameAsc();
-
-  List<User>
-      findTop25ByDeleteDateIsNullAndUsernameContainingIgnoreCaseOrDeleteDateIsNullAndEmailContainingIgnoreCaseOrderByUsernameAsc(
-          String usernameQuery, String emailQuery);
-
-  List<User> findTop25ByDeleteDateIsNullAndBlockedOrderByUsernameAsc(boolean blocked);
-
-  List<User>
-      findTop25ByDeleteDateIsNullAndBlockedAndUsernameContainingIgnoreCaseOrDeleteDateIsNullAndBlockedAndEmailContainingIgnoreCaseOrderByUsernameAsc(
-          boolean usernameBlocked, String usernameQuery, boolean emailBlocked, String emailQuery);
-
   Page<User> findAllByDeleteDateIsNullOrderByUsernameAsc(Pageable pageable);
 
   @Query(
