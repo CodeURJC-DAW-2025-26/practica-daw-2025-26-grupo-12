@@ -7,6 +7,7 @@ import es.codeurjc.grupo12.scissors_please.service.TournamentService;
 import es.codeurjc.grupo12.scissors_please.service.UserService;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -28,25 +29,49 @@ public class TournamentController {
   @Autowired private UserService userService;
 
   @GetMapping
-  public String tournamentList(@PageableDefault(size = 10) Pageable pageable, Model model) {
+  public String tournamentList(
+      @PageableDefault(size = 10) Pageable pageable,
+      @RequestParam(name = "q", required = false) String query,
+      Model model) {
+    String normalizedQuery = query == null ? "" : query.trim();
+    Page<TournamentService.TournamentListItem> tournamentPage =
+        tournamentService.getTournamentPage(normalizedQuery, pageable);
+    int fromItem =
+        tournamentPage.isEmpty() ? 0 : (int) tournamentPage.getPageable().getOffset() + 1;
+    int toItem = tournamentPage.isEmpty() ? 0 : fromItem + tournamentPage.getNumberOfElements() - 1;
+
+    model.addAttribute("tournaments", tournamentPage.getContent());
+    model.addAttribute("showEmpty", pageable.getPageNumber() == 0 && tournamentPage.isEmpty());
+    model.addAttribute("nextPage", tournamentPage.getNumber() + 1);
+    model.addAttribute("hasMore", tournamentPage.hasNext());
+    model.addAttribute("totalElements", tournamentPage.getTotalElements());
+    model.addAttribute("fromItem", fromItem);
+    model.addAttribute("toItem", toItem);
     model.addAttribute("size", Math.max(pageable.getPageSize(), 1));
-    model.addAttribute("fromItem", 0);
-    model.addAttribute("toItem", 0);
-    model.addAttribute("totalElements", 0);
+    model.addAttribute("searchQuery", normalizedQuery);
     return "tournament-list";
   }
 
   @GetMapping("/page")
-  public String tournamentListPage(@PageableDefault(size = 10) Pageable pageable, Model model) {
-    TournamentService.TournamentPage tournamentPage = tournamentService.getTournamentPage(pageable);
-    model.addAttribute("tournaments", tournamentPage.tournaments());
-    model.addAttribute(
-        "showEmpty", pageable.getPageNumber() == 0 && tournamentPage.tournaments().isEmpty());
-    model.addAttribute("nextPage", tournamentPage.nextPage());
-    model.addAttribute("hasMore", tournamentPage.hasMore());
-    model.addAttribute("totalElements", tournamentPage.totalElements());
-    model.addAttribute("fromItem", tournamentPage.fromItem());
-    model.addAttribute("toItem", tournamentPage.toItem());
+  public String tournamentListPage(
+      @PageableDefault(size = 10) Pageable pageable,
+      @RequestParam(name = "q", required = false) String query,
+      Model model) {
+    String normalizedQuery = query == null ? "" : query.trim();
+    Page<TournamentService.TournamentListItem> tournamentPage =
+        tournamentService.getTournamentPage(normalizedQuery, pageable);
+    int fromItem =
+        tournamentPage.isEmpty() ? 0 : (int) tournamentPage.getPageable().getOffset() + 1;
+    int toItem = tournamentPage.isEmpty() ? 0 : fromItem + tournamentPage.getNumberOfElements() - 1;
+
+    model.addAttribute("tournaments", tournamentPage.getContent());
+    model.addAttribute("showEmpty", pageable.getPageNumber() == 0 && tournamentPage.isEmpty());
+    model.addAttribute("nextPage", tournamentPage.getNumber() + 1);
+    model.addAttribute("hasMore", tournamentPage.hasNext());
+    model.addAttribute("totalElements", tournamentPage.getTotalElements());
+    model.addAttribute("fromItem", fromItem);
+    model.addAttribute("toItem", toItem);
+    model.addAttribute("searchQuery", normalizedQuery);
     return "components/tournament-page-chunk";
   }
 
@@ -147,19 +172,15 @@ public class TournamentController {
   @GetMapping("/my-tournaments")
   public String myTournaments(
       Authentication authentication,
-      @RequestParam(name = "registration", required = false) String registrationFilter,
       @RequestParam(name = "q", required = false) String search,
       Model model) {
     Long userId = userService.getCurrentUser(authentication).getId();
     TournamentService.UserTournamentSection section =
-        tournamentService.getUserTournamentSection(userId, registrationFilter, search);
+        tournamentService.getUserTournamentSection(userId, search);
 
     model.addAttribute("tournaments", section.tournaments());
     model.addAttribute("hasTournaments", !section.tournaments().isEmpty());
     model.addAttribute("search", section.search());
-    model.addAttribute("selectedAll", section.selectedAll());
-    model.addAttribute("selectedRegistered", section.selectedRegistered());
-    model.addAttribute("selectedNotRegistered", section.selectedNotRegistered());
     return "my-tournaments-auth";
   }
 

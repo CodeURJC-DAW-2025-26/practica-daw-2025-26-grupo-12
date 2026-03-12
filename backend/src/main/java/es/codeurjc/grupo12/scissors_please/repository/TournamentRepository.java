@@ -11,6 +11,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface TournamentRepository extends JpaRepository<Tournament, Long> {
   Page<Tournament> findAllByOrderByStartDateAsc(Pageable pageable);
 
+  Page<Tournament> findByNameContainingIgnoreCaseOrderByStartDateAsc(
+      String name, Pageable pageable);
+
   List<Tournament> findAllByOrderByStartDateAsc();
 
   List<Tournament> findDistinctByParticipantsOwnerIdOrderByStartDateAsc(Long ownerId);

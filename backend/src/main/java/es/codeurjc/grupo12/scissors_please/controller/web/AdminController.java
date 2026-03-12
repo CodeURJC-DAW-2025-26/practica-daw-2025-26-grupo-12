@@ -1,6 +1,5 @@
 package es.codeurjc.grupo12.scissors_please.controller.web;
 
-import es.codeurjc.grupo12.scissors_please.common.pagination.PageResult;
 import es.codeurjc.grupo12.scissors_please.config.ErrorConstants;
 import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.Image;
@@ -25,6 +24,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.Authentication;
@@ -58,13 +58,25 @@ public class AdminController {
   @GetMapping("/tournaments")
   public String adminTournaments(
       @PageableDefault(size = 10) Pageable pageable,
+      @RequestParam(name = "q", required = false) String query,
       @RequestParam(required = false) Integer processed,
       Model model) {
+    String normalizedQuery = normalizeQuery(query);
+    Page<TournamentService.TournamentListItem> tournamentPage =
+        tournamentService.getTournamentPage(normalizedQuery, pageable);
+    int fromItem =
+        tournamentPage.isEmpty() ? 0 : (int) tournamentPage.getPageable().getOffset() + 1;
+    int toItem = tournamentPage.isEmpty() ? 0 : fromItem + tournamentPage.getNumberOfElements() - 1;
 
+    model.addAttribute("tournaments", tournamentPage.getContent());
+    model.addAttribute("showEmpty", pageable.getPageNumber() == 0 && tournamentPage.isEmpty());
+    model.addAttribute("nextPage", tournamentPage.getNumber() + 1);
+    model.addAttribute("hasMore", tournamentPage.hasNext());
+    model.addAttribute("totalElements", tournamentPage.getTotalElements());
+    model.addAttribute("fromItem", fromItem);
+    model.addAttribute("toItem", toItem);
     model.addAttribute("size", Math.max(pageable.getPageSize(), 1));
-    model.addAttribute("fromItem", 0);
-    model.addAttribute("toItem", 0);
-    model.addAttribute("totalElements", 0);
+    model.addAttribute("searchQuery", normalizedQuery);
 
     if (processed != null) {
       if (processed > 0) {
@@ -77,16 +89,25 @@ public class AdminController {
   }
 
   @GetMapping("/tournaments/page")
-  public String adminPanelPage(@PageableDefault(size = 10) Pageable pageable, Model model) {
-    TournamentService.TournamentPage tournamentPage = tournamentService.getTournamentPage(pageable);
-    model.addAttribute("tournaments", tournamentPage.tournaments());
-    model.addAttribute(
-        "showEmpty", pageable.getPageNumber() == 0 && tournamentPage.tournaments().isEmpty());
-    model.addAttribute("nextPage", tournamentPage.nextPage());
-    model.addAttribute("hasMore", tournamentPage.hasMore());
-    model.addAttribute("totalElements", tournamentPage.totalElements());
-    model.addAttribute("fromItem", tournamentPage.fromItem());
-    model.addAttribute("toItem", tournamentPage.toItem());
+  public String adminPanelPage(
+      @PageableDefault(size = 10) Pageable pageable,
+      @RequestParam(name = "q", required = false) String query,
+      Model model) {
+    String normalizedQuery = normalizeQuery(query);
+    Page<TournamentService.TournamentListItem> tournamentPage =
+        tournamentService.getTournamentPage(normalizedQuery, pageable);
+    int fromItem =
+        tournamentPage.isEmpty() ? 0 : (int) tournamentPage.getPageable().getOffset() + 1;
+    int toItem = tournamentPage.isEmpty() ? 0 : fromItem + tournamentPage.getNumberOfElements() - 1;
+
+    model.addAttribute("tournaments", tournamentPage.getContent());
+    model.addAttribute("showEmpty", pageable.getPageNumber() == 0 && tournamentPage.isEmpty());
+    model.addAttribute("nextPage", tournamentPage.getNumber() + 1);
+    model.addAttribute("hasMore", tournamentPage.hasNext());
+    model.addAttribute("totalElements", tournamentPage.getTotalElements());
+    model.addAttribute("fromItem", fromItem);
+    model.addAttribute("toItem", toItem);
+    model.addAttribute("searchQuery", normalizedQuery);
     return "components/admin-tournament-page-chunk";
   }
 
@@ -358,7 +379,7 @@ public class AdminController {
     UserStatusFilter statusFilter = UserStatusFilter.fromValue(status);
     User currentAdmin = userService.getCurrentUser(authentication);
     populateUsersSearchModel(model, normalizedQuery, statusFilter, currentAdmin, pageable);
-    return "components/admin-user-rows";
+    return "components/admin-user-page-chunk";
   }
 
   @PostMapping("/users/{id}/block")
@@ -401,12 +422,14 @@ public class AdminController {
       Model model) {
     String normalizedQuery = normalizeQuery(query);
     populateBotsSearchModel(model, normalizedQuery, visibility, pageable);
-    return "components/admin-bot-rows";
+    return "components/admin-bot-page-chunk";
   }
 
   private void populateBotsSearchModel(
       Model model, String searchQuery, String visibility, Pageable pageable) {
-    PageResult<Bot> botPage = botService.getAdminBotPage(searchQuery, visibility, pageable);
+    Page<Bot> botPage = botService.getAdminBotPage(searchQuery, visibility, pageable);
+    int fromItem = botPage.isEmpty() ? 0 : (int) botPage.getPageable().getOffset() + 1;
+    int toItem = botPage.isEmpty() ? 0 : fromItem + botPage.getNumberOfElements() - 1;
 
     model.addAttribute("searchQuery", searchQuery);
     model.addAttribute("visibilityFilter", visibility);
@@ -414,13 +437,13 @@ public class AdminController {
     model.addAttribute("visPublic", visibility.equals("public"));
     model.addAttribute("visPrivate", visibility.equals("private"));
 
-    model.addAttribute("bots", botPage.items());
-    model.addAttribute("nextPage", botPage.nextPage());
-    model.addAttribute("hasMore", botPage.hasMore());
-    model.addAttribute("totalElements", botPage.totalElements());
-    model.addAttribute("fromItem", botPage.fromItem());
-    model.addAttribute("toItem", botPage.toItem());
-    model.addAttribute("resultCount", botPage.totalElements());
+    model.addAttribute("bots", botPage.getContent());
+    model.addAttribute("nextPage", botPage.getNumber() + 1);
+    model.addAttribute("hasMore", botPage.hasNext());
+    model.addAttribute("totalElements", botPage.getTotalElements());
+    model.addAttribute("fromItem", fromItem);
+    model.addAttribute("toItem", toItem);
+    model.addAttribute("resultCount", botPage.getTotalElements());
     model.addAttribute("size", Math.max(pageable.getPageSize(), 1));
   }
 
@@ -525,9 +548,11 @@ public class AdminController {
       UserStatusFilter statusFilter,
       User currentAdmin,
       Pageable pageable) {
-    UserService.UserPage userPage = userService.getUserPage(searchQuery, statusFilter, pageable);
+    Page<User> userPage = userService.getUserPage(searchQuery, statusFilter, pageable);
     List<AdminUserView> users =
-        userPage.users().stream().map(user -> toAdminUserView(user, currentAdmin)).toList();
+        userPage.getContent().stream().map(user -> toAdminUserView(user, currentAdmin)).toList();
+    int fromItem = userPage.isEmpty() ? 0 : (int) userPage.getPageable().getOffset() + 1;
+    int toItem = userPage.isEmpty() ? 0 : fromItem + userPage.getNumberOfElements() - 1;
 
     model.addAttribute("searchQuery", searchQuery);
     model.addAttribute("statusFilter", statusFilter.value());
@@ -536,12 +561,12 @@ public class AdminController {
     model.addAttribute("statusBlocked", statusFilter == UserStatusFilter.BLOCKED);
 
     model.addAttribute("users", users);
-    model.addAttribute("nextPage", userPage.nextPage());
-    model.addAttribute("hasMore", userPage.hasMore());
-    model.addAttribute("totalElements", userPage.totalElements());
-    model.addAttribute("fromItem", userPage.fromItem());
-    model.addAttribute("toItem", userPage.toItem());
-    model.addAttribute("resultCount", userPage.totalElements());
+    model.addAttribute("nextPage", userPage.getNumber() + 1);
+    model.addAttribute("hasMore", userPage.hasNext());
+    model.addAttribute("totalElements", userPage.getTotalElements());
+    model.addAttribute("fromItem", fromItem);
+    model.addAttribute("toItem", toItem);
+    model.addAttribute("resultCount", userPage.getTotalElements());
     model.addAttribute("size", Math.max(pageable.getPageSize(), 1));
   }
 

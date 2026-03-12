@@ -1,6 +1,5 @@
 package es.codeurjc.grupo12.scissors_please.service;
 
-import es.codeurjc.grupo12.scissors_please.common.pagination.PageResult;
 import es.codeurjc.grupo12.scissors_please.common.pagination.PageableUtils;
 import es.codeurjc.grupo12.scissors_please.config.ErrorConstants;
 import es.codeurjc.grupo12.scissors_please.exception.BotAccessDeniedException;
@@ -84,7 +83,7 @@ public class BotService {
   }
 
   @Transactional(readOnly = true)
-  public PageResult<Bot> getUserBots(Optional<Long> requesterId, Long targetId, Pageable pageable) {
+  public Page<Bot> getUserBots(Optional<Long> requesterId, Long targetId, Pageable pageable) {
 
     User targetUser = userService.getUserById(targetId);
     if (targetUser == null) throw new IllegalArgumentException("Target user does not exist");
@@ -139,10 +138,8 @@ public class BotService {
   }
 
   @Transactional(readOnly = true)
-  public PageResult<Bot> getAdminBotPage(String query, String visibility, Pageable pageable) {
+  public Page<Bot> getAdminBotPage(String query, String visibility, Pageable pageable) {
     Pageable safePageable = PageableUtils.sanitize(pageable, MAX_PAGE_SIZE);
-    int safePage = safePageable.getPageNumber();
-    int safeSize = safePageable.getPageSize();
 
     String normalizedQuery = (query != null) ? query.trim() : "";
     boolean hasQuery = !normalizedQuery.isBlank();
@@ -168,13 +165,7 @@ public class BotService {
               : botRepository.findAllByDeletedFalseOrderByIdDesc(safePageable);
     }
 
-    List<Bot> bots = pageResult.getContent();
-    long totalElements = pageResult.getTotalElements();
-    int fromItem = bots.isEmpty() ? 0 : (safePage * safeSize) + 1;
-    int toItem = bots.isEmpty() ? 0 : fromItem + bots.size() - 1;
-
-    return new PageResult<>(
-        bots, safePage + 1, pageResult.hasNext(), totalElements, fromItem, toItem);
+    return pageResult;
   }
 
   @Transactional(readOnly = true)
@@ -304,7 +295,7 @@ public class BotService {
   }
 
   @Transactional(readOnly = true)
-  private PageResult<Bot> getBotPage(User user, boolean includePrivate, Pageable pageable) {
+  private Page<Bot> getBotPage(User user, boolean includePrivate, Pageable pageable) {
     Long ownerId = requireOwnerId(user);
     Pageable safePageable = PageableUtils.sanitize(pageable, MAX_PAGE_SIZE);
 
@@ -314,7 +305,7 @@ public class BotService {
             : botRepository.findByOwnerIdAndIsPublicTrueAndDeletedFalseOrderByIdDesc(
                 ownerId, safePageable);
 
-    return PageResult.from(pageResult);
+    return pageResult;
   }
 
   private Optional<Bot> getBotById(Long id) {

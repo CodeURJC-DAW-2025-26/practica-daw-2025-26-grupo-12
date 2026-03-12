@@ -15,6 +15,20 @@
             </div>
         </div>
 
+        <div class="card p-4 mb-4">
+            <form id="tournament-search-form" method="get" action="/tournaments" class="row g-3 align-items-center">
+                <div class="col-lg-9">
+                    <label for="tournament-search" class="form-label text-uppercase small mb-1">Search tournaments</label>
+                    <input id="tournament-search" type="search" name="q" class="form-control"
+                        placeholder="Search by tournament name..." value="{{searchQuery}}" autocomplete="off">
+                </div>
+                <div class="col-lg-3 d-grid d-lg-flex justify-content-lg-end gap-2">
+                    <button type="submit" class="btn btn-primary btn-sm px-3 mt-lg-4">Search</button>
+                    <a href="/tournaments" class="btn btn-outline-muted btn-sm px-3 mt-lg-4">Clear</a>
+                </div>
+            </form>
+        </div>
+
         <div class="row g-4">
             <div class="col-12">
                 <div class="card p-4">
@@ -29,18 +43,17 @@
                                 <tr class="text-secondary small text-uppercase">
                                     <th scope="col" class="ps-3" style="width: 60px;">Image</th>
                                     <th scope="col">Tournament</th>
+                                    <th scope="col">Slots</th>
                                     <th scope="col">Status</th>
                                     <th scope="col" class="text-end pe-3">Action</th>
                                 </tr>
                             </thead>
-                            <tbody id="tournament-table-body"></tbody>
+                            <tbody id="tournament-table-body">{{> components/tournament-page-chunk}}</tbody>
                         </table>
                     </div>
                     <div class="d-flex justify-content-center mt-3">
                         <button id="show-more-tournaments-btn" class="btn btn-outline-muted btn-sm"
-                            data-load-more="tournaments" data-endpoint="/tournaments/page"
-                            data-body-id="tournament-table-body" data-counter-id="tournament-counter"
-                            data-meta-class="tournament-meta-row" data-size="{{size}}">
+                            {{^hasMore}}hidden{{/hasMore}}>
                             Show more
                         </button>
                     </div>
@@ -51,7 +64,7 @@
     </div>
 
     {{> components/scripts}}
-    <script src="/js/pageable.js"></script>
+    <script src="/js/tournament-list.js"></script>
 </body>
 
 </html>

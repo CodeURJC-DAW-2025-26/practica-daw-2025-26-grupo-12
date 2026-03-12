@@ -7,6 +7,7 @@ import es.codeurjc.grupo12.scissors_please.service.MatchService;
 import es.codeurjc.grupo12.scissors_please.service.UserService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -39,14 +40,17 @@ public class MatchController {
 
   @GetMapping("/list/page")
   public String matchListPage(@PageableDefault(size = 10) Pageable pageable, Model model) {
-    MatchService.MatchPage matchPage = matchService.getBestMatchPage(pageable);
-    model.addAttribute("matches", matchPage.matches());
-    model.addAttribute("showEmpty", pageable.getPageNumber() == 0 && matchPage.matches().isEmpty());
-    model.addAttribute("nextPage", matchPage.nextPage());
-    model.addAttribute("hasMore", matchPage.hasMore());
-    model.addAttribute("totalElements", matchPage.totalElements());
-    model.addAttribute("fromItem", matchPage.fromItem());
-    model.addAttribute("toItem", matchPage.toItem());
+    Page<MatchService.MatchListItem> matchPage = matchService.getBestMatchPage(pageable);
+    int fromItem = matchPage.isEmpty() ? 0 : (int) matchPage.getPageable().getOffset() + 1;
+    int toItem = matchPage.isEmpty() ? 0 : fromItem + matchPage.getNumberOfElements() - 1;
+
+    model.addAttribute("matches", matchPage.getContent());
+    model.addAttribute("showEmpty", pageable.getPageNumber() == 0 && matchPage.isEmpty());
+    model.addAttribute("nextPage", matchPage.getNumber() + 1);
+    model.addAttribute("hasMore", matchPage.hasNext());
+    model.addAttribute("totalElements", matchPage.getTotalElements());
+    model.addAttribute("fromItem", fromItem);
+    model.addAttribute("toItem", toItem);
     return "components/match-page-chunk";
   }
 

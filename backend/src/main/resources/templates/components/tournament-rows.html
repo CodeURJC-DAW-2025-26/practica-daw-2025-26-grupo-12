@@ -19,6 +19,9 @@
         <div class="text-secondary small text-truncate" style="max-width: 300px;">{{summary}}</div>
     </td>
     <td>
+        <span class="badge bg-dark border border-secondary text-secondary">{{occupiedSlots}}/{{totalSlots}}</span>
+    </td>
+    <td>
         <span class="badge {{badgeClass}}">{{status}}</span>
     </td>
     <td class="text-end pe-3">
@@ -33,6 +36,6 @@
 {{/tournaments}}
 {{#showEmpty}}
 <tr class="tournament-empty-row">
-    <td class="ps-3 text-secondary" colspan="4">No tournaments available.</td>
+    <td class="ps-3 text-secondary" colspan="5">No tournaments available.</td>
 </tr>
 {{/showEmpty}}

@@ -29,14 +29,6 @@ public class UserService {
 
   @Autowired private BotRepository botRepository;
 
-  public record UserPage(
-      List<User> users,
-      int nextPage,
-      boolean hasMore,
-      long totalElements,
-      int fromItem,
-      int toItem) {}
-
   public boolean canViewPrivateBots(User requester, User target) {
     if (requester == null || target == null) return false;
 
@@ -47,12 +39,12 @@ public class UserService {
   }
 
   @Transactional(readOnly = true)
-  public UserPage getUserPage(Pageable pageable) {
+  public Page<User> getUserPage(Pageable pageable) {
     return getUserPage("", UserStatusFilter.ALL, pageable);
   }
 
   @Transactional(readOnly = true)
-  public UserPage getUserPage(String query, UserStatusFilter statusFilter, Pageable pageable) {
+  public Page<User> getUserPage(String query, UserStatusFilter statusFilter, Pageable pageable) {
     int safePage = Math.max(pageable.getPageNumber(), 0);
     int safeSize = Math.min(Math.max(pageable.getPageSize(), 1), MAX_PAGE_SIZE);
     Pageable safePageable = PageRequest.of(safePage, safeSize);
@@ -76,27 +68,15 @@ public class UserService {
     } else {
       pageResult =
           switch (effectiveStatusFilter) {
-            case ALL ->
-                userRepository
-                    .findByUsernameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrderByUsernameAsc(
-                        normalizedQuery, normalizedQuery, safePageable);
+            case ALL -> userRepository.searchActiveUsers(normalizedQuery, safePageable);
             case BLOCKED ->
-                userRepository
-                    .findByBlockedAndUsernameContainingIgnoreCaseOrBlockedAndEmailContainingIgnoreCaseOrderByUsernameAsc(
-                        true, normalizedQuery, true, normalizedQuery, safePageable);
+                userRepository.searchActiveUsersByBlocked(true, normalizedQuery, safePageable);
             case ACTIVE ->
-                userRepository
-                    .findByBlockedAndUsernameContainingIgnoreCaseOrBlockedAndEmailContainingIgnoreCaseOrderByUsernameAsc(
-                        false, normalizedQuery, false, normalizedQuery, safePageable);
+                userRepository.searchActiveUsersByBlocked(false, normalizedQuery, safePageable);
           };
     }
 
-    List<User> users = pageResult.getContent();
-    long totalElements = pageResult.getTotalElements();
-    int fromItem = users.isEmpty() ? 0 : (safePage * safeSize) + 1;
-    int toItem = users.isEmpty() ? 0 : fromItem + users.size() - 1;
-
-    return new UserPage(users, safePage + 1, pageResult.hasNext(), totalElements, fromItem, toItem);
+    return pageResult;
   }
 
   public User registerUser(String username, String email, String password) {

@@ -362,19 +362,13 @@ public class MatchService {
         rounds);
   }
 
-  public MatchPage getBestMatchPage(Pageable pageable) {
+  public Page<MatchListItem> getBestMatchPage(Pageable pageable) {
     int safePage = Math.max(pageable.getPageNumber(), 0);
     int safeSize = Math.min(Math.max(pageable.getPageSize(), 1), MAX_PAGE_SIZE);
     Pageable safePageable = PageRequest.of(safePage, safeSize);
 
     Page<Match> pageResult = matchRepository.findBestMatches(safePageable);
-    List<MatchListItem> matches = pageResult.getContent().stream().map(this::toListItem).toList();
-    long totalElements = pageResult.getTotalElements();
-    int fromItem = matches.isEmpty() ? 0 : (safePage * safeSize) + 1;
-    int toItem = matches.isEmpty() ? 0 : fromItem + matches.size() - 1;
-
-    return new MatchPage(
-        matches, safePage + 1, pageResult.hasNext(), totalElements, fromItem, toItem);
+    return pageResult.map(this::toListItem);
   }
 
   public List<UserMatchItem> getUserHomeMatches(Long userId, int limit) {
@@ -940,14 +934,6 @@ public class MatchService {
       String resultBadgeClass,
       String date,
       String actionHref) {}
-
-  public record MatchPage(
-      List<MatchListItem> matches,
-      int nextPage,
-      boolean hasMore,
-      long totalElements,
-      int fromItem,
-      int toItem) {}
 
   public record UserMatchItem(
       Long id,

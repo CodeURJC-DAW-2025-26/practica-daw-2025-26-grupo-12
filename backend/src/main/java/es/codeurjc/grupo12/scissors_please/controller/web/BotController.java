@@ -1,6 +1,5 @@
 package es.codeurjc.grupo12.scissors_please.controller.web;
 
-import es.codeurjc.grupo12.scissors_please.common.pagination.PageResult;
 import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.service.BotService;
@@ -9,6 +8,7 @@ import es.codeurjc.grupo12.scissors_please.service.UserService;
 import java.util.Base64;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -162,17 +162,20 @@ public class BotController {
 
     User currentUser = userService.getCurrentUser(authentication);
 
-    PageResult<Bot> botPage =
+    Page<Bot> botPage =
         botService.getUserBots(Optional.of(currentUser.getId()), currentUser.getId(), pageable);
 
-    model.addAttribute("bots", botPage.items());
-    model.addAttribute("showEmpty", pageable.getPageNumber() == 0 && botPage.items().isEmpty());
+    int fromItem = botPage.isEmpty() ? 0 : (int) botPage.getPageable().getOffset() + 1;
+    int toItem = botPage.isEmpty() ? 0 : fromItem + botPage.getNumberOfElements() - 1;
+
+    model.addAttribute("bots", botPage.getContent());
+    model.addAttribute("showEmpty", pageable.getPageNumber() == 0 && botPage.isEmpty());
     model.addAttribute("canManage", true);
-    model.addAttribute("nextPage", botPage.nextPage());
-    model.addAttribute("hasMore", botPage.hasMore());
-    model.addAttribute("totalElements", botPage.totalElements());
-    model.addAttribute("fromItem", botPage.fromItem());
-    model.addAttribute("toItem", botPage.toItem());
+    model.addAttribute("nextPage", botPage.getNumber() + 1);
+    model.addAttribute("hasMore", botPage.hasNext());
+    model.addAttribute("totalElements", botPage.getTotalElements());
+    model.addAttribute("fromItem", fromItem);
+    model.addAttribute("toItem", toItem);
     return "components/bot-page-chunk";
   }
 
