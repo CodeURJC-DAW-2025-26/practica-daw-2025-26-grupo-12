@@ -1,4 +1,4 @@
-package es.codeurjc.grupo12.scissors_please.service;
+package es.codeurjc.grupo12.scissors_please.service.image;
 
 import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.Image;

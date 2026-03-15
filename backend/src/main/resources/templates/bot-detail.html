@@ -36,7 +36,9 @@
                 <a href="/bots/{{bot.id}}/edit" class="btn btn-outline-muted">Edit Bot</a>
                 {{/canManage}}
                 {{#logged}}
+                {{#isOwner}}
                 <a href="/matches/search" class="btn btn-primary">Find Match</a>
+                {{/isOwner}}
                 {{/logged}}
             </div>
         </div>

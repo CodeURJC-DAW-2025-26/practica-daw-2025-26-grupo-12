@@ -1,6 +1,7 @@
 package es.codeurjc.grupo12.scissors_please.controller.web;
 
-import es.codeurjc.grupo12.scissors_please.service.UserService;
+import es.codeurjc.grupo12.scissors_please.service.auth.AuthWebHandlerService;
+import es.codeurjc.grupo12.scissors_please.views.WebFlowView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,7 +11,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class AuthController {
-  @Autowired private UserService userService;
+
+  @Autowired private AuthWebHandlerService authWebHandlerService;
 
   @GetMapping("/login")
   public String loginPage(
@@ -18,22 +20,16 @@ public class AuthController {
       @RequestParam(required = false) String blocked,
       @RequestParam(required = false) String success,
       Model model) {
-    if (blocked != null) {
-      model.addAttribute("errorMessage", "Your account is blocked. Contact an administrator.");
-      return "login";
-    }
-    if (error != null) {
-      model.addAttribute("errorMessage", "Invalid username or password");
-    }
-    if (success != null) {
-      model.addAttribute("successMessage", "Account created successfully! You can now log in.");
-    }
-    return "login";
+    WebFlowView view = authWebHandlerService.loginPageHandler(error, blocked, success);
+    view.toModel(model);
+    return view.viewName();
   }
 
   @GetMapping("/sign-up")
-  public String signupPage() {
-    return "sign-up";
+  public String signupPage(Model model) {
+    WebFlowView view = authWebHandlerService.signupPageHandler();
+    view.toModel(model);
+    return view.viewName();
   }
 
   @PostMapping("/register")
@@ -43,16 +39,9 @@ public class AuthController {
       @RequestParam String password,
       @RequestParam String confirmPassword,
       Model model) {
-    try {
-      if (!password.equals(confirmPassword)) {
-        model.addAttribute("errorMessage", "Passwords do not match");
-        return "sign-up";
-      }
-      userService.registerUser(username, email, password);
-      return "redirect:/login?success";
-    } catch (Exception e) {
-      model.addAttribute("errorMessage", e.getMessage());
-      return "sign-up";
-    }
+    WebFlowView view =
+        authWebHandlerService.registerHandler(username, email, password, confirmPassword);
+    view.toModel(model);
+    return view.viewName();
   }
 }

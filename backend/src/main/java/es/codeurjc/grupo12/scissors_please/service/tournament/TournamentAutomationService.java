@@ -1,4 +1,4 @@
-package es.codeurjc.grupo12.scissors_please.service;
+package es.codeurjc.grupo12.scissors_please.service.tournament;
 
 import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.Match;
@@ -6,6 +6,7 @@ import es.codeurjc.grupo12.scissors_please.model.Tournament;
 import es.codeurjc.grupo12.scissors_please.model.TournamentStatus;
 import es.codeurjc.grupo12.scissors_please.repository.BotRepository;
 import es.codeurjc.grupo12.scissors_please.repository.TournamentRepository;
+import es.codeurjc.grupo12.scissors_please.service.bot.BotService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;

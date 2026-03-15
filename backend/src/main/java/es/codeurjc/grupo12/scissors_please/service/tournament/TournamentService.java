@@ -1,4 +1,4 @@
-package es.codeurjc.grupo12.scissors_please.service;
+package es.codeurjc.grupo12.scissors_please.service.tournament;
 
 import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.Image;
@@ -7,6 +7,15 @@ import es.codeurjc.grupo12.scissors_please.model.TournamentStatus;
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.repository.BotRepository;
 import es.codeurjc.grupo12.scissors_please.repository.TournamentRepository;
+import es.codeurjc.grupo12.scissors_please.views.AdminTournamentDetail;
+import es.codeurjc.grupo12.scissors_please.views.BotOptionView;
+import es.codeurjc.grupo12.scissors_please.views.JoinTournamentResult;
+import es.codeurjc.grupo12.scissors_please.views.JoinTournamentStatus;
+import es.codeurjc.grupo12.scissors_please.views.TournamentJoinPage;
+import es.codeurjc.grupo12.scissors_please.views.TournamentListItem;
+import es.codeurjc.grupo12.scissors_please.views.TournamentRegistrationState;
+import es.codeurjc.grupo12.scissors_please.views.UserTournamentItem;
+import es.codeurjc.grupo12.scissors_please.views.UserTournamentSection;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -170,14 +179,14 @@ public class TournamentService {
     TournamentRegistrationState registrationState = getRegistrationState(tournament, currentUser);
 
     Set<Long> participantIds = getParticipantIds(tournament.getParticipants());
-    List<BotOption> botOptions =
+    List<BotOptionView> botOptions =
         getOwnedBots(currentUser).stream()
             .filter(bot -> bot.getId() != null && !participantIds.contains(bot.getId()))
             .sorted(Comparator.comparingInt(Bot::getElo).reversed())
-            .map(bot -> new BotOption(bot.getId(), bot.getName(), bot.getElo(), false))
+            .map(bot -> new BotOptionView(bot.getId(), bot.getName(), bot.getElo(), false))
             .toList();
 
-    List<BotOption> resolvedBotOptions = selectFirstBot(botOptions);
+    List<BotOptionView> resolvedBotOptions = selectFirstBot(botOptions);
     return new TournamentJoinPage(
         tournament,
         resolvedBotOptions,
@@ -494,100 +503,19 @@ public class TournamentService {
     return participantIds;
   }
 
-  private List<BotOption> selectFirstBot(List<BotOption> botOptions) {
+  private List<BotOptionView> selectFirstBot(List<BotOptionView> botOptions) {
     if (botOptions.isEmpty()) {
       return List.of();
     }
 
-    List<BotOption> resolvedBotOptions = new ArrayList<>(botOptions.size());
+    List<BotOptionView> resolvedBotOptions = new ArrayList<>(botOptions.size());
     boolean selectedAssigned = false;
-    for (BotOption botOption : botOptions) {
+    for (BotOptionView botOption : botOptions) {
       boolean selected = !selectedAssigned;
       resolvedBotOptions.add(
-          new BotOption(botOption.id(), botOption.name(), botOption.elo(), selected));
+          new BotOptionView(botOption.id(), botOption.name(), botOption.elo(), selected));
       selectedAssigned = true;
     }
     return resolvedBotOptions;
-  }
-
-  public record TournamentListItem(
-      Long id,
-      String name,
-      String summary,
-      String status,
-      String badgeClass,
-      String actionLabel,
-      String actionHref,
-      boolean actionDisabled,
-      boolean hasImage,
-      int occupiedSlots,
-      int totalSlots) {}
-
-  public record UserTournamentItem(
-      Long id,
-      String name,
-      String date,
-      String format,
-      String status,
-      String statusBadgeClass,
-      String actionLabel,
-      String actionHref,
-      boolean actionDisabled,
-      boolean hasImage) {}
-
-  public record UserTournamentSection(List<UserTournamentItem> tournaments, String search) {}
-
-  public record AdminTournamentDetail(
-      Long id,
-      String name,
-      String description,
-      TournamentStatus status,
-      LocalDate startDate,
-      int slots,
-      int participants,
-      boolean canRunNow,
-      boolean hasImage) {}
-
-  public record TournamentRegistrationState(
-      boolean registrationOpen,
-      boolean hasAvailableSlots,
-      boolean registrationStarted,
-      boolean startsInFuture,
-      boolean upcoming,
-      boolean alreadyRegistered,
-      boolean hasOwnedBots,
-      boolean hasSelectableBots,
-      boolean showJoinButton,
-      int registeredParticipants,
-      String joinMessage,
-      String joinMessageClass) {}
-
-  public record BotOption(Long id, String name, int elo, boolean selected) {}
-
-  public record TournamentJoinPage(
-      Tournament tournament,
-      List<BotOption> botOptions,
-      boolean canSubmit,
-      int participants,
-      String startDate,
-      String registrationOpenDate,
-      String format,
-      String availabilityMessage,
-      String availabilityMessageClass,
-      boolean showCreateBotAction) {}
-
-  public record JoinTournamentResult(JoinTournamentStatus status, String message) {}
-
-  public enum JoinTournamentStatus {
-    JOINED,
-    TOURNAMENT_NOT_FOUND,
-    INVALID_USER,
-    ADMIN_NOT_ALLOWED,
-    INVALID_BOT,
-    ALREADY_REGISTERED,
-    REGISTRATION_NOT_OPEN,
-    REGISTRATION_CLOSED,
-    TOURNAMENT_FULL,
-    BOT_ALREADY_REGISTERED
   }
 }

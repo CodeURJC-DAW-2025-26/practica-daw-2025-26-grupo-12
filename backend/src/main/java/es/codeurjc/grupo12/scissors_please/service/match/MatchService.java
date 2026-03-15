@@ -1,4 +1,4 @@
-package es.codeurjc.grupo12.scissors_please.service;
+package es.codeurjc.grupo12.scissors_please.service.match;
 
 import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.Match;
@@ -6,6 +6,17 @@ import es.codeurjc.grupo12.scissors_please.model.Round;
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.repository.BotRepository;
 import es.codeurjc.grupo12.scissors_please.repository.MatchRepository;
+import es.codeurjc.grupo12.scissors_please.service.bot.BotService;
+import es.codeurjc.grupo12.scissors_please.service.notification.NotificationService;
+import es.codeurjc.grupo12.scissors_please.service.user.UserService;
+import es.codeurjc.grupo12.scissors_please.views.MatchBattleView;
+import es.codeurjc.grupo12.scissors_please.views.MatchListItem;
+import es.codeurjc.grupo12.scissors_please.views.MatchRoundView;
+import es.codeurjc.grupo12.scissors_please.views.MatchStartResult;
+import es.codeurjc.grupo12.scissors_please.views.MatchStatsView;
+import es.codeurjc.grupo12.scissors_please.views.MatchmakingStatusView;
+import es.codeurjc.grupo12.scissors_please.views.UserMatchItem;
+import es.codeurjc.grupo12.scissors_please.views.UserRecentMatchSection;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -894,148 +905,6 @@ public class MatchService {
 
     return DATE_FORMATTER.format(timestamp);
   }
-
-  public record MatchListItem(
-      Long id,
-      Long bot1Id,
-      String bot1Name,
-      String bot1Initial,
-      boolean bot1HasImage,
-      String bot1OwnerName,
-      Long bot2Id,
-      String bot2Name,
-      String bot2Initial,
-      boolean bot2HasImage,
-      String bot2OwnerName,
-      int topElo,
-      String result,
-      String resultBadgeClass,
-      String date,
-      String actionHref) {}
-
-  public record UserMatchItem(
-      Long id,
-      Long myBotId,
-      String myBotName,
-      boolean myBotHasImage,
-      Long opponentBotId,
-      String opponentName,
-      String opponentOwnerName,
-      boolean opponentHasImage,
-      String result,
-      String resultBadgeClass,
-      String date,
-      String actionHref) {}
-
-  public record UserRecentMatchSection(List<UserMatchItem> matches) {}
-
-  public record MatchStartResult(
-      boolean matched, Long matchId, String myBotName, String opponentBotName, boolean searching) {
-    static MatchStartResult matched(Long matchId, String myBotName, String opponentBotName) {
-      return new MatchStartResult(true, matchId, myBotName, opponentBotName, false);
-    }
-
-    static MatchStartResult searching(String myBotName) {
-      return new MatchStartResult(false, null, myBotName, null, true);
-    }
-  }
-
-  public record MatchmakingStatusView(
-      String state,
-      boolean searching,
-      boolean matched,
-      Long matchId,
-      String redirectUrl,
-      Long selectedBotId,
-      String selectedBotName,
-      int selectedBotElo,
-      String selectedBotDescription,
-      String opponentBotName,
-      long waitSeconds,
-      int playersSearching) {
-    static MatchmakingStatusView idle() {
-      return new MatchmakingStatusView(
-          "idle", false, false, null, null, null, null, 0, null, null, 0, 0);
-    }
-
-    static MatchmakingStatusView searching(
-        Long selectedBotId,
-        String selectedBotName,
-        int selectedBotElo,
-        String selectedBotDescription,
-        long waitSeconds,
-        int playersSearching) {
-      return new MatchmakingStatusView(
-          "searching",
-          true,
-          false,
-          null,
-          null,
-          selectedBotId,
-          selectedBotName,
-          selectedBotElo,
-          selectedBotDescription,
-          null,
-          waitSeconds,
-          playersSearching);
-    }
-
-    static MatchmakingStatusView matched(
-        Long matchId,
-        String redirectUrl,
-        Long selectedBotId,
-        String selectedBotName,
-        int selectedBotElo,
-        String selectedBotDescription,
-        String opponentBotName) {
-      return new MatchmakingStatusView(
-          "matched",
-          false,
-          true,
-          matchId,
-          redirectUrl,
-          selectedBotId,
-          selectedBotName,
-          selectedBotElo,
-          selectedBotDescription,
-          opponentBotName,
-          0,
-          0);
-    }
-  }
-
-  public record MatchBattleView(
-      Long matchId,
-      Long bot1Id,
-      String bot1Name,
-      String bot1Initial,
-      boolean bot1HasImage,
-      String bot1OwnerName,
-      Long bot2Id,
-      String bot2Name,
-      String bot2Initial,
-      boolean bot2HasImage,
-      String bot2OwnerName,
-      String statsHref) {}
-
-  public record MatchRoundView(
-      int roundNumber, String bot1Move, String bot2Move, String result, String resultBadgeClass) {}
-
-  public record MatchStatsView(
-      Long matchId,
-      Long bot1Id,
-      String bot1Name,
-      String bot1OwnerName,
-      Long bot2Id,
-      String bot2Name,
-      String bot2OwnerName,
-      String winnerLabel,
-      String winnerBadgeClass,
-      int bot1Score,
-      int bot2Score,
-      int totalRounds,
-      String playedAt,
-      List<MatchRoundView> rounds) {}
 
   private record SearchTicket(Long userId, String username, Bot bot, LocalDateTime createdAt) {}
 

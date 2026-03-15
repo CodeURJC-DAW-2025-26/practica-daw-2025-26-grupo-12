@@ -1,7 +1,6 @@
 (() => {
 	const initLoadMore = (button) => {
 		const endpoint = button.dataset.endpoint;
-		const user = button.dataset.user;
 		const bodyId = button.dataset.bodyId;
 		const counterId = button.dataset.counterId;
 		const metaClass = button.dataset.metaClass;
@@ -60,9 +59,6 @@
 					url.searchParams.set(key, value);
 				});
 
-				if (user) {
-					url.searchParams.set("user", user);
-				}
 				url.searchParams.set("page", nextPage);
 				url.searchParams.set("size", size);
 

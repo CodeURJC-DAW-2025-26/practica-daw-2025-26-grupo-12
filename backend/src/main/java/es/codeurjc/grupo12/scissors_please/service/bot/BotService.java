@@ -1,4 +1,4 @@
-package es.codeurjc.grupo12.scissors_please.service;
+package es.codeurjc.grupo12.scissors_please.service.bot;
 
 import es.codeurjc.grupo12.scissors_please.common.pagination.PageableUtils;
 import es.codeurjc.grupo12.scissors_please.config.ErrorConstants;
@@ -8,6 +8,9 @@ import es.codeurjc.grupo12.scissors_please.exception.BotNotFoundException;
 import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.repository.BotRepository;
+import es.codeurjc.grupo12.scissors_please.service.image.ImageService;
+import es.codeurjc.grupo12.scissors_please.service.user.UserService;
+import es.codeurjc.grupo12.scissors_please.views.UserGlobalRanking;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -337,6 +340,4 @@ public class BotService {
     }
     return parsedTags;
   }
-
-  public record UserGlobalRanking(boolean ranked, int rank, int totalUsers, int bestElo) {}
 }

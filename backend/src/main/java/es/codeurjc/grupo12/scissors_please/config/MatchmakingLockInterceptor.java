@@ -1,8 +1,8 @@
 package es.codeurjc.grupo12.scissors_please.config;
 
 import es.codeurjc.grupo12.scissors_please.model.User;
-import es.codeurjc.grupo12.scissors_please.service.MatchService;
-import es.codeurjc.grupo12.scissors_please.service.UserService;
+import es.codeurjc.grupo12.scissors_please.service.match.MatchService;
+import es.codeurjc.grupo12.scissors_please.service.user.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Set;

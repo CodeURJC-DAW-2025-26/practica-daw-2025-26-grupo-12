@@ -44,7 +44,7 @@ public class SecurityConfig {
   private static final String[] USER_ROUTES = {"/user/profile"};
 
   private static final String[] USER_AND_NOT_ADMIN_ROUTES = {
-    "/bots/my-bots", "/bots/my-bots/page", "/bots/create", "/bots"
+    "/bots/user-bots", "/bots/user-bots/page", "/bots/create", "/bots"
   };
 
   private static final String[] USER_OR_ADMIN_BOT_ROUTES = {"/bots/*", "/bots/*/edit"};

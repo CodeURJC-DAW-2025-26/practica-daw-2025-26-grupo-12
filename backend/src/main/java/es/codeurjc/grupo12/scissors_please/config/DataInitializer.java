@@ -9,7 +9,7 @@ import es.codeurjc.grupo12.scissors_please.repository.BotRepository;
 import es.codeurjc.grupo12.scissors_please.repository.MatchRepository;
 import es.codeurjc.grupo12.scissors_please.repository.TournamentRepository;
 import es.codeurjc.grupo12.scissors_please.repository.UserRepository;
-import es.codeurjc.grupo12.scissors_please.service.MatchService;
+import es.codeurjc.grupo12.scissors_please.service.match.MatchService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;

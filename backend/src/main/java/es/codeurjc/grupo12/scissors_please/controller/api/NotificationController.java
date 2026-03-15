@@ -1,6 +1,6 @@
 package es.codeurjc.grupo12.scissors_please.controller.api;
 
-import es.codeurjc.grupo12.scissors_please.service.NotificationService;
+import es.codeurjc.grupo12.scissors_please.service.notification.NotificationService;
 import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
