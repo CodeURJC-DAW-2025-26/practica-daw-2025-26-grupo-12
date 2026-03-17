@@ -19,12 +19,6 @@ public interface BotRepository extends JpaRepository<Bot, Long> {
 
   List<Bot> findByOwnerIdAndIsPublicTrueAndDeletedFalse(Long ownerId);
 
-  List<Bot> findByNameContainingIgnoreCaseAndDeletedFalse(String name);
-
-  List<Bot> findByNameContainingIgnoreCaseAndIsPublicAndDeletedFalse(String name, boolean isPublic);
-
-  List<Bot> findByIsPublicAndDeletedFalse(boolean isPublic);
-
   Page<Bot> findAllByDeletedFalseOrderByIdDesc(Pageable pageable);
 
   Page<Bot> findByNameContainingIgnoreCaseAndDeletedFalseOrderByIdDesc(
@@ -51,6 +45,9 @@ public interface BotRepository extends JpaRepository<Bot, Long> {
 
   @Query("SELECT MAX(b.elo) FROM Bot b WHERE b.deleted = false AND b.ownerId = :ownerId")
   Integer findMaxEloByOwnerId(@Param("ownerId") Long ownerId);
+
+  @Query("SELECT count(b) FROM Bot b WHERE b.deleted = false AND b.ownerId = :ownerId")
+  int countByOwnerId(@Param("ownerId") Long ownerId);
 
   public interface StatsProjection {
     Long getTotalWins();

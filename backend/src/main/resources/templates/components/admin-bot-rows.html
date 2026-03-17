@@ -28,7 +28,7 @@
     </td>
     <td class="text-end pe-3">
         <div class="d-flex justify-content-end gap-2">
-            <a href="/bots/detail/{{id}}" class="btn btn-sm btn-outline-muted">View</a>
+            <a href="/bots/{{id}}" class="btn btn-sm btn-outline-muted">View</a>
             <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteBotModal"
                 data-bot-id="{{id}}" data-bot-name="{{name}}">
                 Delete
@@ -44,7 +44,3 @@
     </td>
 </tr>
 {{/bots}}
-<tr class="admin-bot-meta-row d-none" data-result-count="{{resultCount}}" data-search-query="{{searchQuery}}"
-    data-visibility-filter="{{visibilityFilter}}" data-next-page="{{nextPage}}" data-has-more="{{hasMore}}"
-    data-total-elements="{{totalElements}}" data-from-item="{{fromItem}}" data-to-item="{{toItem}}">
-</tr>

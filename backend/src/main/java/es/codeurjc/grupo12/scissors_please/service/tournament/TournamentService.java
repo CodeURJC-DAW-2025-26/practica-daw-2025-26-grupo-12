@@ -1,4 +1,4 @@
-package es.codeurjc.grupo12.scissors_please.service;
+package es.codeurjc.grupo12.scissors_please.service.tournament;
 
 import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.Image;
@@ -7,6 +7,15 @@ import es.codeurjc.grupo12.scissors_please.model.TournamentStatus;
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.repository.BotRepository;
 import es.codeurjc.grupo12.scissors_please.repository.TournamentRepository;
+import es.codeurjc.grupo12.scissors_please.views.AdminTournamentDetail;
+import es.codeurjc.grupo12.scissors_please.views.BotOptionView;
+import es.codeurjc.grupo12.scissors_please.views.JoinTournamentResult;
+import es.codeurjc.grupo12.scissors_please.views.JoinTournamentStatus;
+import es.codeurjc.grupo12.scissors_please.views.TournamentJoinPage;
+import es.codeurjc.grupo12.scissors_please.views.TournamentListItem;
+import es.codeurjc.grupo12.scissors_please.views.TournamentRegistrationState;
+import es.codeurjc.grupo12.scissors_please.views.UserTournamentItem;
+import es.codeurjc.grupo12.scissors_please.views.UserTournamentSection;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -18,7 +27,6 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -171,14 +179,14 @@ public class TournamentService {
     TournamentRegistrationState registrationState = getRegistrationState(tournament, currentUser);
 
     Set<Long> participantIds = getParticipantIds(tournament.getParticipants());
-    List<BotOption> botOptions =
+    List<BotOptionView> botOptions =
         getOwnedBots(currentUser).stream()
             .filter(bot -> bot.getId() != null && !participantIds.contains(bot.getId()))
             .sorted(Comparator.comparingInt(Bot::getElo).reversed())
-            .map(bot -> new BotOption(bot.getId(), bot.getName(), bot.getElo(), false))
+            .map(bot -> new BotOptionView(bot.getId(), bot.getName(), bot.getElo(), false))
             .toList();
 
-    List<BotOption> resolvedBotOptions = selectFirstBot(botOptions);
+    List<BotOptionView> resolvedBotOptions = selectFirstBot(botOptions);
     return new TournamentJoinPage(
         tournament,
         resolvedBotOptions,
@@ -263,20 +271,18 @@ public class TournamentService {
     return new JoinTournamentResult(JoinTournamentStatus.JOINED, "Bot registered successfully.");
   }
 
-  public TournamentPage getTournamentPage(Pageable pageable) {
+  public Page<TournamentListItem> getTournamentPage(String query, Pageable pageable) {
     int safePage = Math.max(pageable.getPageNumber(), 0);
     int safeSize = Math.min(Math.max(pageable.getPageSize(), 1), MAX_PAGE_SIZE);
     Pageable safePageable = PageRequest.of(safePage, safeSize);
 
-    Page<Tournament> pageResult = tournamentRepository.findAllByOrderByStartDateAsc(safePageable);
-    List<TournamentListItem> tournaments =
-        pageResult.getContent().stream().map(this::toListItem).toList();
-    long totalElements = pageResult.getTotalElements();
-    int fromItem = tournaments.isEmpty() ? 0 : (safePage * safeSize) + 1;
-    int toItem = tournaments.isEmpty() ? 0 : fromItem + tournaments.size() - 1;
-
-    return new TournamentPage(
-        tournaments, safePage + 1, pageResult.hasNext(), totalElements, fromItem, toItem);
+    String normalizedQuery = query == null ? "" : query.trim();
+    Page<Tournament> pageResult =
+        normalizedQuery.isBlank()
+            ? tournamentRepository.findAllByOrderByStartDateAsc(safePageable)
+            : tournamentRepository.findByNameContainingIgnoreCaseOrderByStartDateAsc(
+                normalizedQuery, safePageable);
+    return pageResult.map(this::toListItem);
   }
 
   public List<UserTournamentItem> getUserHomeTournaments(Long userId, int limit) {
@@ -289,53 +295,24 @@ public class TournamentService {
         .findDistinctByParticipantsOwnerIdOrderByStartDateAsc(userId)
         .stream()
         .limit(safeLimit)
-        .map(tournament -> toUserTournamentItem(tournament, true))
+        .map(this::toUserTournamentItem)
         .toList();
   }
 
-  public UserTournamentSection getUserTournamentSection(
-      Long userId, String registrationFilterParam, String query) {
-    RegistrationFilter registrationFilter = RegistrationFilter.fromParam(registrationFilterParam);
+  public UserTournamentSection getUserTournamentSection(Long userId, String query) {
     String normalizedQuery = normalizeQuery(query);
 
-    List<Tournament> allTournaments = tournamentRepository.findAllByOrderByStartDateAsc();
-    Set<Long> registeredTournamentIds =
-        tournamentRepository.findDistinctByParticipantsOwnerIdOrderByStartDateAsc(userId).stream()
-            .map(Tournament::getId)
-            .collect(Collectors.toSet());
+    List<Tournament> registeredTournaments =
+        tournamentRepository.findDistinctByParticipantsOwnerIdOrderByStartDateAsc(userId);
 
     List<UserTournamentItem> tournaments =
-        allTournaments.stream()
-            .filter(
-                tournament ->
-                    matchesRegistrationFilter(
-                        tournament.getId(), registeredTournamentIds, registrationFilter))
+        registeredTournaments.stream()
             .filter(tournament -> matchesQuery(tournament, normalizedQuery))
-            .map(
-                tournament ->
-                    toUserTournamentItem(
-                        tournament, registeredTournamentIds.contains(tournament.getId())))
+            .map(this::toUserTournamentItem)
             .toList();
 
     String search = query == null ? "" : query.trim();
-    return new UserTournamentSection(
-        tournaments,
-        search,
-        registrationFilter == RegistrationFilter.ALL,
-        registrationFilter == RegistrationFilter.REGISTERED,
-        registrationFilter == RegistrationFilter.NOT_REGISTERED);
-  }
-
-  private boolean matchesRegistrationFilter(
-      Long tournamentId, Set<Long> registeredTournamentIds, RegistrationFilter registrationFilter) {
-    boolean isRegistered = registeredTournamentIds.contains(tournamentId);
-    if (registrationFilter == RegistrationFilter.REGISTERED) {
-      return isRegistered;
-    }
-    if (registrationFilter == RegistrationFilter.NOT_REGISTERED) {
-      return !isRegistered;
-    }
-    return true;
+    return new UserTournamentSection(tournaments, search);
   }
 
   private boolean matchesQuery(Tournament tournament, String normalizedQuery) {
@@ -350,12 +327,8 @@ public class TournamentService {
     return query == null ? "" : query.trim().toLowerCase();
   }
 
-  private UserTournamentItem toUserTournamentItem(Tournament tournament, boolean isRegistered) {
+  private UserTournamentItem toUserTournamentItem(Tournament tournament) {
     TournamentListItem listItem = toListItem(tournament);
-
-    String registrationLabel = isRegistered ? "Registered" : "Not Registered";
-    String registrationBadgeClass =
-        isRegistered ? "bg-secondary" : "bg-dark border border-secondary text-secondary";
 
     return new UserTournamentItem(
         listItem.id(),
@@ -367,10 +340,7 @@ public class TournamentService {
         listItem.actionLabel(),
         listItem.actionHref(),
         listItem.actionDisabled(),
-        listItem.hasImage(),
-        isRegistered,
-        registrationLabel,
-        registrationBadgeClass);
+        listItem.hasImage());
   }
 
   private String formatDate(LocalDate startDate) {
@@ -431,6 +401,8 @@ public class TournamentService {
         tournament.getDescription() == null || tournament.getDescription().isBlank()
             ? "No description available."
             : tournament.getDescription();
+    int occupiedSlots = getParticipantIds(tournament.getParticipants()).size();
+    int totalSlots = Math.max(tournament.getSlots(), 0);
 
     return new TournamentListItem(
         tournament.getId(),
@@ -441,7 +413,9 @@ public class TournamentService {
         actionLabel,
         actionHref,
         actionDisabled,
-        tournament.getImage() != null);
+        tournament.getImage() != null,
+        occupiedSlots,
+        totalSlots);
   }
 
   public AdminTournamentDetail getAdminTournamentDetail(Long id) {
@@ -529,135 +503,19 @@ public class TournamentService {
     return participantIds;
   }
 
-  private List<BotOption> selectFirstBot(List<BotOption> botOptions) {
+  private List<BotOptionView> selectFirstBot(List<BotOptionView> botOptions) {
     if (botOptions.isEmpty()) {
       return List.of();
     }
 
-    List<BotOption> resolvedBotOptions = new ArrayList<>(botOptions.size());
+    List<BotOptionView> resolvedBotOptions = new ArrayList<>(botOptions.size());
     boolean selectedAssigned = false;
-    for (BotOption botOption : botOptions) {
+    for (BotOptionView botOption : botOptions) {
       boolean selected = !selectedAssigned;
       resolvedBotOptions.add(
-          new BotOption(botOption.id(), botOption.name(), botOption.elo(), selected));
+          new BotOptionView(botOption.id(), botOption.name(), botOption.elo(), selected));
       selectedAssigned = true;
     }
     return resolvedBotOptions;
-  }
-
-  public record TournamentListItem(
-      Long id,
-      String name,
-      String summary,
-      String status,
-      String badgeClass,
-      String actionLabel,
-      String actionHref,
-      boolean actionDisabled,
-      boolean hasImage) {}
-
-  public record UserTournamentItem(
-      Long id,
-      String name,
-      String date,
-      String format,
-      String status,
-      String statusBadgeClass,
-      String actionLabel,
-      String actionHref,
-      boolean actionDisabled,
-      boolean hasImage,
-      boolean registered,
-      String registrationLabel,
-      String registrationBadgeClass) {}
-
-  public record UserTournamentSection(
-      List<UserTournamentItem> tournaments,
-      String search,
-      boolean selectedAll,
-      boolean selectedRegistered,
-      boolean selectedNotRegistered) {}
-
-  public record AdminTournamentDetail(
-      Long id,
-      String name,
-      String description,
-      TournamentStatus status,
-      LocalDate startDate,
-      int slots,
-      int participants,
-      boolean canRunNow,
-      boolean hasImage) {}
-
-  public record TournamentPage(
-      List<TournamentListItem> tournaments,
-      int nextPage,
-      boolean hasMore,
-      long totalElements,
-      int fromItem,
-      int toItem) {}
-
-  public record TournamentRegistrationState(
-      boolean registrationOpen,
-      boolean hasAvailableSlots,
-      boolean registrationStarted,
-      boolean startsInFuture,
-      boolean upcoming,
-      boolean alreadyRegistered,
-      boolean hasOwnedBots,
-      boolean hasSelectableBots,
-      boolean showJoinButton,
-      int registeredParticipants,
-      String joinMessage,
-      String joinMessageClass) {}
-
-  public record BotOption(Long id, String name, int elo, boolean selected) {}
-
-  public record TournamentJoinPage(
-      Tournament tournament,
-      List<BotOption> botOptions,
-      boolean canSubmit,
-      int participants,
-      String startDate,
-      String registrationOpenDate,
-      String format,
-      String availabilityMessage,
-      String availabilityMessageClass,
-      boolean showCreateBotAction) {}
-
-  public record JoinTournamentResult(JoinTournamentStatus status, String message) {}
-
-  public enum JoinTournamentStatus {
-    JOINED,
-    TOURNAMENT_NOT_FOUND,
-    INVALID_USER,
-    ADMIN_NOT_ALLOWED,
-    INVALID_BOT,
-    ALREADY_REGISTERED,
-    REGISTRATION_NOT_OPEN,
-    REGISTRATION_CLOSED,
-    TOURNAMENT_FULL,
-    BOT_ALREADY_REGISTERED
-  }
-
-  private enum RegistrationFilter {
-    ALL,
-    REGISTERED,
-    NOT_REGISTERED;
-
-    static RegistrationFilter fromParam(String value) {
-      if (value == null) {
-        return ALL;
-      }
-
-      String normalizedValue = value.trim().toLowerCase();
-      if ("registered".equals(normalizedValue)) {
-        return REGISTERED;
-      }
-      if ("not-registered".equals(normalizedValue) || "not_registered".equals(normalizedValue)) {
-        return NOT_REGISTERED;
-      }
-      return ALL;
-    }
   }
 }

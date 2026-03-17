@@ -14,7 +14,9 @@
                 <h1 class="h3 fw-bold mb-0">Bots</h1>
             </div>
             <div class="d-flex flex-wrap gap-2">
+                {{#canManage}}
                 <a href="/bots/create" class="btn btn-primary btn-sm">Create Bot</a>
+                {{/canManage}}
             </div>
         </div>
 
@@ -41,7 +43,7 @@
                     </div>
                     <div class="d-flex justify-content-center mt-3">
                         <button id="bots-load-more" class="btn btn-outline-muted btn-sm" type="button"
-                            data-load-more="bots" data-endpoint="/bots/my-bots/page" data-user="{{userQuery}}"
+                            data-load-more="bots" data-endpoint="/bots/user-bots/page"
                             data-body-id="bots-body" data-counter-id="bot-counter" data-meta-class="bot-meta-row"
                             data-size="{{size}}">
                             Show more
@@ -67,8 +69,17 @@
                 <div class="card p-4">
                     <h2 class="h5 fw-bold mb-3">Quick Actions</h2>
                     <div class="d-grid gap-2">
-                        <a href="/bots/edit/{{latestBotId}}" class="btn btn-outline-muted btn-sm">Open Latest Bot</a>
+                        {{#canManage}}
+                        {{#hasLatestBot}}
+                        <a href="/bots/{{latestBotId}}/edit" class="btn btn-outline-muted btn-sm">Open Latest Bot</a>
+                        {{/hasLatestBot}}
+                        {{^hasLatestBot}}
+                        <button type="button" class="btn btn-outline-muted btn-sm" disabled>Open Latest Bot</button>
+                        {{/hasLatestBot}}
+                        {{/canManage}}
+                        {{#ownBotsView}}
                         <a href="/matches/recent" class="btn btn-outline-muted btn-sm">View Matches</a>
+                        {{/ownBotsView}}
                     </div>
                 </div>
             </div>
@@ -89,7 +100,7 @@
                     const form = deleteModal.querySelector('#deleteBotForm');
                     const nameSpan = deleteModal.querySelector('#deleteBotName');
 
-                    form.action = `/bots/${botId}/delete`;
+                    form.action = `/bots/${botId}`;
                     nameSpan.textContent = botName;
                 });
             }
@@ -122,6 +133,7 @@
                             <div class="col-6">
                                 <form id="deleteBotForm" method="post" action="">
                                     <input type="hidden" name="_csrf" value="{{_csrf.token}}">
+                                    <input type="hidden" name="_method" value="delete">
                                     <button type="submit" class="btn btn-danger w-100 py-2 fw-medium">Delete
                                         Forever</button>
                                 </form>

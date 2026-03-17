@@ -1,4 +1,4 @@
-package es.codeurjc.grupo12.scissors_please.service;
+package es.codeurjc.grupo12.scissors_please.service.user;
 
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.repository.BotRepository;
@@ -29,21 +29,17 @@ public class UserService {
 
   @Autowired private BotRepository botRepository;
 
-  public record UserPage(
-      List<User> users,
-      int nextPage,
-      boolean hasMore,
-      long totalElements,
-      int fromItem,
-      int toItem) {}
+  public boolean canViewPrivateBots(User requester, User target) {
+    if (requester == null || target == null) return false;
 
-  @Transactional(readOnly = true)
-  public UserPage getUserPage(Pageable pageable) {
-    return getUserPage("", UserStatusFilter.ALL, pageable);
+    boolean isOwner = requester.getId() != null && requester.getId().equals(target.getId());
+    boolean isAdmin = requester.getRoles() != null && requester.getRoles().contains("ADMIN");
+
+    return isOwner || isAdmin;
   }
 
   @Transactional(readOnly = true)
-  public UserPage getUserPage(String query, UserStatusFilter statusFilter, Pageable pageable) {
+  public Page<User> getUserPage(String query, UserStatusFilter statusFilter, Pageable pageable) {
     int safePage = Math.max(pageable.getPageNumber(), 0);
     int safeSize = Math.min(Math.max(pageable.getPageSize(), 1), MAX_PAGE_SIZE);
     Pageable safePageable = PageRequest.of(safePage, safeSize);
@@ -67,27 +63,15 @@ public class UserService {
     } else {
       pageResult =
           switch (effectiveStatusFilter) {
-            case ALL ->
-                userRepository
-                    .findByUsernameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrderByUsernameAsc(
-                        normalizedQuery, normalizedQuery, safePageable);
+            case ALL -> userRepository.searchActiveUsers(normalizedQuery, safePageable);
             case BLOCKED ->
-                userRepository
-                    .findByBlockedAndUsernameContainingIgnoreCaseOrBlockedAndEmailContainingIgnoreCaseOrderByUsernameAsc(
-                        true, normalizedQuery, true, normalizedQuery, safePageable);
+                userRepository.searchActiveUsersByBlocked(true, normalizedQuery, safePageable);
             case ACTIVE ->
-                userRepository
-                    .findByBlockedAndUsernameContainingIgnoreCaseOrBlockedAndEmailContainingIgnoreCaseOrderByUsernameAsc(
-                        false, normalizedQuery, false, normalizedQuery, safePageable);
+                userRepository.searchActiveUsersByBlocked(false, normalizedQuery, safePageable);
           };
     }
 
-    List<User> users = pageResult.getContent();
-    long totalElements = pageResult.getTotalElements();
-    int fromItem = users.isEmpty() ? 0 : (safePage * safeSize) + 1;
-    int toItem = users.isEmpty() ? 0 : fromItem + users.size() - 1;
-
-    return new UserPage(users, safePage + 1, pageResult.hasNext(), totalElements, fromItem, toItem);
+    return pageResult;
   }
 
   public User registerUser(String username, String email, String password) {
@@ -135,21 +119,6 @@ public class UserService {
   }
 
   @Transactional(readOnly = true)
-  public Optional<User> findByEmail(String email) {
-    return userRepository.findByEmailAndDeleteDateIsNull(email);
-  }
-
-  @Transactional(readOnly = true)
-  public Optional<User> findByUsernameIncludingDeleted(String username) {
-    return userRepository.findByUsername(username);
-  }
-
-  @Transactional(readOnly = true)
-  public Optional<User> findByEmailIncludingDeleted(String email) {
-    return userRepository.findByEmail(email);
-  }
-
-  @Transactional(readOnly = true)
   public User getUserById(Long id) {
     return userRepository
         .findById(id)
@@ -171,47 +140,6 @@ public class UserService {
 
   public List<MonthlyUserCount> getMonthlyUserCount() {
     return userRepository.countUsersByMonth();
-  }
-
-  @Transactional(readOnly = true)
-  public List<User> getAllUsers() {
-    return userRepository.findAllByDeleteDateIsNull();
-  }
-
-  @Transactional(readOnly = true)
-  public List<User> searchUsers(String query) {
-    return searchUsers(query, UserStatusFilter.ALL);
-  }
-
-  @Transactional(readOnly = true)
-  public List<User> searchUsers(String query, UserStatusFilter statusFilter) {
-    UserStatusFilter effectiveStatusFilter =
-        statusFilter == null ? UserStatusFilter.ALL : statusFilter;
-    if (query == null || query.isBlank()) {
-      return switch (effectiveStatusFilter) {
-        case ALL -> userRepository.findTop25ByDeleteDateIsNullOrderByUsernameAsc();
-        case BLOCKED ->
-            userRepository.findTop25ByDeleteDateIsNullAndBlockedOrderByUsernameAsc(true);
-        case ACTIVE ->
-            userRepository.findTop25ByDeleteDateIsNullAndBlockedOrderByUsernameAsc(false);
-      };
-    }
-
-    String normalizedQuery = query.trim();
-    return switch (effectiveStatusFilter) {
-      case ALL ->
-          userRepository
-              .findTop25ByDeleteDateIsNullAndUsernameContainingIgnoreCaseOrDeleteDateIsNullAndEmailContainingIgnoreCaseOrderByUsernameAsc(
-                  normalizedQuery, normalizedQuery);
-      case BLOCKED ->
-          userRepository
-              .findTop25ByDeleteDateIsNullAndBlockedAndUsernameContainingIgnoreCaseOrDeleteDateIsNullAndBlockedAndEmailContainingIgnoreCaseOrderByUsernameAsc(
-                  true, normalizedQuery, true, normalizedQuery);
-      case ACTIVE ->
-          userRepository
-              .findTop25ByDeleteDateIsNullAndBlockedAndUsernameContainingIgnoreCaseOrDeleteDateIsNullAndBlockedAndEmailContainingIgnoreCaseOrderByUsernameAsc(
-                  false, normalizedQuery, false, normalizedQuery);
-    };
   }
 
   @Transactional(readOnly = true)

@@ -1,4 +1,4 @@
-package es.codeurjc.grupo12.scissors_please.service;
+package es.codeurjc.grupo12.scissors_please.service.match;
 
 import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.Match;
@@ -6,6 +6,17 @@ import es.codeurjc.grupo12.scissors_please.model.Round;
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.repository.BotRepository;
 import es.codeurjc.grupo12.scissors_please.repository.MatchRepository;
+import es.codeurjc.grupo12.scissors_please.service.bot.BotService;
+import es.codeurjc.grupo12.scissors_please.service.notification.NotificationService;
+import es.codeurjc.grupo12.scissors_please.service.user.UserService;
+import es.codeurjc.grupo12.scissors_please.views.MatchBattleView;
+import es.codeurjc.grupo12.scissors_please.views.MatchListItem;
+import es.codeurjc.grupo12.scissors_please.views.MatchRoundView;
+import es.codeurjc.grupo12.scissors_please.views.MatchStartResult;
+import es.codeurjc.grupo12.scissors_please.views.MatchStatsView;
+import es.codeurjc.grupo12.scissors_please.views.MatchmakingStatusView;
+import es.codeurjc.grupo12.scissors_please.views.UserMatchItem;
+import es.codeurjc.grupo12.scissors_please.views.UserRecentMatchSection;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -362,19 +373,13 @@ public class MatchService {
         rounds);
   }
 
-  public MatchPage getBestMatchPage(Pageable pageable) {
+  public Page<MatchListItem> getBestMatchPage(Pageable pageable) {
     int safePage = Math.max(pageable.getPageNumber(), 0);
     int safeSize = Math.min(Math.max(pageable.getPageSize(), 1), MAX_PAGE_SIZE);
     Pageable safePageable = PageRequest.of(safePage, safeSize);
 
     Page<Match> pageResult = matchRepository.findBestMatches(safePageable);
-    List<MatchListItem> matches = pageResult.getContent().stream().map(this::toListItem).toList();
-    long totalElements = pageResult.getTotalElements();
-    int fromItem = matches.isEmpty() ? 0 : (safePage * safeSize) + 1;
-    int toItem = matches.isEmpty() ? 0 : fromItem + matches.size() - 1;
-
-    return new MatchPage(
-        matches, safePage + 1, pageResult.hasNext(), totalElements, fromItem, toItem);
+    return pageResult.map(this::toListItem);
   }
 
   public List<UserMatchItem> getUserHomeMatches(Long userId, int limit) {
@@ -391,34 +396,15 @@ public class MatchService {
         .toList();
   }
 
-  public UserRecentMatchSection getUserRecentMatchSection(
-      Long userId, String participationFilterParam) {
-    ParticipationFilter filter = ParticipationFilter.fromParam(participationFilterParam);
-
-    List<Match> source =
-        (filter == ParticipationFilter.PLAYED)
-            ? matchRepository.findDistinctByBot1OwnerIdOrBot2OwnerIdOrderByTimestampDesc(
-                userId, userId)
-            : matchRepository.findAllByOrderByTimestampDesc().stream().limit(100).toList();
-
+  public UserRecentMatchSection getUserRecentMatchSection(Long userId) {
     List<UserMatchItem> matches =
-        source.stream()
-            .filter(m -> matchesFilter(m, userId, filter))
+        matchRepository
+            .findDistinctByBot1OwnerIdOrBot2OwnerIdOrderByTimestampDesc(userId, userId)
+            .stream()
             .map(m -> toUserMatchItem(m, userId))
             .toList();
 
-    return new UserRecentMatchSection(
-        matches,
-        filter == ParticipationFilter.ALL,
-        filter == ParticipationFilter.PLAYED,
-        filter == ParticipationFilter.NOT_PLAYED);
-  }
-
-  private boolean matchesFilter(Match m, Long userId, ParticipationFilter filter) {
-    boolean played = isOwnedByUser(m.getBot1(), userId) || isOwnedByUser(m.getBot2(), userId);
-    return filter == ParticipationFilter.ALL
-        || (filter == ParticipationFilter.PLAYED && played)
-        || (filter == ParticipationFilter.NOT_PLAYED && !played);
+    return new UserRecentMatchSection(matches);
   }
 
   @Scheduled(fixedDelay = 30000)
@@ -670,9 +656,6 @@ public class MatchService {
         res,
         resolveBadgeClass(res),
         formatDate(match.getTimestamp()),
-        played,
-        played ? "Played" : "Not Played",
-        played ? "bg-secondary" : "bg-dark border border-secondary text-secondary",
         "/matches/stats?id=" + match.getId());
   }
 
@@ -923,163 +906,6 @@ public class MatchService {
     return DATE_FORMATTER.format(timestamp);
   }
 
-  public record MatchListItem(
-      Long id,
-      Long bot1Id,
-      String bot1Name,
-      String bot1Initial,
-      boolean bot1HasImage,
-      String bot1OwnerName,
-      Long bot2Id,
-      String bot2Name,
-      String bot2Initial,
-      boolean bot2HasImage,
-      String bot2OwnerName,
-      int topElo,
-      String result,
-      String resultBadgeClass,
-      String date,
-      String actionHref) {}
-
-  public record MatchPage(
-      List<MatchListItem> matches,
-      int nextPage,
-      boolean hasMore,
-      long totalElements,
-      int fromItem,
-      int toItem) {}
-
-  public record UserMatchItem(
-      Long id,
-      Long myBotId,
-      String myBotName,
-      boolean myBotHasImage,
-      Long opponentBotId,
-      String opponentName,
-      String opponentOwnerName,
-      boolean opponentHasImage,
-      String result,
-      String resultBadgeClass,
-      String date,
-      boolean played,
-      String participationLabel,
-      String participationBadgeClass,
-      String actionHref) {}
-
-  public record UserRecentMatchSection(
-      List<UserMatchItem> matches,
-      boolean selectedAll,
-      boolean selectedPlayed,
-      boolean selectedNotPlayed) {}
-
-  public record MatchStartResult(
-      boolean matched, Long matchId, String myBotName, String opponentBotName, boolean searching) {
-    static MatchStartResult matched(Long matchId, String myBotName, String opponentBotName) {
-      return new MatchStartResult(true, matchId, myBotName, opponentBotName, false);
-    }
-
-    static MatchStartResult searching(String myBotName) {
-      return new MatchStartResult(false, null, myBotName, null, true);
-    }
-  }
-
-  public record MatchmakingStatusView(
-      String state,
-      boolean searching,
-      boolean matched,
-      Long matchId,
-      String redirectUrl,
-      Long selectedBotId,
-      String selectedBotName,
-      int selectedBotElo,
-      String selectedBotDescription,
-      String opponentBotName,
-      long waitSeconds,
-      int playersSearching) {
-    static MatchmakingStatusView idle() {
-      return new MatchmakingStatusView(
-          "idle", false, false, null, null, null, null, 0, null, null, 0, 0);
-    }
-
-    static MatchmakingStatusView searching(
-        Long selectedBotId,
-        String selectedBotName,
-        int selectedBotElo,
-        String selectedBotDescription,
-        long waitSeconds,
-        int playersSearching) {
-      return new MatchmakingStatusView(
-          "searching",
-          true,
-          false,
-          null,
-          null,
-          selectedBotId,
-          selectedBotName,
-          selectedBotElo,
-          selectedBotDescription,
-          null,
-          waitSeconds,
-          playersSearching);
-    }
-
-    static MatchmakingStatusView matched(
-        Long matchId,
-        String redirectUrl,
-        Long selectedBotId,
-        String selectedBotName,
-        int selectedBotElo,
-        String selectedBotDescription,
-        String opponentBotName) {
-      return new MatchmakingStatusView(
-          "matched",
-          false,
-          true,
-          matchId,
-          redirectUrl,
-          selectedBotId,
-          selectedBotName,
-          selectedBotElo,
-          selectedBotDescription,
-          opponentBotName,
-          0,
-          0);
-    }
-  }
-
-  public record MatchBattleView(
-      Long matchId,
-      Long bot1Id,
-      String bot1Name,
-      String bot1Initial,
-      boolean bot1HasImage,
-      String bot1OwnerName,
-      Long bot2Id,
-      String bot2Name,
-      String bot2Initial,
-      boolean bot2HasImage,
-      String bot2OwnerName,
-      String statsHref) {}
-
-  public record MatchRoundView(
-      int roundNumber, String bot1Move, String bot2Move, String result, String resultBadgeClass) {}
-
-  public record MatchStatsView(
-      Long matchId,
-      Long bot1Id,
-      String bot1Name,
-      String bot1OwnerName,
-      Long bot2Id,
-      String bot2Name,
-      String bot2OwnerName,
-      String winnerLabel,
-      String winnerBadgeClass,
-      int bot1Score,
-      int bot2Score,
-      int totalRounds,
-      String playedAt,
-      List<MatchRoundView> rounds) {}
-
   private record SearchTicket(Long userId, String username, Bot bot, LocalDateTime createdAt) {}
 
   private record ReadyMatch(
@@ -1107,28 +933,4 @@ public class MatchService {
       LocalDateTime createdAt) {}
 
   private record RematchParticipants(Bot requesterBot, Bot opponentBot, User opponentUser) {}
-
-  private enum ParticipationFilter {
-    ALL,
-    PLAYED,
-    NOT_PLAYED;
-
-    static ParticipationFilter fromParam(String value) {
-      if (value == null || value.isBlank()) {
-        return PLAYED;
-      }
-
-      String normalizedValue = value.trim().toLowerCase(Locale.ROOT);
-      if ("played".equals(normalizedValue)) {
-        return PLAYED;
-      }
-      if ("not-played".equals(normalizedValue) || "not_played".equals(normalizedValue)) {
-        return NOT_PLAYED;
-      }
-      if ("all".equals(normalizedValue)) {
-        return ALL;
-      }
-      return PLAYED;
-    }
-  }
 }

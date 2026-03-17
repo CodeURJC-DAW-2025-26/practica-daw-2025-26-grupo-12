@@ -1,17 +1,8 @@
 package es.codeurjc.grupo12.scissors_please.controller.web;
 
-import es.codeurjc.grupo12.scissors_please.model.Bot;
-import es.codeurjc.grupo12.scissors_please.model.Tournament;
-import es.codeurjc.grupo12.scissors_please.model.User;
-import es.codeurjc.grupo12.scissors_please.repository.BotRepository;
-import es.codeurjc.grupo12.scissors_please.service.TournamentService;
-import es.codeurjc.grupo12.scissors_please.service.UserService;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.net.URLConnection;
-import java.util.Optional;
+import es.codeurjc.grupo12.scissors_please.service.image.ImageWebHandlerService;
+import es.codeurjc.grupo12.scissors_please.views.BinaryResponseView;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,74 +11,23 @@ import org.springframework.web.bind.annotation.PathVariable;
 @Controller
 public class ImageController {
 
-  @Autowired private BotRepository botRepository;
-  @Autowired private UserService userService;
-  @Autowired private TournamentService tournamentService;
+  @Autowired private ImageWebHandlerService imageWebHandlerService;
 
   @GetMapping("/bot-images/{id}")
   public ResponseEntity<byte[]> getBotImage(@PathVariable Long id) {
-    Optional<Bot> opBot = botRepository.findById(id);
-
-    if (opBot.isPresent() && opBot.get().getImage() != null) {
-      byte[] imageBytes = opBot.get().getImage().getData();
-
-      String mimeType = null;
-      try {
-        mimeType = URLConnection.guessContentTypeFromStream(new ByteArrayInputStream(imageBytes));
-      } catch (IOException e) {
-      }
-
-      MediaType contentType =
-          (mimeType != null) ? MediaType.parseMediaType(mimeType) : MediaType.IMAGE_JPEG;
-
-      return ResponseEntity.ok().contentType(contentType).body(imageBytes);
-    }
-
-    return ResponseEntity.notFound().build();
+    BinaryResponseView view = imageWebHandlerService.botImageHandler(id);
+    return view.responseEntity();
   }
 
   @GetMapping("/user-images/{id}")
   public ResponseEntity<byte[]> getUserImage(@PathVariable Long id) {
-    User user = userService.getUserById(id);
-
-    if (user != null && user.getImage() != null) {
-      byte[] imageBytes = user.getImage().getData();
-
-      String mimeType = null;
-      try {
-        mimeType = URLConnection.guessContentTypeFromStream(new ByteArrayInputStream(imageBytes));
-      } catch (IOException e) {
-      }
-
-      MediaType contentType =
-          (mimeType != null) ? MediaType.parseMediaType(mimeType) : MediaType.IMAGE_JPEG;
-
-      return ResponseEntity.ok().contentType(contentType).body(imageBytes);
-    }
-
-    return ResponseEntity.notFound().build();
+    BinaryResponseView view = imageWebHandlerService.userImageHandler(id);
+    return view.responseEntity();
   }
 
   @GetMapping("/tournament-images/{id}")
   public ResponseEntity<byte[]> getTournamentImage(@PathVariable Long id) {
-
-    Optional<Tournament> opTournament = tournamentService.getTournamentById(id);
-    if (opTournament.isPresent() && opTournament.get().getImage() != null) {
-      Tournament tournament = opTournament.get();
-      byte[] imageBytes = tournament.getImage().getData();
-
-      String mimeType = null;
-      try {
-        mimeType = URLConnection.guessContentTypeFromStream(new ByteArrayInputStream(imageBytes));
-      } catch (IOException e) {
-      }
-
-      MediaType contentType =
-          (mimeType != null) ? MediaType.parseMediaType(mimeType) : MediaType.IMAGE_JPEG;
-
-      return ResponseEntity.ok().contentType(contentType).body(imageBytes);
-    }
-
-    return ResponseEntity.notFound().build();
+    BinaryResponseView view = imageWebHandlerService.tournamentImageHandler(id);
+    return view.responseEntity();
   }
 }

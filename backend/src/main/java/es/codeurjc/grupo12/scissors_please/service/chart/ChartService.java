@@ -1,4 +1,4 @@
-package es.codeurjc.grupo12.scissors_please.service;
+package es.codeurjc.grupo12.scissors_please.service.chart;
 
 import es.codeurjc.grupo12.scissors_please.repository.UserRepository.MonthlyUserCount;
 import java.awt.*;

@@ -27,9 +27,11 @@
     </td>
     <td class="text-end pe-3">
         <div class="d-inline-flex align-items-center justify-content-end gap-2 flex-wrap">
+            {{^adminRole}}
             <a href="{{profileHref}}" class="btn btn-outline-muted btn-sm">
                 View
             </a>
+            {{/adminRole}}
             {{#manageable}}
             {{#blocked}}
             <button type="button" class="btn btn-outline-muted btn-sm user-lock-toggle-btn" data-bs-toggle="modal"
@@ -68,6 +70,3 @@
     </td>
 </tr>
 {{/users}}
-<tr class="admin-user-meta-row d-none" data-result-count="{{resultCount}}" data-search-query="{{searchQuery}}"
-    data-status-filter="{{statusFilter}}" data-next-page="{{nextPage}}" data-has-more="{{hasMore}}"
-    data-total-elements="{{totalElements}}" data-from-item="{{fromItem}}" data-to-item="{{toItem}}"></tr>

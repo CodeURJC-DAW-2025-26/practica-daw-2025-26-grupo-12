@@ -22,7 +22,9 @@
                 {{#admin}}
                 <span class="badge bg-primary me-2">Admin</span>
                 {{/admin}}
+                {{^admin}}
                 <a href="/user/profile" class="btn btn-outline-muted btn-sm px-3">Profile</a>
+                {{/admin}}
                 <form action="/logout" method="post" style="display: inline;">
                     <input type="hidden" name="_csrf" value="{{_csrf.token}}" />
                     <button type="submit" class="btn btn-primary btn-sm px-3">Log Out</button>

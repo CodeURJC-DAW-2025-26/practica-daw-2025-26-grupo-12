@@ -208,7 +208,7 @@
                 const formDelete = deleteModal.querySelector("#deleteBotForm");
                 const nameSpan = deleteModal.querySelector("#deleteBotName");
 
-                formDelete.action = `/bots/${botId}/delete`;
+                formDelete.action = `/bots/${botId}`;
                 nameSpan.textContent = botName;
             });
         }

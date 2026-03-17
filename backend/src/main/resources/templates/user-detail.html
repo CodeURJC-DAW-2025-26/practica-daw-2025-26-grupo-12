@@ -58,10 +58,13 @@
                     <a href="{{myProfileHref}}" class="btn btn-outline-muted btn-sm">My Profile</a>
                     {{/showBackToMyProfile}}
 
+                    {{^isAdmin}}
                     <a href="{{botsPageHref}}" class="btn btn-primary btn-sm">View Bots</a>
+                    {{/isAdmin}}
                 </div>
             </div>
 
+            {{^isAdmin}}
             <div class="row g-4 mb-5">
                 <div class="col-md-4">
                     <div class="card p-3 stat-card h-100">
@@ -85,6 +88,7 @@
                     </div>
                 </div>
             </div>
+            {{/isAdmin}}
 
             <div class="row g-4">
                 <div class="col-lg-7">
@@ -103,7 +107,7 @@
                                     {{#topBots}}
                                     <tr>
                                         <td class="ps-3">
-                                            <a href="/bots/detail/{{id}}"
+                                            <a href="/bots/{{id}}"
                                                 class="text-white text-decoration-none hover-link fw-semibold">{{name}}</a>
                                         </td>
                                         <td class="text-secondary">{{elo}}</td>
@@ -134,7 +138,7 @@
                                 <div>
                                     <div class="fw-semibold">
                                         {{#myBotId}}
-                                        <a href="/bots/detail/{{myBotId}}"
+                                        <a href="/bots/{{myBotId}}"
                                             class="text-white text-decoration-none hover-link">{{myBotName}}</a>
                                         {{/myBotId}}
                                         {{^myBotId}}
@@ -142,7 +146,7 @@
                                         {{/myBotId}}
                                         <span class="text-secondary opacity-50 mx-1">vs</span>
                                         {{#opponentBotId}}
-                                        <a href="/bots/detail/{{opponentBotId}}"
+                                        <a href="/bots/{{opponentBotId}}"
                                             class="text-white text-decoration-none hover-link">{{opponentName}}</a>
                                         {{/opponentBotId}}
                                         {{^opponentBotId}}

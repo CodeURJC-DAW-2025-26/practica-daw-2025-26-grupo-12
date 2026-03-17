@@ -12,13 +12,13 @@
             <div>
                 <p class="text-secondary mb-1 small text-uppercase">Match #{{stats.matchId}}</p>
                 <h1 class="h3 fw-bold mb-0">
-                    <a href="/bots/detail/{{stats.bot1Id}}"
+                    <a href="/bots/{{stats.bot1Id}}"
                         class="text-light text-decoration-none hover-link">{{stats.bot1Name}}</a>
                     <span class="text-secondary opacity-50 small"> (by <a
                             href="/user/profile?user={{stats.bot1OwnerName}}"
                             class="text-secondary text-decoration-none hover-link">{{stats.bot1OwnerName}}</a>)</span>
                     vs
-                    <a href="/bots/detail/{{stats.bot2Id}}"
+                    <a href="/bots/{{stats.bot2Id}}"
                         class="text-light text-decoration-none hover-link">{{stats.bot2Name}}</a>
                     <span class="text-secondary opacity-50 small"> (by <a
                             href="/user/profile?user={{stats.bot2OwnerName}}"
@@ -75,11 +75,11 @@
                         <tr class="text-secondary small text-uppercase">
                             <th scope="col" class="ps-3">Round</th>
                             <th scope="col">
-                                <a href="/bots/detail/{{stats.bot1Id}}"
+                                <a href="/bots/{{stats.bot1Id}}"
                                     class="text-secondary text-decoration-none hover-link">{{stats.bot1Name}}</a>
                             </th>
                             <th scope="col">
-                                <a href="/bots/detail/{{stats.bot2Id}}"
+                                <a href="/bots/{{stats.bot2Id}}"
                                     class="text-secondary text-decoration-none hover-link">{{stats.bot2Name}}</a>
                             </th>
                             <th scope="col">Result</th>

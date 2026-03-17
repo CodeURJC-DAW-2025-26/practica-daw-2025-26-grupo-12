@@ -1,0 +1,14 @@
+package es.codeurjc.grupo12.scissors_please.views;
+
+public enum JoinTournamentStatus {
+  JOINED,
+  TOURNAMENT_NOT_FOUND,
+  INVALID_USER,
+  ADMIN_NOT_ALLOWED,
+  INVALID_BOT,
+  ALREADY_REGISTERED,
+  REGISTRATION_NOT_OPEN,
+  REGISTRATION_CLOSED,
+  TOURNAMENT_FULL,
+  BOT_ALREADY_REGISTERED
+}
