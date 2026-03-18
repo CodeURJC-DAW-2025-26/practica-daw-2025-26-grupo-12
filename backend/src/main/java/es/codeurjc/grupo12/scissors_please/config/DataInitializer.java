@@ -20,6 +20,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +29,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 @Slf4j
 public class DataInitializer {
+
+  @Value("${app.load-sample-data:true}")
+  private boolean loadSampleData;
 
   private static final int SEEDED_REGULAR_USERS = 48;
   private static final int BOTS_PER_USER = 2;
@@ -77,6 +81,10 @@ public class DataInitializer {
         log.info("admin user created admin:admin123");
         log.info("ordinary user created user:user123");
         log.info("{} additional seed users created", SEEDED_REGULAR_USERS);
+      }
+
+      if (!loadSampleData) {
+        return;
       }
 
       if (tournamentRepository.count() == 0) {
