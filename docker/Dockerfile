@@ -8,8 +8,7 @@ COPY backend/src ./src
 RUN chmod +x ./src/main/resources/generate-keystore.sh && \
     ./src/main/resources/generate-keystore.sh
 
-RUN mvn -B clean package -DskipTests
-
+RUN mvn -B clean -Pmysql -Dspring.profiles.active=mysql,https package -DskipTests
 
 FROM eclipse-temurin:21-jre
 
@@ -17,10 +16,11 @@ WORKDIR /usr/src/app/
 
 COPY --from=builder /project/target/*.jar app.jar
 
-COPY --from=builder /project/src/main/resources/keystore.p12 keystore.p12
+COPY --from=builder /project/src/main/resources/keystore.p12 ./keystore.p12
 
 EXPOSE 8443
 
 ENV SERVER_PORT=8443
+ENV SPRING_PROFILES_ACTIVE=mysql,https
 
 CMD ["java", "-jar", "app.jar"]
