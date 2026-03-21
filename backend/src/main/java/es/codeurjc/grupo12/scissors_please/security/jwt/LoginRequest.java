@@ -1,4 +1,4 @@
-package es.codeurjc.daw.library.security.jwt;
+package es.codeurjc.grupo12.scissors_please.security.jwt;
 
 public class LoginRequest {
 
