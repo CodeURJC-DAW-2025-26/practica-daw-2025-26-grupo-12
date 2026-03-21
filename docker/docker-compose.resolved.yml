@@ -1,0 +1,32 @@
+services:
+  web:
+    image: sa4dus/scissors-please:latest
+    platform: linux/amd64
+    ports:
+    - 8443:8443
+    environment:
+    - SPRING_DATASOURCE_URL=jdbc:mysql://db/${DB_NAME:-scissors_please}
+    - SPRING_DATASOURCE_USERNAME=${DB_USERNAME:-root}
+    - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-password}
+    - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-client_id}
+    - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-client_secret}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:9.6
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD:-password}
+      - MYSQL_DATABASE=${DB_NAME:-scissors_please}
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-uroot", "-p$"]
+      interval: 5s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
+
+volumes:
+  db_data:
