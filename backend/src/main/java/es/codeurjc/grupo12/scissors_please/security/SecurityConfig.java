@@ -1,18 +1,27 @@
 package es.codeurjc.grupo12.scissors_please.security;
 
+import es.codeurjc.grupo12.scissors_please.security.jwt.JwtRequestFilter;
+import es.codeurjc.grupo12.scissors_please.security.jwt.JwtTokenProvider;
+import es.codeurjc.grupo12.scissors_please.security.jwt.UnauthorizedHandlerJwt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 
 @Configuration
@@ -51,6 +60,10 @@ public class SecurityConfig {
 
   private static final String[] ADMIN_ROUTES = {"/admin/**", "/api/admin/**"};
 
+  @Autowired private UnauthorizedHandlerJwt unauthorizedHandlerJwt;
+  @Autowired public CustomUserDetailsService userDetailsService;
+
+  @Autowired private JwtTokenProvider jwtTokenProvider;
   @Autowired private CustomOAuth2UserService customOAuth2UserService;
   @Autowired private LoginFailureHandler loginFailureHandler;
 
@@ -65,12 +78,66 @@ public class SecurityConfig {
   }
 
   @Bean
+  public AuthenticationManager authenticationManager(
+      AuthenticationConfiguration authenticationConfiguration) throws Exception {
+    return authenticationConfiguration.getAuthenticationManager();
+  }
+
+  @Bean
   HttpSessionEventPublisher httpSessionEventPublisher() {
     return new HttpSessionEventPublisher();
   }
 
   @Bean
-  SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+  public DaoAuthenticationProvider authenticationProvider() {
+    DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
+    authProvider.setPasswordEncoder(passwordEncoder());
+
+    return authProvider;
+  }
+
+  @Bean
+  @Order(1)
+  SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
+
+    http.authenticationProvider(authenticationProvider());
+
+    http.securityMatcher("/api/**")
+        .exceptionHandling(handling -> handling.authenticationEntryPoint(unauthorizedHandlerJwt));
+
+    http.authorizeHttpRequests(
+        authorize ->
+            authorize
+                // PRIVATE ENDPOINTS TODO:Fill this
+
+                // PUBLIC ENDPOINTS
+                .anyRequest()
+                .permitAll());
+
+    // Disable Form login Authentication
+    http.formLogin(formLogin -> formLogin.disable());
+
+    // Disable CSRF protection (it is difficult to implement in REST APIs)
+    http.csrf(csrf -> csrf.disable());
+
+    // Disable Basic Authentication
+    http.httpBasic(httpBasic -> httpBasic.disable());
+
+    // Stateless session
+    http.sessionManagement(
+        management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+    // Add JWT Token filter
+    http.addFilterBefore(
+        new JwtRequestFilter(userDetailsService, jwtTokenProvider),
+        UsernamePasswordAuthenticationFilter.class);
+
+    return http.build();
+  }
+
+  @Bean
+  @Order(2)
+  SecurityFilterChain webFilterChain(HttpSecurity http) throws Exception {
     http.csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
         .authorizeHttpRequests(
             authz ->
