@@ -1,20 +1,19 @@
 package es.codeurjc.grupo12.scissors_please.security;
 
-import java.beans.BeanProperty;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
-import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -58,7 +57,6 @@ public class SecurityConfig {
       "/bots/user-bots", "/bots/user-bots/page", "/bots/create", "/bots"
   };
 
-  
   private static final String[] USER_OR_ADMIN_BOT_ROUTES = { "/bots/*", "/bots/*/edit" };
 
   private static final String[] ADMIN_ROUTES = { "/admin/**", "/api/admin/**" };
@@ -66,9 +64,8 @@ public class SecurityConfig {
   @Autowired
   private UnauthorizedHandlerJwt unauthorizedHandlerJwt;
   @Autowired
-  private JwtRequestFilter jwtRequestFilter;
-	@Autowired
-    public ReactiveUserDetailsService userDetailService;
+  public CustomUserDetailsService userDetailsService;
+
   @Autowired
   private JwtTokenProvider jwtTokenProvider;
   @Autowired
@@ -87,18 +84,23 @@ public class SecurityConfig {
   }
 
   @Bean
+  public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
+      throws Exception {
+    return authenticationConfiguration.getAuthenticationManager();
+  }
+
+  @Bean
   HttpSessionEventPublisher httpSessionEventPublisher() {
     return new HttpSessionEventPublisher();
   }
 
-  	@Bean
-	public DaoAuthenticationProvider authenticationProvider() {
-		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailService);
-		authProvider.setPasswordEncoder(passwordEncoder());
+  @Bean
+  public DaoAuthenticationProvider authenticationProvider() {
+    DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
+    authProvider.setPasswordEncoder(passwordEncoder());
 
-		return authProvider;
-	}
-
+    return authProvider;
+  }
 
   @Bean
   @Order(1)
@@ -112,10 +114,8 @@ public class SecurityConfig {
 
     http
         .authorizeHttpRequests(authorize -> authorize
-            // PRIVATE ENDPOINTS
-            .requestMatchers(HttpMethod.POST, "/api/books/").hasRole("USER")
-            .requestMatchers(HttpMethod.PUT, "/api/books/**").hasRole("USER")
-            .requestMatchers(HttpMethod.DELETE, "/api/books/**").hasRole("ADMIN")
+            // PRIVATE ENDPOINTS TODO:Fill this
+
             // PUBLIC ENDPOINTS
             .anyRequest().permitAll());
 
@@ -132,7 +132,7 @@ public class SecurityConfig {
     http.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
     // Add JWT Token filter
-    http.addFilterBefore(new JwtRequestFilter(userDetailService, jwtTokenProvider),
+    http.addFilterBefore(new JwtRequestFilter(userDetailsService, jwtTokenProvider),
         UsernamePasswordAuthenticationFilter.class);
 
     return http.build();

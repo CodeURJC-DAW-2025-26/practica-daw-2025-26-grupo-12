@@ -50,6 +50,9 @@ public class User {
   @JsonIgnore
   private String password;
 
+  @JsonIgnore
+	private String encodedPassword;
+
   private LocalDateTime createdAt;
 
   @Column(name = "oauth_provider")
