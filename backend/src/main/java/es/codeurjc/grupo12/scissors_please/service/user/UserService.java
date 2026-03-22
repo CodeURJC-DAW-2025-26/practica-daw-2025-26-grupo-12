@@ -275,4 +275,17 @@ public class UserService {
       return value;
     }
   }
+
+  @Transactional(readOnly = true)
+  public boolean authenticate(String username, String rawPassword) {
+    Optional<User> userOpt = userRepository.findByUsernameAndDeleteDateIsNull(username);
+
+    if (userOpt.isEmpty()) {
+      return false;
+    }
+
+    User user = userOpt.get();
+
+    return passwordEncoder.matches(rawPassword, user.getPassword());
+  }
 }
