@@ -72,7 +72,8 @@ public class BotService {
   @Transactional(readOnly = true)
   public Bot getEditableBotOrThrow(Long botId, User actingUser) {
     Bot bot =
-        getBotById(botId).orElseThrow(() -> new BotNotFoundException(ResponseConstants.BOT_NOT_FOUND));
+        getBotById(botId)
+            .orElseThrow(() -> new BotNotFoundException(ResponseConstants.BOT_NOT_FOUND));
 
     if (userService.isAdmin(actingUser)) {
       return bot;

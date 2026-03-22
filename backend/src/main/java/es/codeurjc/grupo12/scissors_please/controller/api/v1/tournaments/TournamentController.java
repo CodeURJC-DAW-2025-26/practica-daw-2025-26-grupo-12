@@ -6,13 +6,11 @@ import es.codeurjc.grupo12.scissors_please.model.Image;
 import es.codeurjc.grupo12.scissors_please.model.TournamentStatus;
 import es.codeurjc.grupo12.scissors_please.service.image.ImageService;
 import es.codeurjc.grupo12.scissors_please.service.tournament.TournamentService;
-import lombok.extern.java.Log;
-
 import java.io.IOException;
 import java.time.LocalDate;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,9 +25,10 @@ public class TournamentController {
   @Autowired ImageService imageService;
 
   @PostMapping()
-  public ResponseDto createTournament(@RequestPart CreateTournamentRequest request,
-       @RequestPart("imageFile") MultipartFile imageFile
-      ) throws IOException {
+  public ResponseDto createTournament(
+      @RequestPart CreateTournamentRequest request,
+      @RequestPart("imageFile") MultipartFile imageFile)
+      throws IOException {
     log.info("Recibimos la Request");
     Image image = imageService.convertToImage(imageFile);
 
