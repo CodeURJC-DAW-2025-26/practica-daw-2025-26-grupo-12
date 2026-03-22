@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
         true, ResponseConstants.BAD_REQUEST_CODE_INT, ResponseConstants.BAD_JSON, null);
   }
 
-  @ExceptionHandler({ IllegalArgumentException.class, java.io.IOException.class })
+  @ExceptionHandler({IllegalArgumentException.class, java.io.IOException.class})
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ResponseDto handleImageUploadException(Exception ex, HttpServletRequest request) {
     log.error("Image upload error at {}: {}", request.getRequestURI(), ex.getMessage());
@@ -45,10 +45,15 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(MissingServletRequestParameterException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ResponseDto handleMissingParams(MissingServletRequestParameterException ex, HttpServletRequest request) {
-    log.error("Missing request parameter at {}: {}", request.getRequestURI(), ex.getParameterName());
-    return new ResponseDto(true, ResponseConstants.BAD_REQUEST_CODE_INT,
-        "Missing parameter: " + ex.getParameterName(), null);
+  public ResponseDto handleMissingParams(
+      MissingServletRequestParameterException ex, HttpServletRequest request) {
+    log.error(
+        "Missing request parameter at {}: {}", request.getRequestURI(), ex.getParameterName());
+    return new ResponseDto(
+        true,
+        ResponseConstants.BAD_REQUEST_CODE_INT,
+        "Missing parameter: " + ex.getParameterName(),
+        null);
   }
 
   @ExceptionHandler(Exception.class)
