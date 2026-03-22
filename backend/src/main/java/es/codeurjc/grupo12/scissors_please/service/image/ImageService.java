@@ -32,4 +32,22 @@ public class ImageService {
       return false;
     }
   }
+
+  public Image convertToImage(MultipartFile file) throws IOException {
+    if (file == null || file.isEmpty()) {
+      return null;
+    }
+
+    String contentType = file.getContentType();
+    if (contentType == null || !contentType.startsWith("image/")) {
+      throw new IllegalArgumentException();
+    }
+
+    Image img = new Image();
+    img.setFilename(file.getOriginalFilename());
+    img.setContentType(contentType);
+    img.setData(file.getBytes());
+
+    return img;
+  }
 }

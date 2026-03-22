@@ -102,7 +102,7 @@ public class SecurityConfig {
 
     http.authenticationProvider(authenticationProvider());
 
-    http.securityMatcher("/api/**")
+    http.securityMatcher("/api/v1/**")
         .exceptionHandling(handling -> handling.authenticationEntryPoint(unauthorizedHandlerJwt));
 
     http.authorizeHttpRequests(

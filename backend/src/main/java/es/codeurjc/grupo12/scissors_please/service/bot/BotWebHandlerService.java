@@ -1,6 +1,6 @@
 package es.codeurjc.grupo12.scissors_please.service.bot;
 
-import es.codeurjc.grupo12.scissors_please.config.ErrorConstants;
+import es.codeurjc.grupo12.scissors_please.config.ResponseConstants;
 import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.service.chart.ChartService;
@@ -115,7 +115,7 @@ public class BotWebHandlerService {
     if (targetUser == null) {
       return WebPageView.of("error")
           .attribute("errorMessage", "The user is no longer in the database.")
-          .attribute("errorCode", ErrorConstants.NOT_FOUND_CODE);
+          .attribute("errorCode", ResponseConstants.NOT_FOUND_CODE);
     }
 
     boolean canManage = userService.canViewPrivateBots(currentUser, targetUser);
