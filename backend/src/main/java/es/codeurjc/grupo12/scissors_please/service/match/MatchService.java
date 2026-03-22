@@ -65,6 +65,10 @@ public class MatchService {
   private final Map<Long, RematchInvitation> pendingRematchesByRequester =
       new ConcurrentHashMap<>();
 
+  public Optional<Match> getMatchById(Long id) {
+    return matchRepository.findById(id);
+  }
+
   public MatchStartResult startMatchmaking(Long userId, String username, Long selectedBotId) {
     Bot myBot = resolveMyBot(userId, selectedBotId);
     LocalDateTime now = LocalDateTime.now();
