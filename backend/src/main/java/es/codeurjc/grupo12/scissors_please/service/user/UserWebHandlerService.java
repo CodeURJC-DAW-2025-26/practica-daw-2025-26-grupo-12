@@ -1,6 +1,6 @@
 package es.codeurjc.grupo12.scissors_please.service.user;
 
-import es.codeurjc.grupo12.scissors_please.config.ErrorConstants;
+import es.codeurjc.grupo12.scissors_please.config.ResponseConstants;
 import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.Image;
 import es.codeurjc.grupo12.scissors_please.model.User;
@@ -47,7 +47,7 @@ public class UserWebHandlerService {
     if (targetUser == null) {
       return WebPageView.of("error")
           .attribute("errorMessage", "The user is no longer in the database.")
-          .attribute("errorCode", ErrorConstants.NOT_FOUND_CODE);
+          .attribute("errorCode", ResponseConstants.NOT_FOUND_CODE);
     }
 
     boolean ownProfile = isOwnProfile(currentUser, targetUser);
@@ -102,8 +102,8 @@ public class UserWebHandlerService {
     if (!image.isEmpty()) {
       if (!handleImageUpload(currentUser, image)) {
         return WebPageView.of("error")
-            .attribute("errorMessage", ErrorConstants.IMAGE_ERROR_UPLOAD)
-            .attribute("errorCode", ErrorConstants.BAD_REQUEST_CODE);
+            .attribute("errorMessage", ResponseConstants.IMAGE_ERROR_UPLOAD)
+            .attribute("errorCode", ResponseConstants.BAD_REQUEST_CODE);
       }
       userService.updateUser(currentUser);
     }

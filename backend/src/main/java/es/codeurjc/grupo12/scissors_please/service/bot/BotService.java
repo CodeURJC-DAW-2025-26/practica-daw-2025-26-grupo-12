@@ -1,7 +1,7 @@
 package es.codeurjc.grupo12.scissors_please.service.bot;
 
 import es.codeurjc.grupo12.scissors_please.common.pagination.PageableUtils;
-import es.codeurjc.grupo12.scissors_please.config.ErrorConstants;
+import es.codeurjc.grupo12.scissors_please.config.ResponseConstants;
 import es.codeurjc.grupo12.scissors_please.exception.BotAccessDeniedException;
 import es.codeurjc.grupo12.scissors_please.exception.BotImageUploadException;
 import es.codeurjc.grupo12.scissors_please.exception.BotNotFoundException;
@@ -46,10 +46,10 @@ public class BotService {
     Bot bot =
         botRepository
             .findById(botId)
-            .orElseThrow(() -> new BotNotFoundException(ErrorConstants.BOT_NOT_FOUND));
+            .orElseThrow(() -> new BotNotFoundException(ResponseConstants.BOT_NOT_FOUND));
 
     if (bot.isDeleted()) {
-      throw new BotNotFoundException(ErrorConstants.BOT_NOT_FOUND);
+      throw new BotNotFoundException(ResponseConstants.BOT_NOT_FOUND);
     }
 
     if (bot.isPublic()) {
@@ -57,7 +57,7 @@ public class BotService {
     }
 
     if (requesterUser.isEmpty()) {
-      throw new BotAccessDeniedException(ErrorConstants.ACCESS_DENIED);
+      throw new BotAccessDeniedException(ResponseConstants.ACCESS_DENIED);
     }
 
     User targetUser = userService.getUserById(bot.getOwnerId());
@@ -66,13 +66,14 @@ public class BotService {
       return bot;
     }
 
-    throw new BotAccessDeniedException(ErrorConstants.ACCESS_DENIED);
+    throw new BotAccessDeniedException(ResponseConstants.ACCESS_DENIED);
   }
 
   @Transactional(readOnly = true)
   public Bot getEditableBotOrThrow(Long botId, User actingUser) {
     Bot bot =
-        getBotById(botId).orElseThrow(() -> new BotNotFoundException(ErrorConstants.BOT_NOT_FOUND));
+        getBotById(botId)
+            .orElseThrow(() -> new BotNotFoundException(ResponseConstants.BOT_NOT_FOUND));
 
     if (userService.isAdmin(actingUser)) {
       return bot;
@@ -80,7 +81,7 @@ public class BotService {
 
     Long actingUserId = requireOwnerId(actingUser);
     if (bot.getOwnerId() == null || !bot.getOwnerId().equals(actingUserId)) {
-      throw new BotAccessDeniedException(ErrorConstants.ACCESS_DENIED);
+      throw new BotAccessDeniedException(ResponseConstants.ACCESS_DENIED);
     }
 
     return bot;
@@ -217,7 +218,7 @@ public class BotService {
     bot.setPublic(isPublic);
     bot.setTags(parseTags(tags));
     if (!imageService.handleImageUpload(bot, image)) {
-      throw new BotImageUploadException(ErrorConstants.IMAGE_ERROR_UPLOAD);
+      throw new BotImageUploadException(ResponseConstants.IMAGE_ERROR_UPLOAD);
     }
 
     return botRepository.save(bot);
@@ -240,7 +241,7 @@ public class BotService {
     bot.setTags(parseTags(tags));
     bot.setPublic(isPublic);
     if (!imageService.handleImageUpload(bot, image)) {
-      throw new BotImageUploadException(ErrorConstants.IMAGE_ERROR_UPLOAD);
+      throw new BotImageUploadException(ResponseConstants.IMAGE_ERROR_UPLOAD);
     }
 
     return botRepository.save(bot);
@@ -252,7 +253,7 @@ public class BotService {
       bot.setDeleted(true);
       botRepository.save(bot);
     } else {
-      throw new BotAccessDeniedException(ErrorConstants.ACCESS_DENIED);
+      throw new BotAccessDeniedException(ResponseConstants.ACCESS_DENIED);
     }
   }
 

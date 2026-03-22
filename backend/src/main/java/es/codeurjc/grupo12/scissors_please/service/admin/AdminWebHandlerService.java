@@ -1,6 +1,6 @@
 package es.codeurjc.grupo12.scissors_please.service.admin;
 
-import es.codeurjc.grupo12.scissors_please.config.ErrorConstants;
+import es.codeurjc.grupo12.scissors_please.config.ResponseConstants;
 import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.Image;
 import es.codeurjc.grupo12.scissors_please.model.Tournament;
@@ -163,7 +163,7 @@ public class AdminWebHandlerService {
         tournamentImage.setContentType(image.getContentType());
         tournamentImage.setData(image.getBytes());
       } catch (IOException exception) {
-        return errorView(ErrorConstants.IMAGE_ERROR_UPLOAD, ErrorConstants.BAD_REQUEST_CODE);
+        return errorView(ResponseConstants.IMAGE_ERROR_UPLOAD, ResponseConstants.BAD_REQUEST_CODE);
       }
     }
 
@@ -175,7 +175,7 @@ public class AdminWebHandlerService {
   public WebFlowView editTournamentPageHandler(Long id) {
     Optional<Tournament> tournament = tournamentService.getTournamentById(id);
     if (tournament.isEmpty()) {
-      return errorView(ErrorConstants.TOURNAMENT_NOT_FOUND, ErrorConstants.NOT_FOUND_CODE);
+      return errorView(ResponseConstants.TOURNAMENT_NOT_FOUND, ResponseConstants.NOT_FOUND_CODE);
     }
     return WebPageView.of("admin-tournament-edit").attribute("tournament", tournament.get());
   }
@@ -190,12 +190,12 @@ public class AdminWebHandlerService {
       String status) {
     Optional<Tournament> tournamentOp = tournamentService.getTournamentById(id);
     if (tournamentOp.isEmpty()) {
-      return errorView(ErrorConstants.TOURNAMENT_NOT_FOUND, ErrorConstants.NOT_FOUND_CODE);
+      return errorView(ResponseConstants.TOURNAMENT_NOT_FOUND, ResponseConstants.NOT_FOUND_CODE);
     }
 
     Tournament tournament = tournamentOp.get();
     if (!handleImageUpload(tournament, image)) {
-      return errorView(ErrorConstants.IMAGE_ERROR_UPLOAD, ErrorConstants.BAD_REQUEST_CODE);
+      return errorView(ResponseConstants.IMAGE_ERROR_UPLOAD, ResponseConstants.BAD_REQUEST_CODE);
     }
 
     tournament.setName(name);
@@ -207,7 +207,7 @@ public class AdminWebHandlerService {
       try {
         tournament.setStartDate(LocalDate.parse(startDate));
       } catch (Exception exception) {
-        return errorView(ErrorConstants.DATE_INVALID, ErrorConstants.BAD_REQUEST_CODE);
+        return errorView(ResponseConstants.DATE_INVALID, ResponseConstants.BAD_REQUEST_CODE);
       }
     }
 

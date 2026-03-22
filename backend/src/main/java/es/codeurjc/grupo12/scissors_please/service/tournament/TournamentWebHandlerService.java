@@ -1,6 +1,6 @@
 package es.codeurjc.grupo12.scissors_please.service.tournament;
 
-import es.codeurjc.grupo12.scissors_please.config.ErrorConstants;
+import es.codeurjc.grupo12.scissors_please.config.ResponseConstants;
 import es.codeurjc.grupo12.scissors_please.model.Tournament;
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.service.user.UserService;
@@ -72,8 +72,8 @@ public class TournamentWebHandlerService {
     Optional<Tournament> tournamentOp = tournamentService.getTournamentById(id);
     if (tournamentOp.isEmpty()) {
       return WebPageView.of("error")
-          .attribute("errorMessage", ErrorConstants.TOURNAMENT_NOT_FOUND)
-          .attribute("errorCode", ErrorConstants.NOT_FOUND_CODE);
+          .attribute("errorMessage", ResponseConstants.TOURNAMENT_NOT_FOUND)
+          .attribute("errorCode", ResponseConstants.NOT_FOUND_CODE);
     }
 
     Tournament tournament = tournamentOp.get();
@@ -109,8 +109,8 @@ public class TournamentWebHandlerService {
     Optional<Tournament> tournamentOp = tournamentService.getTournamentById(id);
     if (tournamentOp.isEmpty()) {
       return WebPageView.of("error")
-          .attribute("errorMessage", ErrorConstants.TOURNAMENT_NOT_FOUND)
-          .attribute("errorCode", ErrorConstants.NOT_FOUND_CODE);
+          .attribute("errorMessage", ResponseConstants.TOURNAMENT_NOT_FOUND)
+          .attribute("errorCode", ResponseConstants.NOT_FOUND_CODE);
     }
 
     TournamentJoinPage joinPage = tournamentService.getTournamentJoinPage(id, currentUser);

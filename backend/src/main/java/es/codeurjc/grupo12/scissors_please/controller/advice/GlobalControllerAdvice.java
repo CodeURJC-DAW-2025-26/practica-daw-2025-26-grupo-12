@@ -1,6 +1,6 @@
 package es.codeurjc.grupo12.scissors_please.controller.advice;
 
-import es.codeurjc.grupo12.scissors_please.config.ErrorConstants;
+import es.codeurjc.grupo12.scissors_please.config.ResponseConstants;
 import es.codeurjc.grupo12.scissors_please.exception.BotAccessDeniedException;
 import es.codeurjc.grupo12.scissors_please.exception.BotImageUploadException;
 import es.codeurjc.grupo12.scissors_please.exception.BotNotFoundException;
@@ -32,7 +32,7 @@ public class GlobalControllerAdvice {
       BotNotFoundException exception, Model model, HttpServletResponse response) {
     response.setStatus(HttpStatus.NOT_FOUND.value());
     model.addAttribute("errorMessage", exception.getMessage());
-    model.addAttribute("errorCode", ErrorConstants.NOT_FOUND_CODE);
+    model.addAttribute("errorCode", ResponseConstants.NOT_FOUND_CODE);
     return "error";
   }
 
@@ -41,7 +41,7 @@ public class GlobalControllerAdvice {
       BotAccessDeniedException exception, Model model, HttpServletResponse response) {
     response.setStatus(HttpStatus.FORBIDDEN.value());
     model.addAttribute("errorMessage", exception.getMessage());
-    model.addAttribute("errorCode", ErrorConstants.FORBIDDEN_CODE);
+    model.addAttribute("errorCode", ResponseConstants.FORBIDDEN_CODE);
     return "error";
   }
 
@@ -50,7 +50,7 @@ public class GlobalControllerAdvice {
       BotImageUploadException exception, Model model, HttpServletResponse response) {
     response.setStatus(HttpStatus.BAD_REQUEST.value());
     model.addAttribute("errorMessage", exception.getMessage());
-    model.addAttribute("errorCode", ErrorConstants.BAD_REQUEST_CODE);
+    model.addAttribute("errorCode", ResponseConstants.BAD_REQUEST_CODE);
     return "error";
   }
 

@@ -47,7 +47,8 @@ public class SecurityConfig {
     "/tournaments",
     "/tournaments/page",
     "/tournaments/detail/**",
-    "/tournaments/results"
+    "/tournaments/results",
+    "/error"
   };
 
   private static final String[] USER_ROUTES = {"/user/profile"};
@@ -102,7 +103,7 @@ public class SecurityConfig {
 
     http.authenticationProvider(authenticationProvider());
 
-    http.securityMatcher("/api/**")
+    http.securityMatcher("/api/v1/**")
         .exceptionHandling(handling -> handling.authenticationEntryPoint(unauthorizedHandlerJwt));
 
     http.authorizeHttpRequests(
