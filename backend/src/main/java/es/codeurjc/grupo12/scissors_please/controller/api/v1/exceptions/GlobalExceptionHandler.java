@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -40,6 +41,19 @@ public class GlobalExceptionHandler {
     log.error("Element not found at {}: {}", request.getRequestURI(), ex.getMessage());
     return new ResponseDto(
         true, ResponseConstants.NOT_FOUND_CODE_INT, ResponseConstants.ELEMENT_NOT_FOUND, null);
+  }
+
+  @ExceptionHandler(MissingServletRequestParameterException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ResponseDto handleMissingParams(
+      MissingServletRequestParameterException ex, HttpServletRequest request) {
+    log.error(
+        "Missing request parameter at {}: {}", request.getRequestURI(), ex.getParameterName());
+    return new ResponseDto(
+        true,
+        ResponseConstants.BAD_REQUEST_CODE_INT,
+        "Missing parameter: " + ex.getParameterName(),
+        null);
   }
 
   @ExceptionHandler(Exception.class)
