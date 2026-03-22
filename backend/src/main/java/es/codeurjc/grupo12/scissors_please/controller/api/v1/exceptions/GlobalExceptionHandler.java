@@ -24,9 +24,9 @@ public class GlobalExceptionHandler {
         true, ResponseConstants.BAD_REQUEST_CODE_INT, ResponseConstants.IMAGE_ERROR_UPLOAD, null);
   }
 
-  @ExceptionHandler({NoSuchElementException.class, java.io.IOException.class})
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ResponseDto elementNotFound(Exception ex) {
+  @ExceptionHandler(NoSuchElementException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  public ResponseDto handleElementNotFound(Exception ex) {
     return new ResponseDto(
         true, ResponseConstants.NOT_FOUND_CODE_INT, ResponseConstants.ELEMENT_NOT_FOUND, null);
   }
