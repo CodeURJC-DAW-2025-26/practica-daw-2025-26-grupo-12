@@ -54,4 +54,6 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
       Long bot1OwnerId, Long bot2OwnerId);
 
   Optional<Match> findTopByOrderByTimestampDesc();
+
+  Optional<Match> findById(Long id);
 }
