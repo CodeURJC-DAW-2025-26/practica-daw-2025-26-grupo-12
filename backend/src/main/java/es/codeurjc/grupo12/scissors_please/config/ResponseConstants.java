@@ -4,6 +4,7 @@ public class ResponseConstants {
 
   public static String IMAGE_ERROR_UPLOAD = "The image wasn't uploaded correctly.";
   public static String TOURNAMENT_NOT_FOUND = "The tournament is no longer in the database.";
+  public static String ELEMENT_NOT_FOUND = "The element is no longer in the database.";
   public static String DATE_INVALID = "The date entered is invalid.";
   public static String BOT_NOT_FOUND = "The bot is no longer in the database.";
   public static String ACCESS_DENIED = "You do not have permission to access this resource.";

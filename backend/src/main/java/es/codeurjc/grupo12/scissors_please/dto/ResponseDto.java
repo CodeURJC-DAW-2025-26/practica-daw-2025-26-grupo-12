@@ -10,4 +10,5 @@ public class ResponseDto {
   private boolean isError;
   private int statusCode;
   private String message;
+  private Object data;
 }
