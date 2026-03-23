@@ -1,1441 +1,1246 @@
 {
-  "info": {
-    "_postman_id": "7c5ada91-e6e3-4331-8eb6-03968d6ed0fe",
-    "name": "Scissors Please API",
-    "description": "Colección completa para probar la API",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "45993892"
-  },
-  "item": [
-    {
-      "name": "AUTH",
-      "item": [
-        {
-          "name": "Login OK",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status 200', () => pm.response.code === 200);",
-                  "pm.test('Login success false error', () => pm.response.json().error === false);"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"user\",\n  \"password\": \"user123\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/login",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "login"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Login OK Admin",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status 200', () => pm.response.code === 200);",
-                  "pm.test('Login success false error', () => pm.response.json().error === false);"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/login",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "login"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Login KO",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"wrong\",\n  \"password\": \"wrong\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/login",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "login"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Register",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"newUser\",\n  \"email\": \"test@test.com\",\n  \"password\": \"1234\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/register",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "register"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Refresh Token",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/refresh",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "refresh"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Logout",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/logout",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "logout"
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "CHARTS",
-      "item": [
-        {
-          "name": "Pie Chart",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/charts/results?wins=10&losses=5&draws=2",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "charts",
-                "results"
-              ],
-              "query": [
-                {
-                  "key": "wins",
-                  "value": "10"
-                },
-                {
-                  "key": "losses",
-                  "value": "5"
-                },
-                {
-                  "key": "draws",
-                  "value": "2"
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Pie Chart edge case (0 values)",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/charts/results?wins=0&losses=0&draws=0",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "charts",
-                "results"
-              ],
-              "query": [
-                {
-                  "key": "wins",
-                  "value": "0"
-                },
-                {
-                  "key": "losses",
-                  "value": "0"
-                },
-                {
-                  "key": "draws",
-                  "value": "0"
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "ELO Chart",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "[1000, 1100, 1050, 1200]"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/charts/elo",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "charts",
-                "elo"
-              ]
-            }
-          },
-          "protocolProfileBehavior": {
-            "disableBodyPruning": true
-          },
-          "response": []
-        },
-        {
-          "name": "Users Chart",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "[\n  {\"year\": 2026, \"month\": 1, \"count\": 10},\n  {\"year\": 2026, \"month\": 2, \"count\": 20}\n]"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/charts/users",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "charts",
-                "users"
-              ]
-            }
-          },
-          "protocolProfileBehavior": {
-            "disableBodyPruning": true
-          },
-          "response": []
-        },
-        {
-          "name": "Progress Bar",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/charts/progress?current=30&max=100&color=255,0,0",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "charts",
-                "progress"
-              ],
-              "query": [
-                {
-                  "key": "current",
-                  "value": "30"
-                },
-                {
-                  "key": "max",
-                  "value": "100"
-                },
-                {
-                  "key": "color",
-                  "value": "255,0,0"
-                }
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "MATCHES",
-      "item": [
-        {
-          "name": "Get Match by ID",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/matches/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "matches",
-                "1"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Match NOT FOUND",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/matches/999999",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "matches",
-                "999999"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Matches Page",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/matches?page=0&size=5",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "matches"
-              ],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "5"
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Match Stats",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/matches/1/stats",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "matches",
-                "1",
-                "stats"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Battle View",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/matches/1/battle",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "matches",
-                "1",
-                "battle"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Recent Matches",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/matches/recent",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "matches",
-                "recent"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Matchmaking Status",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/matches/matchmaking/status",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "matches",
-                "matchmaking",
-                "status"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Start Matchmaking",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/matches/matchmaking/start?botId=1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "matches",
-                "matchmaking",
-                "start"
-              ],
-              "query": [
-                {
-                  "key": "botId",
-                  "value": "1"
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Cancel Matchmaking",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/matches/matchmaking/cancel",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "matches",
-                "matchmaking",
-                "cancel"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Request Rematch",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/matches/1/rematch/request",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "matches",
-                "1",
-                "rematch",
-                "request"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Accept Rematch",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/matches/rematch/INV123/accept",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "matches",
-                "rematch",
-                "INV123",
-                "accept"
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "TOURNAMENTS",
-      "item": [
-        {
-          "name": "Create Tournament",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "formdata",
-              "formdata": [
-                {
-                  "key": "request",
-                  "type": "text",
-                  "value": "{\n  \"name\": \"Tournament 1\",\n  \"description\": \"Test\",\n  \"slots\": 16,\n  \"registrationStarts\": \"2026-04-01\",\n  \"startDate\": \"2026-05-01\",\n  \"price\": \"10€\"\n}"
-                },
-                {
-                  "key": "imageFile",
-                  "type": "file",
-                  "value": ""
-                }
-              ]
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/tournaments",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "tournaments"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Tournaments",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/tournaments?page=0&size=5&query=Tournament",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "tournaments"
-              ],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "5"
-                },
-                {
-                  "key": "query",
-                  "value": "Tournament"
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Tournament",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/tournaments/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "tournaments",
-                "1"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Update Tournament",
-          "request": {
-            "method": "PUT",
-            "header": [],
-            "body": {
-              "mode": "formdata",
-              "formdata": [
-                {
-                  "key": "request",
-                  "type": "text",
-                  "value": "{\n  \"name\": \"Tournament 1 Updated\",\n  \"description\": \"Updated description\",\n  \"status\": \"REGISTRATION_OPEN\",\n  \"slots\": 32,\n  \"registrationStarts\": \"2026-04-10\",\n  \"startDate\": \"2026-05-10\",\n  \"price\": \"20€\"\n}"
-                },
-                {
-                  "key": "imageFile",
-                  "type": "file",
-                  "value": ""
-                }
-              ]
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/tournaments/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "tournaments",
-                "1"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Join Tournament",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"tournamentId\": 1,\n  \"botId\": 1\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/tournaments/join",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "tournaments",
-                "join"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get My Tournaments",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/tournaments/my-tournaments?page=0&size=5&query=Tournament",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "tournaments",
-                "my-tournaments"
-              ],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "5"
-                },
-                {
-                  "key": "query",
-                  "value": "Tournament"
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Delete Tournament",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/tournaments/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "tournaments",
-                "1"
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "USERS",
-      "item": [
-        {
-          "name": "Get User",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/users/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "users",
-                "1"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Users Page",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "const body = pm.response.json();",
-                  "pm.test('Users page returns pagination payload', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "  pm.expect(body).to.have.property('content');",
-                  "  pm.expect(Array.isArray(body.content)).to.eql(true);",
-                  "  pm.expect(body.page).to.eql(0);",
-                  "  pm.expect(body.size).to.eql(10);",
-                  "});"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/users?query=user&page=0&size=10",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "users"
-              ],
-              "query": [
-                {
-                  "key": "query",
-                  "value": "user"
-                },
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "10"
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Update User",
-          "request": {
-            "method": "PUT",
-            "header": [],
-            "body": {
-              "mode": "formdata",
-              "formdata": [
-                {
-                  "key": "request",
-                  "value": "{ \"username\": \"updatedUser\", \"email\": \"new@mail.com\" }",
-                  "type": "text"
-                },
-                {
-                  "key": "imageFile",
-                  "type": "file",
-                  "value": ""
-                }
-              ]
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/users/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "users",
-                "1"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Block User",
-          "request": {
-            "method": "PUT",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/users/2/block",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "users",
-                "2",
-                "block"
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "IMAGES",
-      "item": [
-        {
-          "name": "Get Bot Image",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/images/bots/{{publicBotId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "images",
-                "bots",
-                "{{publicBotId}}"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get User Image",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/images/users/{{userId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "images",
-                "users",
-                "{{userId}}"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Tournament Image",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/images/tournaments/{{tournamentId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "images",
-                "tournaments",
-                "{{tournamentId}}"
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "BOTS",
-      "item": [
-        {
-          "name": "Create public bot as owner",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "const body = pm.response.json();",
-                  "pm.test('Owner can create public bot', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "  pm.expect(body.isPublic).to.eql(true);",
-                  "  pm.expect(body).to.have.property('imageUrl');",
-                  "});",
-                  "pm.collectionVariables.set('publicBotId', String(body.id));",
-                  "pm.collectionVariables.set('userId', String(body.ownerId));"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "body": {
-              "mode": "formdata",
-              "formdata": [
-                {
-                  "key": "name",
-                  "value": "Postman Public Bot {{$timestamp}}",
-                  "type": "text"
-                },
-                {
-                  "key": "description",
-                  "value": "Bot publico creado desde Postman",
-                  "type": "text"
-                },
-                {
-                  "key": "tags",
-                  "value": "postman,public,owner",
-                  "type": "text"
-                },
-                {
-                  "key": "isPublic",
-                  "value": "true",
-                  "type": "text"
-                }
-              ]
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/bots",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "bots"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Create private bot as owner",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "const body = pm.response.json();",
-                  "pm.test('Owner can create private bot', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "  pm.expect(body.isPublic).to.eql(false);",
-                  "  pm.expect(body).to.have.property('imageUrl');",
-                  "});",
-                  "pm.collectionVariables.set('privateBotId', String(body.id));",
-                  "pm.collectionVariables.set('userId', String(body.ownerId));"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "body": {
-              "mode": "formdata",
-              "formdata": [
-                {
-                  "key": "name",
-                  "value": "Postman Private Bot {{$timestamp}}",
-                  "type": "text"
-                },
-                {
-                  "key": "description",
-                  "value": "Bot privado creado desde Postman",
-                  "type": "text"
-                },
-                {
-                  "key": "tags",
-                  "value": "postman,private,owner",
-                  "type": "text"
-                },
-                {
-                  "key": "isPublic",
-                  "value": "false",
-                  "type": "text"
-                }
-              ]
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/bots",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "bots"
-              ]
-            }
-          }
-        },
-        {
-          "name": "GET public bot anonymously",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "const body = pm.response.json();",
-                  "pm.test('Anonymous user can read public bot', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "  pm.expect(String(body.id)).to.eql(pm.collectionVariables.get('publicBotId'));",
-                  "  pm.expect(body).to.have.property('imageUrl');",
-                  "});"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/bots/{{publicBotId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "bots",
-                "{{publicBotId}}"
-              ]
-            }
-          }
-        },
-        {
-          "name": "GET bots page",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "const body = pm.response.json();",
-                  "const ids = body.content.map(bot => String(bot.id));",
-                  "pm.test('Bot page returns public results', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "  pm.expect(body.page).to.eql(0);",
-                  "  pm.expect(body.size).to.eql(10);",
-                  "  pm.expect(ids).to.include(pm.collectionVariables.get('publicBotId'));",
-                  "  pm.expect(ids).to.not.include(pm.collectionVariables.get('privateBotId'));",
-                  "});"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/bots?query=Postman&page=0&size=10",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "bots"
-              ],
-              "query": [
-                {
-                  "key": "query",
-                  "value": "Postman"
-                },
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "10"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "name": "GET private bot as owner",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "const body = pm.response.json();",
-                  "pm.test('Owner can read private bot', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "  pm.expect(String(body.id)).to.eql(pm.collectionVariables.get('privateBotId'));",
-                  "  pm.expect(body.isPublic).to.eql(false);",
-                  "  pm.expect(body).to.have.property('imageUrl');",
-                  "});"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/bots/{{privateBotId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "bots",
-                "{{privateBotId}}"
-              ]
-            }
-          }
-        },
-        {
-          "name": "GET own bot list",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "const body = pm.response.json();",
-                  "const ids = body.content.map(bot => String(bot.id));",
-                  "pm.test('Owner sees both created bots', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "  pm.expect(ids).to.include(pm.collectionVariables.get('publicBotId'));",
-                  "  pm.expect(ids).to.include(pm.collectionVariables.get('privateBotId'));",
-                  "});"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/bots/user/{{userId}}?page=0&size=10",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "bots",
-                "user",
-                "{{userId}}"
-              ],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "10"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "name": "PUT private bot as owner",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "const body = pm.response.json();",
-                  "pm.test('Owner can update private bot', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "  pm.expect(body.description).to.eql('Owner updated private bot');",
-                  "  pm.expect(body.code).to.eql(\"print('owner update')\");",
-                  "  pm.expect(body).to.have.property('imageUrl');",
-                  "});"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "PUT",
-            "body": {
-              "mode": "formdata",
-              "formdata": [
-                {
-                  "key": "name",
-                  "value": "Owner Updated Private Bot",
-                  "type": "text"
-                },
-                {
-                  "key": "description",
-                  "value": "Owner updated private bot",
-                  "type": "text"
-                },
-                {
-                  "key": "code",
-                  "value": "print('owner update')",
-                  "type": "text"
-                },
-                {
-                  "key": "tags",
-                  "value": "owner,updated,private",
-                  "type": "text"
-                },
-                {
-                  "key": "isPublic",
-                  "value": "false",
-                  "type": "text"
-                }
-              ]
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/bots/{{privateBotId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "bots",
-                "{{privateBotId}}"
-              ]
-            }
-          }
-        },
-        {
-          "name": "DELETE private bot as owner",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "const body = pm.response.json();",
-                  "pm.test('Owner can delete their private bot', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "  pm.expect(String(body.id)).to.eql(pm.collectionVariables.get('privateBotId'));",
-                  "  pm.expect(body).to.have.property('imageUrl');",
-                  "});"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "DELETE",
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/bots/{{privateBotId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "bots",
-                "{{privateBotId}}"
-              ]
-            }
-          }
-        }
-      ]
-    }
-  ],
-  "variable": [
-    {
-      "key": "baseUrl",
-      "value": "http://localhost:8080"
-    },
-    {
-      "key": "userId",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "publicBotId",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "privateBotId",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "tournamentId",
-      "value": "1",
-      "type": "string"
-    }
-  ]
+	"info": {
+		"_postman_id": "98c590ed-f2b8-4e4c-9e02-4a86883266b9",
+		"name": "Scissors Please API Copy",
+		"description": "Colección completa para probar la API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "14660628",
+		"_collection_link": "https://interstellar-firefly-163504.postman.co/workspace/Team-Workspace~f29ebd37-3369-4cac-82d6-ffb88251a9ab/collection/14660628-98c590ed-f2b8-4e4c-9e02-4a86883266b9?action=share&source=collection_link&creator=14660628"
+	},
+	"item": [
+		{
+			"name": "AUTH",
+			"item": [
+				{
+					"name": "Login OK",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', () => pm.response.code === 200);",
+									"pm.test('Login success false error', () => pm.response.json().error === false);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"user\",\n  \"password\": \"user123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "auth", "login"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login OK Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', () => pm.response.code === 200);",
+									"pm.test('Login success false error', () => pm.response.json().error === false);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "auth", "login"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login KO",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"wrong\",\n  \"password\": \"wrong\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "auth", "login"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"newUser\",\n  \"email\": \"test@test.com\",\n  \"password\": \"1234\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "auth", "register"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/refresh",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "auth", "refresh"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/logout",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "auth", "logout"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "CHARTS",
+			"item": [
+				{
+					"name": "Pie Chart",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/charts/results?wins=10&losses=5&draws=2",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "charts", "results"],
+							"query": [
+								{
+									"key": "wins",
+									"value": "10"
+								},
+								{
+									"key": "losses",
+									"value": "5"
+								},
+								{
+									"key": "draws",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Pie Chart edge case (0 values)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/charts/results?wins=0&losses=0&draws=0",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "charts", "results"],
+							"query": [
+								{
+									"key": "wins",
+									"value": "0"
+								},
+								{
+									"key": "losses",
+									"value": "0"
+								},
+								{
+									"key": "draws",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ELO Chart",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[1000, 1100, 1050, 1200]"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/charts/elo",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "charts", "elo"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Users Chart",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\n  {\"year\": 2026, \"month\": 1, \"count\": 10},\n  {\"year\": 2026, \"month\": 2, \"count\": 20}\n]"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/charts/users",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "charts", "users"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Progress Bar",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/charts/progress?current=30&max=100&color=255,0,0",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "charts", "progress"],
+							"query": [
+								{
+									"key": "current",
+									"value": "30"
+								},
+								{
+									"key": "max",
+									"value": "100"
+								},
+								{
+									"key": "color",
+									"value": "255,0,0"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "MATCHES",
+			"item": [
+				{
+					"name": "Get Match by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/matches/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "matches", "1"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Match NOT FOUND",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/matches/999999",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "matches", "999999"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Matches Page",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/matches?page=0&size=5",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "matches"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "5"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Match Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/matches/1/stats",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "matches", "1", "stats"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Battle View",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/matches/1/battle",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "matches", "1", "battle"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recent Matches",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/matches/recent",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "matches", "recent"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Matchmaking Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/matches/matchmaking/status",
+							"host": ["{{baseUrl}}"],
+							"path": [
+								"api",
+								"v1",
+								"matches",
+								"matchmaking",
+								"status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Start Matchmaking",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/matches/matchmaking/start?botId=1",
+							"host": ["{{baseUrl}}"],
+							"path": [
+								"api",
+								"v1",
+								"matches",
+								"matchmaking",
+								"start"
+							],
+							"query": [
+								{
+									"key": "botId",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Matchmaking",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/matches/matchmaking/cancel",
+							"host": ["{{baseUrl}}"],
+							"path": [
+								"api",
+								"v1",
+								"matches",
+								"matchmaking",
+								"cancel"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Request Rematch",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/matches/1/rematch/request",
+							"host": ["{{baseUrl}}"],
+							"path": [
+								"api",
+								"v1",
+								"matches",
+								"1",
+								"rematch",
+								"request"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Accept Rematch",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/matches/rematch/INV123/accept",
+							"host": ["{{baseUrl}}"],
+							"path": [
+								"api",
+								"v1",
+								"matches",
+								"rematch",
+								"INV123",
+								"accept"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "TOURNAMENTS",
+			"item": [
+				{
+					"name": "Create Tournament",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "request",
+									"value": "{\n  \"name\": \"Tournament 1\",\n  \"description\": \"Test\",\n  \"slots\": 16,\n  \"registrationStarts\": \"2026-04-01\",\n  \"startDate\": \"2026-05-01\",\n  \"price\": \"10€\"\n}",
+									"type": "text"
+								},
+								{
+									"key": "imageFile",
+									"value": "",
+									"type": "file"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tournaments",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "tournaments"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Tournaments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tournaments?page=0&size=5&query=Tournament",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "tournaments"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "5"
+								},
+								{
+									"key": "query",
+									"value": "Tournament"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Tournament",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tournaments/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "tournaments", "1"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Tournament",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "request",
+									"value": "{\n  \"name\": \"Tournament 1 Updated\",\n  \"description\": \"Updated description\",\n  \"status\": \"REGISTRATION_OPEN\",\n  \"slots\": 32,\n  \"registrationStarts\": \"2026-04-10\",\n  \"startDate\": \"2026-05-10\",\n  \"price\": \"20€\"\n}",
+									"type": "text"
+								},
+								{
+									"key": "imageFile",
+									"value": "",
+									"type": "file"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tournaments/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "tournaments", "1"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Join Tournament",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tournamentId\": 1,\n  \"botId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tournaments/join",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "tournaments", "join"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Tournaments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tournaments/my-tournaments?page=0&size=5&query=Tournament",
+							"host": ["{{baseUrl}}"],
+							"path": [
+								"api",
+								"v1",
+								"tournaments",
+								"my-tournaments"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "5"
+								},
+								{
+									"key": "query",
+									"value": "Tournament"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Tournament",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tournaments/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "tournaments", "1"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "USERS",
+			"item": [
+				{
+					"name": "Get User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/users/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "users", "1"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Users Page",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const body = pm.response.json();",
+									"pm.test('Users page returns pagination payload', function () {",
+									"  pm.response.to.have.status(200);",
+									"  pm.expect(body).to.have.property('content');",
+									"  pm.expect(Array.isArray(body.content)).to.eql(true);",
+									"  pm.expect(body.page).to.eql(0);",
+									"  pm.expect(body.size).to.eql(10);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/users?query=user&page=0&size=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "users"],
+							"query": [
+								{
+									"key": "query",
+									"value": "user"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "request",
+									"value": "{ \"username\": \"updatedUser\", \"email\": \"new@mail.com\" }",
+									"type": "text"
+								},
+								{
+									"key": "imageFile",
+									"value": "",
+									"type": "file"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/users/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "users", "1"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Block User",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/users/2/block",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "users", "2", "block"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "IMAGES",
+			"item": [
+				{
+					"name": "Get Bot Image",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/images/bots/{{publicBotId}}",
+							"host": ["{{baseUrl}}"],
+							"path": [
+								"api",
+								"v1",
+								"images",
+								"bots",
+								"{{publicBotId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Image",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/images/users/{{userId}}",
+							"host": ["{{baseUrl}}"],
+							"path": [
+								"api",
+								"v1",
+								"images",
+								"users",
+								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Tournament Image",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/images/tournaments/{{tournamentId}}",
+							"host": ["{{baseUrl}}"],
+							"path": [
+								"api",
+								"v1",
+								"images",
+								"tournaments",
+								"{{tournamentId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "BOTS",
+			"item": [
+				{
+					"name": "Create public bot as owner",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const body = pm.response.json();",
+									"pm.test('Owner can create public bot', function () {",
+									"  pm.response.to.have.status(200);",
+									"  pm.expect(body.isPublic).to.eql(true);",
+									"  pm.expect(body).to.have.property('imageUrl');",
+									"});",
+									"pm.collectionVariables.set('publicBotId', String(body.id));",
+									"pm.collectionVariables.set('userId', String(body.ownerId));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "Postman Public Bot {{$timestamp}}",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Bot publico creado desde Postman",
+									"type": "text"
+								},
+								{
+									"key": "tags",
+									"value": "postman,public,owner",
+									"type": "text"
+								},
+								{
+									"key": "isPublic",
+									"value": "true",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/bots",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "bots"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create private bot as owner",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const body = pm.response.json();",
+									"pm.test('Owner can create private bot', function () {",
+									"  pm.response.to.have.status(200);",
+									"  pm.expect(body.isPublic).to.eql(false);",
+									"  pm.expect(body).to.have.property('imageUrl');",
+									"});",
+									"pm.collectionVariables.set('privateBotId', String(body.id));",
+									"pm.collectionVariables.set('userId', String(body.ownerId));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "Postman Private Bot {{$timestamp}}",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Bot privado creado desde Postman",
+									"type": "text"
+								},
+								{
+									"key": "tags",
+									"value": "postman,private,owner",
+									"type": "text"
+								},
+								{
+									"key": "isPublic",
+									"value": "false",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/bots",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "bots"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET public bot anonymously",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const body = pm.response.json();",
+									"pm.test('Anonymous user can read public bot', function () {",
+									"  pm.response.to.have.status(200);",
+									"  pm.expect(String(body.id)).to.eql(pm.collectionVariables.get('publicBotId'));",
+									"  pm.expect(body).to.have.property('imageUrl');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/bots/{{publicBotId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "bots", "{{publicBotId}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET bots page",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const body = pm.response.json();",
+									"const ids = body.content.map(bot => String(bot.id));",
+									"pm.test('Bot page returns public results', function () {",
+									"  pm.response.to.have.status(200);",
+									"  pm.expect(body.page).to.eql(0);",
+									"  pm.expect(body.size).to.eql(10);",
+									"  pm.expect(ids).to.include(pm.collectionVariables.get('publicBotId'));",
+									"  pm.expect(ids).to.not.include(pm.collectionVariables.get('privateBotId'));",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/bots?query=Postman&page=0&size=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "bots"],
+							"query": [
+								{
+									"key": "query",
+									"value": "Postman"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET private bot as owner",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const body = pm.response.json();",
+									"pm.test('Owner can read private bot', function () {",
+									"  pm.response.to.have.status(200);",
+									"  pm.expect(String(body.id)).to.eql(pm.collectionVariables.get('privateBotId'));",
+									"  pm.expect(body.isPublic).to.eql(false);",
+									"  pm.expect(body).to.have.property('imageUrl');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/bots/{{privateBotId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "bots", "{{privateBotId}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET own bot list",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const body = pm.response.json();",
+									"const ids = body.content.map(bot => String(bot.id));",
+									"pm.test('Owner sees both created bots', function () {",
+									"  pm.response.to.have.status(200);",
+									"  pm.expect(ids).to.include(pm.collectionVariables.get('publicBotId'));",
+									"  pm.expect(ids).to.include(pm.collectionVariables.get('privateBotId'));",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/bots/user/{{userId}}?page=0&size=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "bots", "user", "{{userId}}"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT private bot as owner",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const body = pm.response.json();",
+									"pm.test('Owner can update private bot', function () {",
+									"  pm.response.to.have.status(200);",
+									"  pm.expect(body.description).to.eql('Owner updated private bot');",
+									"  pm.expect(body.code).to.eql(\"print('owner update')\");",
+									"  pm.expect(body).to.have.property('imageUrl');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "Owner Updated Private Bot",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Owner updated private bot",
+									"type": "text"
+								},
+								{
+									"key": "code",
+									"value": "print('owner update')",
+									"type": "text"
+								},
+								{
+									"key": "tags",
+									"value": "owner,updated,private",
+									"type": "text"
+								},
+								{
+									"key": "isPublic",
+									"value": "false",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/bots/{{privateBotId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "bots", "{{privateBotId}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE private bot as owner",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const body = pm.response.json();",
+									"pm.test('Owner can delete their private bot', function () {",
+									"  pm.response.to.have.status(200);",
+									"  pm.expect(String(body.id)).to.eql(pm.collectionVariables.get('privateBotId'));",
+									"  pm.expect(body).to.have.property('imageUrl');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/bots/{{privateBotId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "bots", "{{privateBotId}}"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "NOTIFICATIONS",
+			"item": [
+				{
+					"name": "Notifications subscribe",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/notifications/subscribe",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "notifications", "subscribe"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin send notification",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"message\": \"Hello, User!\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/notifications/admin",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "notifications", "admin"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "New Request",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080"
+		},
+		{
+			"key": "userId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "publicBotId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "privateBotId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "tournamentId",
+			"value": "1",
+			"type": "string"
+		}
+	]
 }
