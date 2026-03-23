@@ -111,6 +111,16 @@ public class SecurityConfig {
             authorize
                 // PRIVATE ENDPOINTS TODO:Fill this
 
+                .requestMatchers(HttpMethod.GET, "/api/v1/matches/recent")
+                .authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/v1/matches/matchmaking/status")
+                .authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/v1/matches/matchmaking/**")
+                .authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/v1/matches/*/rematch/request")
+                .authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/v1/matches/rematch/*/accept")
+                .authenticated()
                 // PUBLIC ENDPOINTS
                 .anyRequest()
                 .permitAll());
