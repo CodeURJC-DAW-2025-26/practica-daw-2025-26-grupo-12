@@ -1,15 +1,12 @@
 package es.codeurjc.grupo12.scissors_please.controller.api.v1.bots;
 
 import es.codeurjc.grupo12.scissors_please.config.ResponseConstants;
-import es.codeurjc.grupo12.scissors_please.dto.ResponseDto;
 import es.codeurjc.grupo12.scissors_please.dto.bots.BotCreateRequestDTO;
 import es.codeurjc.grupo12.scissors_please.dto.bots.BotDTO;
 import es.codeurjc.grupo12.scissors_please.dto.bots.BotDTOWithSimpleImage;
 import es.codeurjc.grupo12.scissors_please.dto.bots.BotPageResponseDTO;
 import es.codeurjc.grupo12.scissors_please.dto.bots.BotUpdateRequestDTO;
 import es.codeurjc.grupo12.scissors_please.exception.BotAccessDeniedException;
-import es.codeurjc.grupo12.scissors_please.exception.BotImageUploadException;
-import es.codeurjc.grupo12.scissors_please.exception.BotNotFoundException;
 import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.service.bot.BotService;
@@ -19,6 +16,8 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -42,143 +41,93 @@ public class BotController {
   @Autowired private UserService userService;
 
   @GetMapping("/{id}")
-  public ResponseDto getBot(@PathVariable Long id, Authentication authentication) {
-    try {
-      Bot bot = botService.getUserBot(resolveCurrentUser(authentication), id);
-      return new ResponseDto(
-          false, ResponseConstants.OK_CODE_INT, ResponseConstants.OK, toBotDto(bot));
-    } catch (BotNotFoundException exception) {
-      return new ResponseDto(
-          true, ResponseConstants.NOT_FOUND_CODE_INT, ResponseConstants.BOT_NOT_FOUND, null);
-    } catch (BotAccessDeniedException exception) {
-      return new ResponseDto(
-          true, ResponseConstants.FORBIDDEN_CODE_INT, ResponseConstants.ACCESS_DENIED, null);
-    }
+  public ResponseEntity<BotDTO> getBot(@PathVariable Long id, Authentication authentication) {
+    Bot bot = botService.getUserBot(resolveCurrentUser(authentication), id);
+    return ResponseEntity.ok(toBotDto(bot));
   }
 
   @GetMapping("/user/{userId}")
-  public ResponseDto getUserBots(
+  public ResponseEntity<BotPageResponseDTO> getUserBots(
       @PathVariable Long userId,
       @RequestParam(value = "page", defaultValue = "0") int page,
       @RequestParam(value = "size", defaultValue = "10") int size,
       Authentication authentication) {
-    try {
-      PageRequest pageable = PageRequest.of(sanitizePage(page), sanitizeSize(size));
-      Optional<Long> requesterId = resolveCurrentUser(authentication).map(User::getId);
-      Page<BotDTOWithSimpleImage> botPage =
-          botService.getUserBots(requesterId, userId, pageable).map(this::toBotSummaryDto);
+    PageRequest pageable = PageRequest.of(sanitizePage(page), sanitizeSize(size));
+    Optional<Long> requesterId = resolveCurrentUser(authentication).map(User::getId);
+    Page<BotDTOWithSimpleImage> botPage =
+        botService.getUserBots(requesterId, userId, pageable).map(this::toBotSummaryDto);
 
-      return new ResponseDto(
-          false,
-          ResponseConstants.OK_CODE_INT,
-          ResponseConstants.OK,
-          toBotPageResponseDto(botPage));
-    } catch (IllegalArgumentException exception) {
-      return new ResponseDto(
-          true, ResponseConstants.NOT_FOUND_CODE_INT, ResponseConstants.ELEMENT_NOT_FOUND, null);
-    }
+    return ResponseEntity.ok(toBotPageResponseDto(botPage));
   }
 
   @PostMapping
-  public ResponseDto createBot(
+  public ResponseEntity<BotDTO> createBot(
       @ModelAttribute BotCreateRequestDTO request, Authentication authentication) {
-    if (!isAuthenticated(authentication)) {
-      return new ResponseDto(
-          true, ResponseConstants.UNAUTHORIZED_CODE_INT, ResponseConstants.ACCESS_DENIED, null);
-    }
-
-    User currentUser = userService.getCurrentUser(authentication);
+    User currentUser = requireCurrentUser(authentication);
     if (userService.isAdmin(currentUser)) {
-      return new ResponseDto(
-          true, ResponseConstants.FORBIDDEN_CODE_INT, ResponseConstants.ACCESS_DENIED, null);
+      throw new BotAccessDeniedException(ResponseConstants.ACCESS_DENIED);
     }
 
-    try {
-      Bot bot =
-          botService.createBot(
-              currentUser,
-              request.getName(),
-              request.getDescription(),
-              request.getTags(),
-              request.getImageFile(),
-              request.isPublic());
-      return new ResponseDto(
-          false, ResponseConstants.OK_CODE_INT, ResponseConstants.OK, toBotDto(bot));
-    } catch (BotAccessDeniedException exception) {
-      return new ResponseDto(
-          true, ResponseConstants.FORBIDDEN_CODE_INT, ResponseConstants.ACCESS_DENIED, null);
-    } catch (BotImageUploadException exception) {
-      return new ResponseDto(
-          true, ResponseConstants.BAD_REQUEST_CODE_INT, ResponseConstants.IMAGE_ERROR_UPLOAD, null);
-    }
+    Bot bot =
+        botService.createBot(
+            currentUser,
+            request.getName(),
+            request.getDescription(),
+            request.getTags(),
+            request.getImageFile(),
+            request.isPublic());
+    return ResponseEntity.ok(toBotDto(bot));
   }
 
   @PutMapping("/{id}")
-  public ResponseDto updateBot(
+  public ResponseEntity<BotDTO> updateBot(
       @PathVariable Long id,
       @ModelAttribute BotUpdateRequestDTO request,
       Authentication authentication) {
-    if (!isAuthenticated(authentication)) {
-      return new ResponseDto(
-          true, ResponseConstants.UNAUTHORIZED_CODE_INT, ResponseConstants.ACCESS_DENIED, null);
-    }
+    User currentUser = requireCurrentUser(authentication);
+    Bot updatedBot =
+        botService.updateBot(
+            currentUser,
+            id,
+            request.getName(),
+            request.getDescription(),
+            request.getCode(),
+            request.getImageFile(),
+            request.getTags(),
+            request.isPublic());
 
-    User currentUser = userService.getCurrentUser(authentication);
-
-    try {
-      Bot updatedBot =
-          botService.updateBot(
-              currentUser,
-              id,
-              request.getName(),
-              request.getDescription(),
-              request.getCode(),
-              request.getImageFile(),
-              request.getTags(),
-              request.isPublic());
-
-      return new ResponseDto(
-          false, ResponseConstants.OK_CODE_INT, ResponseConstants.OK, toBotDto(updatedBot));
-    } catch (BotNotFoundException exception) {
-      return new ResponseDto(
-          true, ResponseConstants.NOT_FOUND_CODE_INT, ResponseConstants.BOT_NOT_FOUND, null);
-    } catch (BotAccessDeniedException exception) {
-      return new ResponseDto(
-          true, ResponseConstants.FORBIDDEN_CODE_INT, ResponseConstants.ACCESS_DENIED, null);
-    } catch (BotImageUploadException exception) {
-      return new ResponseDto(
-          true, ResponseConstants.BAD_REQUEST_CODE_INT, ResponseConstants.IMAGE_ERROR_UPLOAD, null);
-    }
+    return ResponseEntity.ok(toBotDto(updatedBot));
   }
 
   @DeleteMapping("/{id}")
-  public ResponseDto deleteBot(@PathVariable Long id, Authentication authentication) {
-    if (!isAuthenticated(authentication)) {
-      return new ResponseDto(
-          true, ResponseConstants.UNAUTHORIZED_CODE_INT, ResponseConstants.ACCESS_DENIED, null);
-    }
-
-    User currentUser = userService.getCurrentUser(authentication);
-
-    try {
-      Bot botToDelete = botService.getEditableBotOrThrow(id, currentUser);
-      botService.deleteBot(currentUser, id);
-      return new ResponseDto(
-          false, ResponseConstants.OK_CODE_INT, ResponseConstants.OK, toBotSummaryDto(botToDelete));
-    } catch (BotNotFoundException exception) {
-      return new ResponseDto(
-          true, ResponseConstants.NOT_FOUND_CODE_INT, ResponseConstants.BOT_NOT_FOUND, null);
-    } catch (BotAccessDeniedException exception) {
-      return new ResponseDto(
-          true, ResponseConstants.FORBIDDEN_CODE_INT, ResponseConstants.ACCESS_DENIED, null);
-    }
+  public ResponseEntity<BotDTOWithSimpleImage> deleteBot(
+      @PathVariable Long id, Authentication authentication) {
+    User currentUser = requireCurrentUser(authentication);
+    Bot botToDelete = botService.getEditableBotOrThrow(id, currentUser);
+    botService.deleteBot(currentUser, id);
+    return ResponseEntity.ok(toBotSummaryDto(botToDelete));
   }
 
   private Optional<User> resolveCurrentUser(Authentication authentication) {
     if (!isAuthenticated(authentication)) {
       return Optional.empty();
     }
-    return Optional.of(userService.getCurrentUser(authentication));
+    try {
+      return Optional.of(userService.getCurrentUser(authentication));
+    } catch (IllegalArgumentException exception) {
+      return Optional.empty();
+    }
+  }
+
+  private User requireCurrentUser(Authentication authentication) {
+    if (!isAuthenticated(authentication)) {
+      throw new InsufficientAuthenticationException(ResponseConstants.ACCESS_DENIED);
+    }
+    try {
+      return userService.getCurrentUser(authentication);
+    } catch (IllegalArgumentException exception) {
+      throw new InsufficientAuthenticationException(ResponseConstants.ACCESS_DENIED);
+    }
   }
 
   private boolean isAuthenticated(Authentication authentication) {

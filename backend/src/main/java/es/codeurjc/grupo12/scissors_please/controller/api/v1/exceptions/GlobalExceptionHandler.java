@@ -2,12 +2,16 @@ package es.codeurjc.grupo12.scissors_please.controller.api.v1.exceptions;
 
 import es.codeurjc.grupo12.scissors_please.config.ResponseConstants;
 import es.codeurjc.grupo12.scissors_please.dto.ExceptionResponseDto;
+import es.codeurjc.grupo12.scissors_please.exception.BotAccessDeniedException;
+import es.codeurjc.grupo12.scissors_please.exception.BotImageUploadException;
+import es.codeurjc.grupo12.scissors_please.exception.BotNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -33,6 +37,42 @@ public class GlobalExceptionHandler {
         new ExceptionResponseDto(ResponseConstants.IMAGE_ERROR_UPLOAD, LocalDateTime.now());
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+  }
+
+  @ExceptionHandler(BotImageUploadException.class)
+  public ResponseEntity<ExceptionResponseDto> handleBotImageUploadException(
+      BotImageUploadException ex, HttpServletRequest request) {
+
+    ExceptionResponseDto error = new ExceptionResponseDto(ex.getMessage(), LocalDateTime.now());
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+  }
+
+  @ExceptionHandler(BotNotFoundException.class)
+  public ResponseEntity<ExceptionResponseDto> handleBotNotFound(
+      BotNotFoundException ex, HttpServletRequest request) {
+
+    ExceptionResponseDto error = new ExceptionResponseDto(ex.getMessage(), LocalDateTime.now());
+
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+  }
+
+  @ExceptionHandler(BotAccessDeniedException.class)
+  public ResponseEntity<ExceptionResponseDto> handleBotAccessDenied(
+      BotAccessDeniedException ex, HttpServletRequest request) {
+
+    ExceptionResponseDto error = new ExceptionResponseDto(ex.getMessage(), LocalDateTime.now());
+
+    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+  }
+
+  @ExceptionHandler(InsufficientAuthenticationException.class)
+  public ResponseEntity<ExceptionResponseDto> handleInsufficientAuthentication(
+      InsufficientAuthenticationException ex, HttpServletRequest request) {
+
+    ExceptionResponseDto error = new ExceptionResponseDto(ex.getMessage(), LocalDateTime.now());
+
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
   }
 
   @ExceptionHandler(IllegalArgumentException.class)

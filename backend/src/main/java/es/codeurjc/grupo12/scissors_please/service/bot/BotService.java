@@ -16,6 +16,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -90,12 +91,8 @@ public class BotService {
   @Transactional(readOnly = true)
   public Page<Bot> getUserBots(Optional<Long> requesterId, Long targetId, Pageable pageable) {
 
-    User targetUser = userService.getUserById(targetId);
-    if (targetUser == null) throw new IllegalArgumentException("Target user does not exist");
-
-    User requesterUser = requesterId.map(userService::getUserById).orElse(null);
-    if (requesterId.isPresent() && requesterUser == null)
-      throw new IllegalArgumentException("Requester user does not exist");
+    User targetUser = getExistingUserOrThrow(targetId);
+    User requesterUser = requesterId.map(this::getExistingUserOrThrow).orElse(null);
 
     boolean canViewPrivate = userService.canViewPrivateBots(requesterUser, targetUser);
 
@@ -329,6 +326,14 @@ public class BotService {
       throw new IllegalArgumentException("User ID is required");
     }
     return user.getId();
+  }
+
+  private User getExistingUserOrThrow(Long userId) {
+    try {
+      return userService.getUserById(userId);
+    } catch (IllegalArgumentException exception) {
+      throw new NoSuchElementException(ResponseConstants.ELEMENT_NOT_FOUND);
+    }
   }
 
   private List<String> parseTags(String tags) {
