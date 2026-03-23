@@ -48,7 +48,9 @@ public class BotController {
       Authentication authentication) {
     PageRequest pageable = PageRequest.of(sanitizePage(page), sanitizeSize(size));
     Page<BotDTOWithSimpleImage> botPage =
-        botService.getBotPage(resolveCurrentUser(authentication), query, pageable).map(this::toBotSummaryDto);
+        botService
+            .getBotPage(resolveCurrentUser(authentication), query, pageable)
+            .map(this::toBotSummaryDto);
 
     return ResponseEntity.ok(toBotPageResponseDto(botPage));
   }
