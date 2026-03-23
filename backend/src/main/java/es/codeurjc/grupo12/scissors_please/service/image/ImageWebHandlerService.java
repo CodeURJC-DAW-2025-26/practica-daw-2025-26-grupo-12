@@ -6,7 +6,6 @@ import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.repository.BotRepository;
 import es.codeurjc.grupo12.scissors_please.service.tournament.TournamentService;
 import es.codeurjc.grupo12.scissors_please.service.user.UserService;
-import es.codeurjc.grupo12.scissors_please.views.BinaryResponseView;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URLConnection;
@@ -23,28 +22,33 @@ public class ImageWebHandlerService {
   @Autowired private UserService userService;
   @Autowired private TournamentService tournamentService;
 
-  public BinaryResponseView botImageHandler(Long id) {
+  public ResponseEntity<byte[]> botImageHandler(Long id) {
     Optional<Bot> bot = botRepository.findById(id);
     if (bot.isEmpty() || bot.get().getImage() == null) {
-      return new BinaryResponseView(ResponseEntity.notFound().build());
+      return ResponseEntity.notFound().build();
     }
-    return new BinaryResponseView(buildImageResponse(bot.get().getImage().getData()));
+    return buildImageResponse(bot.get().getImage().getData());
   }
 
-  public BinaryResponseView userImageHandler(Long id) {
-    User user = userService.getUserById(id);
-    if (user == null || user.getImage() == null) {
-      return new BinaryResponseView(ResponseEntity.notFound().build());
+  public ResponseEntity<byte[]> userImageHandler(Long id) {
+    User user;
+    try {
+      user = userService.getUserById(id);
+    } catch (IllegalArgumentException exception) {
+      return ResponseEntity.notFound().build();
     }
-    return new BinaryResponseView(buildImageResponse(user.getImage().getData()));
+    if (user.getImage() == null) {
+      return ResponseEntity.notFound().build();
+    }
+    return buildImageResponse(user.getImage().getData());
   }
 
-  public BinaryResponseView tournamentImageHandler(Long id) {
+  public ResponseEntity<byte[]> tournamentImageHandler(Long id) {
     Optional<Tournament> tournament = tournamentService.getTournamentById(id);
     if (tournament.isEmpty() || tournament.get().getImage() == null) {
-      return new BinaryResponseView(ResponseEntity.notFound().build());
+      return ResponseEntity.notFound().build();
     }
-    return new BinaryResponseView(buildImageResponse(tournament.get().getImage().getData()));
+    return buildImageResponse(tournament.get().getImage().getData());
   }
 
   private ResponseEntity<byte[]> buildImageResponse(byte[] imageBytes) {

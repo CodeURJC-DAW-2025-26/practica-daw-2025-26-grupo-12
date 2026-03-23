@@ -15,6 +15,13 @@ public class WebConfig implements WebMvcConfigurer {
     registry
         .addInterceptor(matchmakingLockInterceptor)
         .addPathPatterns("/**")
-        .excludePathPatterns("/css/**", "/js/**", "/images/**", "/tournament-images/**");
+        .excludePathPatterns(
+            "/css/**",
+            "/js/**",
+            "/images/**",
+            "/bot-images/**",
+            "/user-images/**",
+            "/tournament-images/**",
+            "/api/v1/images/**");
   }
 }

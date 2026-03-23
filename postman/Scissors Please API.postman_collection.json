@@ -898,6 +898,74 @@
       ]
     },
     {
+      "name": "IMAGES",
+      "item": [
+        {
+          "name": "Get Bot Image",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/images/bots/{{publicBotId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "images",
+                "bots",
+                "{{publicBotId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Image",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/images/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "images",
+                "users",
+                "{{userId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Tournament Image",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/images/tournaments/{{tournamentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "images",
+                "tournaments",
+                "{{tournamentId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "BOTS",
       "item": [
         {
@@ -910,12 +978,12 @@
                 "exec": [
                   "const body = pm.response.json();",
                   "pm.test('Owner can create public bot', function () {",
-                  "  pm.expect(body.isError).to.eql(false);",
-                  "  pm.expect(body.statusCode).to.eql(200);",
-                  "  pm.expect(body.data.isPublic).to.eql(true);",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(body.isPublic).to.eql(true);",
+                  "  pm.expect(body).to.have.property('imageUrl');",
                   "});",
-                  "pm.collectionVariables.set('publicBotId', String(body.data.id));",
-                  "pm.collectionVariables.set('userId', String(body.data.ownerId));"
+                  "pm.collectionVariables.set('publicBotId', String(body.id));",
+                  "pm.collectionVariables.set('userId', String(body.ownerId));"
                 ]
               }
             }
@@ -970,12 +1038,12 @@
                 "exec": [
                   "const body = pm.response.json();",
                   "pm.test('Owner can create private bot', function () {",
-                  "  pm.expect(body.isError).to.eql(false);",
-                  "  pm.expect(body.statusCode).to.eql(200);",
-                  "  pm.expect(body.data.isPublic).to.eql(false);",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(body.isPublic).to.eql(false);",
+                  "  pm.expect(body).to.have.property('imageUrl');",
                   "});",
-                  "pm.collectionVariables.set('privateBotId', String(body.data.id));",
-                  "pm.collectionVariables.set('userId', String(body.data.ownerId));"
+                  "pm.collectionVariables.set('privateBotId', String(body.id));",
+                  "pm.collectionVariables.set('userId', String(body.ownerId));"
                 ]
               }
             }
@@ -1030,9 +1098,9 @@
                 "exec": [
                   "const body = pm.response.json();",
                   "pm.test('Anonymous user can read public bot', function () {",
-                  "  pm.expect(body.isError).to.eql(false);",
-                  "  pm.expect(body.statusCode).to.eql(200);",
-                  "  pm.expect(String(body.data.id)).to.eql(pm.collectionVariables.get('publicBotId'));",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(String(body.id)).to.eql(pm.collectionVariables.get('publicBotId'));",
+                  "  pm.expect(body).to.have.property('imageUrl');",
                   "});"
                 ]
               }
@@ -1064,8 +1132,8 @@
                 "exec": [
                   "const body = pm.response.json();",
                   "pm.test('Anonymous user cannot read private bot', function () {",
-                  "  pm.expect(body.isError).to.eql(true);",
-                  "  pm.expect(body.statusCode).to.eql(403);",
+                  "  pm.response.to.have.status(403);",
+                  "  pm.expect(body).to.have.property('message');",
                   "});"
                 ]
               }
@@ -1096,12 +1164,12 @@
                 "type": "text/javascript",
                 "exec": [
                   "const body = pm.response.json();",
-                  "const ids = body.data.content.map(bot => String(bot.id));",
+                  "const ids = body.content.map(bot => String(bot.id));",
                   "pm.test('Anonymous list hides private bots', function () {",
-                  "  pm.expect(body.isError).to.eql(false);",
-                  "  pm.expect(body.statusCode).to.eql(200);",
+                  "  pm.response.to.have.status(200);",
                   "  pm.expect(ids).to.include(pm.collectionVariables.get('publicBotId'));",
                   "  pm.expect(ids).to.not.include(pm.collectionVariables.get('privateBotId'));",
+                  "  pm.expect(body.content.every(bot => Object.prototype.hasOwnProperty.call(bot, 'imageUrl'))).to.eql(true);",
                   "});"
                 ]
               }
@@ -1143,9 +1211,9 @@
                 "type": "text/javascript",
                 "exec": [
                   "const body = pm.response.json();",
-                  "pm.test('Unknown bot returns logical 404', function () {",
-                  "  pm.expect(body.isError).to.eql(true);",
-                  "  pm.expect(body.statusCode).to.eql(404);",
+                  "pm.test('Unknown bot returns 404', function () {",
+                  "  pm.response.to.have.status(404);",
+                  "  pm.expect(body).to.have.property('message');",
                   "});"
                 ]
               }
@@ -1176,9 +1244,9 @@
                 "type": "text/javascript",
                 "exec": [
                   "const body = pm.response.json();",
-                  "pm.test('Unknown user returns logical 404 on list', function () {",
-                  "  pm.expect(body.isError).to.eql(true);",
-                  "  pm.expect(body.statusCode).to.eql(404);",
+                  "pm.test('Unknown user returns 404 on list', function () {",
+                  "  pm.response.to.have.status(404);",
+                  "  pm.expect(body).to.have.property('message');",
                   "});"
                 ]
               }
@@ -1221,8 +1289,8 @@
                 "exec": [
                   "const body = pm.response.json();",
                   "pm.test('Anonymous user cannot create bots', function () {",
-                  "  pm.expect(body.isError).to.eql(true);",
-                  "  pm.expect(body.statusCode).to.eql(401);",
+                  "  pm.response.to.have.status(401);",
+                  "  pm.expect(body).to.have.property('message');",
                   "});"
                 ]
               }
@@ -1278,8 +1346,8 @@
                 "exec": [
                   "const body = pm.response.json();",
                   "pm.test('Anonymous user cannot update bots', function () {",
-                  "  pm.expect(body.isError).to.eql(true);",
-                  "  pm.expect(body.statusCode).to.eql(401);",
+                  "  pm.response.to.have.status(401);",
+                  "  pm.expect(body).to.have.property('message');",
                   "});"
                 ]
               }
@@ -1341,8 +1409,8 @@
                 "exec": [
                   "const body = pm.response.json();",
                   "pm.test('Anonymous user cannot delete bots', function () {",
-                  "  pm.expect(body.isError).to.eql(true);",
-                  "  pm.expect(body.statusCode).to.eql(401);",
+                  "  pm.response.to.have.status(401);",
+                  "  pm.expect(body).to.have.property('message');",
                   "});"
                 ]
               }
@@ -1374,10 +1442,10 @@
                 "exec": [
                   "const body = pm.response.json();",
                   "pm.test('Owner can read private bot', function () {",
-                  "  pm.expect(body.isError).to.eql(false);",
-                  "  pm.expect(body.statusCode).to.eql(200);",
-                  "  pm.expect(String(body.data.id)).to.eql(pm.collectionVariables.get('privateBotId'));",
-                  "  pm.expect(body.data.isPublic).to.eql(false);",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(String(body.id)).to.eql(pm.collectionVariables.get('privateBotId'));",
+                  "  pm.expect(body.isPublic).to.eql(false);",
+                  "  pm.expect(body).to.have.property('imageUrl');",
                   "});"
                 ]
               }
@@ -1408,12 +1476,12 @@
                 "type": "text/javascript",
                 "exec": [
                   "const body = pm.response.json();",
-                  "const ids = body.data.content.map(bot => String(bot.id));",
+                  "const ids = body.content.map(bot => String(bot.id));",
                   "pm.test('Owner sees both created bots', function () {",
-                  "  pm.expect(body.isError).to.eql(false);",
-                  "  pm.expect(body.statusCode).to.eql(200);",
+                  "  pm.response.to.have.status(200);",
                   "  pm.expect(ids).to.include(pm.collectionVariables.get('publicBotId'));",
                   "  pm.expect(ids).to.include(pm.collectionVariables.get('privateBotId'));",
+                  "  pm.expect(body.content.every(bot => Object.prototype.hasOwnProperty.call(bot, 'imageUrl'))).to.eql(true);",
                   "});"
                 ]
               }
@@ -1456,10 +1524,10 @@
                 "exec": [
                   "const body = pm.response.json();",
                   "pm.test('Owner can update private bot', function () {",
-                  "  pm.expect(body.isError).to.eql(false);",
-                  "  pm.expect(body.statusCode).to.eql(200);",
-                  "  pm.expect(body.data.description).to.eql('Owner updated private bot');",
-                  "  pm.expect(body.data.code).to.eql(\"print('owner update')\");",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(body.description).to.eql('Owner updated private bot');",
+                  "  pm.expect(body.code).to.eql(\"print('owner update')\");",
+                  "  pm.expect(body).to.have.property('imageUrl');",
                   "});"
                 ]
               }
@@ -1520,9 +1588,9 @@
                 "type": "text/javascript",
                 "exec": [
                   "const body = pm.response.json();",
-                  "pm.test('Updating an unknown bot returns logical 404', function () {",
-                  "  pm.expect(body.isError).to.eql(true);",
-                  "  pm.expect(body.statusCode).to.eql(404);",
+                  "pm.test('Updating an unknown bot returns 404', function () {",
+                  "  pm.response.to.have.status(404);",
+                  "  pm.expect(body).to.have.property('message');",
                   "});"
                 ]
               }
@@ -1584,8 +1652,8 @@
                 "exec": [
                   "const body = pm.response.json();",
                   "pm.test('Other user cannot read private bot', function () {",
-                  "  pm.expect(body.isError).to.eql(true);",
-                  "  pm.expect(body.statusCode).to.eql(403);",
+                  "  pm.response.to.have.status(403);",
+                  "  pm.expect(body).to.have.property('message');",
                   "});"
                 ]
               }
@@ -1616,12 +1684,12 @@
                 "type": "text/javascript",
                 "exec": [
                   "const body = pm.response.json();",
-                  "const ids = body.data.content.map(bot => String(bot.id));",
+                  "const ids = body.content.map(bot => String(bot.id));",
                   "pm.test('Other user list hides private bots', function () {",
-                  "  pm.expect(body.isError).to.eql(false);",
-                  "  pm.expect(body.statusCode).to.eql(200);",
+                  "  pm.response.to.have.status(200);",
                   "  pm.expect(ids).to.include(pm.collectionVariables.get('publicBotId'));",
                   "  pm.expect(ids).to.not.include(pm.collectionVariables.get('privateBotId'));",
+                  "  pm.expect(body.content.every(bot => Object.prototype.hasOwnProperty.call(bot, 'imageUrl'))).to.eql(true);",
                   "});"
                 ]
               }
@@ -1664,8 +1732,8 @@
                 "exec": [
                   "const body = pm.response.json();",
                   "pm.test('Other user cannot update private bot', function () {",
-                  "  pm.expect(body.isError).to.eql(true);",
-                  "  pm.expect(body.statusCode).to.eql(403);",
+                  "  pm.response.to.have.status(403);",
+                  "  pm.expect(body).to.have.property('message');",
                   "});"
                 ]
               }
@@ -1727,8 +1795,8 @@
                 "exec": [
                   "const body = pm.response.json();",
                   "pm.test('Other user cannot delete public bot they do not own', function () {",
-                  "  pm.expect(body.isError).to.eql(true);",
-                  "  pm.expect(body.statusCode).to.eql(403);",
+                  "  pm.response.to.have.status(403);",
+                  "  pm.expect(body).to.have.property('message');",
                   "});"
                 ]
               }
@@ -1760,8 +1828,8 @@
                 "exec": [
                   "const body = pm.response.json();",
                   "pm.test('Admin cannot create bots for themselves', function () {",
-                  "  pm.expect(body.isError).to.eql(true);",
-                  "  pm.expect(body.statusCode).to.eql(403);",
+                  "  pm.response.to.have.status(403);",
+                  "  pm.expect(body).to.have.property('message');",
                   "});"
                 ]
               }
@@ -1817,9 +1885,9 @@
                 "exec": [
                   "const body = pm.response.json();",
                   "pm.test('Admin can read private bot', function () {",
-                  "  pm.expect(body.isError).to.eql(false);",
-                  "  pm.expect(body.statusCode).to.eql(200);",
-                  "  pm.expect(String(body.data.id)).to.eql(pm.collectionVariables.get('privateBotId'));",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(String(body.id)).to.eql(pm.collectionVariables.get('privateBotId'));",
+                  "  pm.expect(body).to.have.property('imageUrl');",
                   "});"
                 ]
               }
@@ -1850,12 +1918,12 @@
                 "type": "text/javascript",
                 "exec": [
                   "const body = pm.response.json();",
-                  "const ids = body.data.content.map(bot => String(bot.id));",
+                  "const ids = body.content.map(bot => String(bot.id));",
                   "pm.test('Admin sees both created bots', function () {",
-                  "  pm.expect(body.isError).to.eql(false);",
-                  "  pm.expect(body.statusCode).to.eql(200);",
+                  "  pm.response.to.have.status(200);",
                   "  pm.expect(ids).to.include(pm.collectionVariables.get('publicBotId'));",
                   "  pm.expect(ids).to.include(pm.collectionVariables.get('privateBotId'));",
+                  "  pm.expect(body.content.every(bot => Object.prototype.hasOwnProperty.call(bot, 'imageUrl'))).to.eql(true);",
                   "});"
                 ]
               }
@@ -1898,10 +1966,10 @@
                 "exec": [
                   "const body = pm.response.json();",
                   "pm.test('Admin can update another user private bot', function () {",
-                  "  pm.expect(body.isError).to.eql(false);",
-                  "  pm.expect(body.statusCode).to.eql(200);",
-                  "  pm.expect(body.data.description).to.eql('Admin updated private bot');",
-                  "  pm.expect(body.data.code).to.eql(\"print('admin update')\");",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(body.description).to.eql('Admin updated private bot');",
+                  "  pm.expect(body.code).to.eql(\"print('admin update')\");",
+                  "  pm.expect(body).to.have.property('imageUrl');",
                   "});"
                 ]
               }
@@ -1963,9 +2031,9 @@
                 "exec": [
                   "const body = pm.response.json();",
                   "pm.test('Admin can delete another user private bot', function () {",
-                  "  pm.expect(body.isError).to.eql(false);",
-                  "  pm.expect(body.statusCode).to.eql(200);",
-                  "  pm.expect(String(body.data.id)).to.eql(pm.collectionVariables.get('privateBotId'));",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(String(body.id)).to.eql(pm.collectionVariables.get('privateBotId'));",
+                  "  pm.expect(body).to.have.property('imageUrl');",
                   "});"
                 ]
               }
@@ -1996,9 +2064,9 @@
                 "type": "text/javascript",
                 "exec": [
                   "const body = pm.response.json();",
-                  "pm.test('Deleting an unknown bot returns logical 404', function () {",
-                  "  pm.expect(body.isError).to.eql(true);",
-                  "  pm.expect(body.statusCode).to.eql(404);",
+                  "pm.test('Deleting an unknown bot returns 404', function () {",
+                  "  pm.response.to.have.status(404);",
+                  "  pm.expect(body).to.have.property('message');",
                   "});"
                 ]
               }
@@ -2030,9 +2098,9 @@
                 "exec": [
                   "const body = pm.response.json();",
                   "pm.test('Owner can delete their public bot', function () {",
-                  "  pm.expect(body.isError).to.eql(false);",
-                  "  pm.expect(body.statusCode).to.eql(200);",
-                  "  pm.expect(String(body.data.id)).to.eql(pm.collectionVariables.get('publicBotId'));",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(String(body.id)).to.eql(pm.collectionVariables.get('publicBotId'));",
+                  "  pm.expect(body).to.have.property('imageUrl');",
                   "});"
                 ]
               }
@@ -2085,6 +2153,11 @@
     {
       "key": "badUserId",
       "value": "999999999",
+      "type": "string"
+    },
+    {
+      "key": "tournamentId",
+      "value": "1",
       "type": "string"
     }
   ]

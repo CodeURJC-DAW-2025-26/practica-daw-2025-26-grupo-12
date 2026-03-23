@@ -2,12 +2,27 @@ package es.codeurjc.grupo12.scissors_please.service.image;
 
 import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.Image;
+import es.codeurjc.grupo12.scissors_please.model.Tournament;
+import es.codeurjc.grupo12.scissors_please.model.User;
+import es.codeurjc.grupo12.scissors_please.repository.BotRepository;
+import es.codeurjc.grupo12.scissors_please.repository.TournamentRepository;
+import es.codeurjc.grupo12.scissors_please.repository.UserRepository;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URLConnection;
+import java.util.Objects;
+import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class ImageService {
+
+  @Autowired private BotRepository botRepository;
+  @Autowired private UserRepository userRepository;
+  @Autowired private TournamentRepository tournamentRepository;
 
   public boolean handleImageUpload(Bot bot, MultipartFile imageFile) {
     if (imageFile == null || imageFile.isEmpty()) {
@@ -49,5 +64,39 @@ public class ImageService {
     img.setData(file.getBytes());
 
     return img;
+  }
+
+  public Optional<Image> getBotImage(Long id) {
+    return botRepository.findById(id).map(Bot::getImage).filter(Objects::nonNull);
+  }
+
+  public Optional<Image> getUserImage(Long id) {
+    return userRepository.findById(id).map(User::getImage).filter(Objects::nonNull);
+  }
+
+  public Optional<Image> getTournamentImage(Long id) {
+    return tournamentRepository.findById(id).map(Tournament::getImage).filter(Objects::nonNull);
+  }
+
+  public MediaType resolveMediaType(Image image) {
+    String contentType = image != null ? image.getContentType() : null;
+    if (contentType != null && !contentType.isBlank()) {
+      return MediaType.parseMediaType(contentType);
+    }
+
+    byte[] imageBytes = image != null ? image.getData() : null;
+    if (imageBytes != null) {
+      try {
+        String guessedType =
+            URLConnection.guessContentTypeFromStream(new ByteArrayInputStream(imageBytes));
+        if (guessedType != null && !guessedType.isBlank()) {
+          return MediaType.parseMediaType(guessedType);
+        }
+      } catch (IOException exception) {
+        // Fall back to JPEG when the content type cannot be detected.
+      }
+    }
+
+    return MediaType.IMAGE_JPEG;
   }
 }
