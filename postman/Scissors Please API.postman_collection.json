@@ -821,12 +821,1196 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "BOTS",
+      "item": [
+        {
+          "name": "Create public bot as owner",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Owner can create public bot', function () {",
+                  "  pm.expect(body.isError).to.eql(false);",
+                  "  pm.expect(body.statusCode).to.eql(200);",
+                  "  pm.expect(body.data.isPublic).to.eql(true);",
+                  "});",
+                  "pm.collectionVariables.set('publicBotId', String(body.data.id));",
+                  "pm.collectionVariables.set('userId', String(body.data.ownerId));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Postman Public Bot {{$timestamp}}",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Bot publico creado desde Postman",
+                  "type": "text"
+                },
+                {
+                  "key": "tags",
+                  "value": "postman,public,owner",
+                  "type": "text"
+                },
+                {
+                  "key": "isPublic",
+                  "value": "true",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bots",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bots"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create private bot as owner",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Owner can create private bot', function () {",
+                  "  pm.expect(body.isError).to.eql(false);",
+                  "  pm.expect(body.statusCode).to.eql(200);",
+                  "  pm.expect(body.data.isPublic).to.eql(false);",
+                  "});",
+                  "pm.collectionVariables.set('privateBotId', String(body.data.id));",
+                  "pm.collectionVariables.set('userId', String(body.data.ownerId));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Postman Private Bot {{$timestamp}}",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Bot privado creado desde Postman",
+                  "type": "text"
+                },
+                {
+                  "key": "tags",
+                  "value": "postman,private,owner",
+                  "type": "text"
+                },
+                {
+                  "key": "isPublic",
+                  "value": "false",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bots",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bots"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET public bot anonymously",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Anonymous user can read public bot', function () {",
+                  "  pm.expect(body.isError).to.eql(false);",
+                  "  pm.expect(body.statusCode).to.eql(200);",
+                  "  pm.expect(String(body.data.id)).to.eql(pm.collectionVariables.get('publicBotId'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bots/{{publicBotId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bots",
+                "{{publicBotId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET private bot anonymously returns logical 403",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Anonymous user cannot read private bot', function () {",
+                  "  pm.expect(body.isError).to.eql(true);",
+                  "  pm.expect(body.statusCode).to.eql(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bots/{{privateBotId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bots",
+                "{{privateBotId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET owner bot list anonymously only shows public bots",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "const ids = body.data.content.map(bot => String(bot.id));",
+                  "pm.test('Anonymous list hides private bots', function () {",
+                  "  pm.expect(body.isError).to.eql(false);",
+                  "  pm.expect(body.statusCode).to.eql(200);",
+                  "  pm.expect(ids).to.include(pm.collectionVariables.get('publicBotId'));",
+                  "  pm.expect(ids).to.not.include(pm.collectionVariables.get('privateBotId'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bots/user/{{userId}}?page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bots",
+                "user",
+                "{{userId}}"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET unknown bot anonymously returns logical 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Unknown bot returns logical 404', function () {",
+                  "  pm.expect(body.isError).to.eql(true);",
+                  "  pm.expect(body.statusCode).to.eql(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bots/{{badBotId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bots",
+                "{{badBotId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET unknown user bot list anonymously returns logical 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Unknown user returns logical 404 on list', function () {",
+                  "  pm.expect(body.isError).to.eql(true);",
+                  "  pm.expect(body.statusCode).to.eql(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bots/user/{{badUserId}}?page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bots",
+                "user",
+                "{{badUserId}}"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST create bot anonymously returns logical 401",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Anonymous user cannot create bots', function () {",
+                  "  pm.expect(body.isError).to.eql(true);",
+                  "  pm.expect(body.statusCode).to.eql(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Anonymous create should fail",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "No auth",
+                  "type": "text"
+                },
+                {
+                  "key": "tags",
+                  "value": "anonymous,fail",
+                  "type": "text"
+                },
+                {
+                  "key": "isPublic",
+                  "value": "true",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bots",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bots"
+              ]
+            }
+          }
+        },
+        {
+          "name": "PUT update bot anonymously returns logical 401",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Anonymous user cannot update bots', function () {",
+                  "  pm.expect(body.isError).to.eql(true);",
+                  "  pm.expect(body.statusCode).to.eql(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Anonymous update should fail",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "No auth",
+                  "type": "text"
+                },
+                {
+                  "key": "code",
+                  "value": "print('anonymous fail')",
+                  "type": "text"
+                },
+                {
+                  "key": "tags",
+                  "value": "anonymous,fail",
+                  "type": "text"
+                },
+                {
+                  "key": "isPublic",
+                  "value": "true",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bots/{{publicBotId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bots",
+                "{{publicBotId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "DELETE bot anonymously returns logical 401",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Anonymous user cannot delete bots', function () {",
+                  "  pm.expect(body.isError).to.eql(true);",
+                  "  pm.expect(body.statusCode).to.eql(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bots/{{publicBotId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bots",
+                "{{publicBotId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET private bot as owner",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Owner can read private bot', function () {",
+                  "  pm.expect(body.isError).to.eql(false);",
+                  "  pm.expect(body.statusCode).to.eql(200);",
+                  "  pm.expect(String(body.data.id)).to.eql(pm.collectionVariables.get('privateBotId'));",
+                  "  pm.expect(body.data.isPublic).to.eql(false);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bots/{{privateBotId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bots",
+                "{{privateBotId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET own bot list as owner sees private and public",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "const ids = body.data.content.map(bot => String(bot.id));",
+                  "pm.test('Owner sees both created bots', function () {",
+                  "  pm.expect(body.isError).to.eql(false);",
+                  "  pm.expect(body.statusCode).to.eql(200);",
+                  "  pm.expect(ids).to.include(pm.collectionVariables.get('publicBotId'));",
+                  "  pm.expect(ids).to.include(pm.collectionVariables.get('privateBotId'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bots/user/{{userId}}?page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bots",
+                "user",
+                "{{userId}}"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "PUT private bot as owner",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Owner can update private bot', function () {",
+                  "  pm.expect(body.isError).to.eql(false);",
+                  "  pm.expect(body.statusCode).to.eql(200);",
+                  "  pm.expect(body.data.description).to.eql('Owner updated private bot');",
+                  "  pm.expect(body.data.code).to.eql(\"print('owner update')\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Owner Updated Private Bot",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Owner updated private bot",
+                  "type": "text"
+                },
+                {
+                  "key": "code",
+                  "value": "print('owner update')",
+                  "type": "text"
+                },
+                {
+                  "key": "tags",
+                  "value": "owner,updated,private",
+                  "type": "text"
+                },
+                {
+                  "key": "isPublic",
+                  "value": "false",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bots/{{privateBotId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bots",
+                "{{privateBotId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "PUT unknown bot as owner returns logical 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Updating an unknown bot returns logical 404', function () {",
+                  "  pm.expect(body.isError).to.eql(true);",
+                  "  pm.expect(body.statusCode).to.eql(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Unknown Bot",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Should not exist",
+                  "type": "text"
+                },
+                {
+                  "key": "code",
+                  "value": "print('unknown')",
+                  "type": "text"
+                },
+                {
+                  "key": "tags",
+                  "value": "unknown",
+                  "type": "text"
+                },
+                {
+                  "key": "isPublic",
+                  "value": "true",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bots/{{badBotId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bots",
+                "{{badBotId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET private bot as other user returns logical 403",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Other user cannot read private bot', function () {",
+                  "  pm.expect(body.isError).to.eql(true);",
+                  "  pm.expect(body.statusCode).to.eql(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bots/{{privateBotId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bots",
+                "{{privateBotId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET owner bot list as other user only shows public bots",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "const ids = body.data.content.map(bot => String(bot.id));",
+                  "pm.test('Other user list hides private bots', function () {",
+                  "  pm.expect(body.isError).to.eql(false);",
+                  "  pm.expect(body.statusCode).to.eql(200);",
+                  "  pm.expect(ids).to.include(pm.collectionVariables.get('publicBotId'));",
+                  "  pm.expect(ids).to.not.include(pm.collectionVariables.get('privateBotId'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bots/user/{{userId}}?page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bots",
+                "user",
+                "{{userId}}"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "PUT private bot as other user returns logical 403",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Other user cannot update private bot', function () {",
+                  "  pm.expect(body.isError).to.eql(true);",
+                  "  pm.expect(body.statusCode).to.eql(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Other user forbidden update",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Should fail",
+                  "type": "text"
+                },
+                {
+                  "key": "code",
+                  "value": "print('forbidden')",
+                  "type": "text"
+                },
+                {
+                  "key": "tags",
+                  "value": "forbidden,other",
+                  "type": "text"
+                },
+                {
+                  "key": "isPublic",
+                  "value": "false",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bots/{{privateBotId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bots",
+                "{{privateBotId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "DELETE public bot as other user returns logical 403",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Other user cannot delete public bot they do not own', function () {",
+                  "  pm.expect(body.isError).to.eql(true);",
+                  "  pm.expect(body.statusCode).to.eql(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bots/{{publicBotId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bots",
+                "{{publicBotId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST create bot as admin returns logical 403",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Admin cannot create bots for themselves', function () {",
+                  "  pm.expect(body.isError).to.eql(true);",
+                  "  pm.expect(body.statusCode).to.eql(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Admin create should fail",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Admin cannot own bots",
+                  "type": "text"
+                },
+                {
+                  "key": "tags",
+                  "value": "admin,forbidden",
+                  "type": "text"
+                },
+                {
+                  "key": "isPublic",
+                  "value": "true",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bots",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bots"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET private bot as admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Admin can read private bot', function () {",
+                  "  pm.expect(body.isError).to.eql(false);",
+                  "  pm.expect(body.statusCode).to.eql(200);",
+                  "  pm.expect(String(body.data.id)).to.eql(pm.collectionVariables.get('privateBotId'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bots/{{privateBotId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bots",
+                "{{privateBotId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET owner bot list as admin sees private and public",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "const ids = body.data.content.map(bot => String(bot.id));",
+                  "pm.test('Admin sees both created bots', function () {",
+                  "  pm.expect(body.isError).to.eql(false);",
+                  "  pm.expect(body.statusCode).to.eql(200);",
+                  "  pm.expect(ids).to.include(pm.collectionVariables.get('publicBotId'));",
+                  "  pm.expect(ids).to.include(pm.collectionVariables.get('privateBotId'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bots/user/{{userId}}?page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bots",
+                "user",
+                "{{userId}}"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "PUT private bot as admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Admin can update another user private bot', function () {",
+                  "  pm.expect(body.isError).to.eql(false);",
+                  "  pm.expect(body.statusCode).to.eql(200);",
+                  "  pm.expect(body.data.description).to.eql('Admin updated private bot');",
+                  "  pm.expect(body.data.code).to.eql(\"print('admin update')\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Admin Updated Private Bot",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Admin updated private bot",
+                  "type": "text"
+                },
+                {
+                  "key": "code",
+                  "value": "print('admin update')",
+                  "type": "text"
+                },
+                {
+                  "key": "tags",
+                  "value": "admin,updated,private",
+                  "type": "text"
+                },
+                {
+                  "key": "isPublic",
+                  "value": "false",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bots/{{privateBotId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bots",
+                "{{privateBotId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "DELETE private bot as admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Admin can delete another user private bot', function () {",
+                  "  pm.expect(body.isError).to.eql(false);",
+                  "  pm.expect(body.statusCode).to.eql(200);",
+                  "  pm.expect(String(body.data.id)).to.eql(pm.collectionVariables.get('privateBotId'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bots/{{privateBotId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bots",
+                "{{privateBotId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "DELETE unknown bot as admin returns logical 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Deleting an unknown bot returns logical 404', function () {",
+                  "  pm.expect(body.isError).to.eql(true);",
+                  "  pm.expect(body.statusCode).to.eql(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bots/{{badBotId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bots",
+                "{{badBotId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "DELETE public bot as owner",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Owner can delete their public bot', function () {",
+                  "  pm.expect(body.isError).to.eql(false);",
+                  "  pm.expect(body.statusCode).to.eql(200);",
+                  "  pm.expect(String(body.data.id)).to.eql(pm.collectionVariables.get('publicBotId'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bots/{{publicBotId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bots",
+                "{{publicBotId}}"
+              ]
+            }
+          }
+        }
+      ]
     }
   ],
   "variable": [
     {
       "key": "baseUrl",
       "value": "http://localhost:8080"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "publicBotId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "privateBotId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "badBotId",
+      "value": "999999999",
+      "type": "string"
+    },
+    {
+      "key": "badUserId",
+      "value": "999999999",
+      "type": "string"
     }
   ]
 }
