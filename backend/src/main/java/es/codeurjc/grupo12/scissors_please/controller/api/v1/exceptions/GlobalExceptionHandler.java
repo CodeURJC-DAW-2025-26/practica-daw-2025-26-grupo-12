@@ -27,12 +27,22 @@ public class GlobalExceptionHandler {
         true, ResponseConstants.BAD_REQUEST_CODE_INT, ResponseConstants.BAD_JSON, null);
   }
 
-  @ExceptionHandler({IllegalArgumentException.class, java.io.IOException.class})
+  @ExceptionHandler(java.io.IOException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ResponseDto handleImageUploadException(Exception ex, HttpServletRequest request) {
     log.error("Image upload error at {}: {}", request.getRequestURI(), ex.getMessage());
     return new ResponseDto(
         true, ResponseConstants.BAD_REQUEST_CODE_INT, ResponseConstants.IMAGE_ERROR_UPLOAD, null);
+  }
+
+  @ExceptionHandler(IllegalArgumentException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ResponseDto handleIllegalArgument(
+      IllegalArgumentException ex, HttpServletRequest request) {
+
+    log.error("Bad request at {}: {}", request.getRequestURI(), ex.getMessage());
+
+    return new ResponseDto(true, ResponseConstants.BAD_REQUEST_CODE_INT, ex.getMessage(), null);
   }
 
   @ExceptionHandler(NoSuchElementException.class)
