@@ -54,7 +54,7 @@ public class DataInitializer {
         adminUser.setPassword(passwordEncoder.encode("admin123"));
         adminUser.setBlocked(false);
         adminUser.setRoles(List.of("ADMIN", "USER"));
-        userRepository.save(admin);
+        userRepository.save(adminUser);
 
         log.info("admin user created admin:admin123");
 
@@ -177,6 +177,9 @@ public class DataInitializer {
 
   private void assignParticipantsToTournaments(
       TournamentRepository tournamentRepository, BotRepository botRepository) {
+    if (!loadSampleData) {
+      return;
+    }
     List<Tournament> tournaments =
         tournamentRepository.findAll().stream()
             .sorted(Comparator.comparing(Tournament::getId))
