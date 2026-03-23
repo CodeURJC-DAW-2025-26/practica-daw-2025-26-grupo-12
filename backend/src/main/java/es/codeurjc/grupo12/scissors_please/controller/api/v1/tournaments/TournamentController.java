@@ -1,7 +1,7 @@
 package es.codeurjc.grupo12.scissors_please.controller.api.v1.tournaments;
 
-import es.codeurjc.grupo12.scissors_please.dto.TournamentDto;
 import es.codeurjc.grupo12.scissors_please.dto.TournamentCreateRequestDto;
+import es.codeurjc.grupo12.scissors_please.dto.TournamentDto;
 import es.codeurjc.grupo12.scissors_please.dto.TournamentJoinRequestDto;
 import es.codeurjc.grupo12.scissors_please.dto.TournamentJoinResultDto;
 import es.codeurjc.grupo12.scissors_please.dto.TournamentPageDto;
