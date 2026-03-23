@@ -1,6 +1,6 @@
-package es.codeurjc.grupo12.scissors_please.views;
+package es.codeurjc.grupo12.scissors_please.dto;
 
-public record MatchmakingStatusView(
+public record MatchmakingStatusDto(
     String state,
     boolean searching,
     boolean matched,
@@ -14,19 +14,19 @@ public record MatchmakingStatusView(
     long waitSeconds,
     int playersSearching) {
 
-  public static MatchmakingStatusView idle() {
-    return new MatchmakingStatusView(
+  public static MatchmakingStatusDto idle() {
+    return new MatchmakingStatusDto(
         "idle", false, false, null, null, null, null, 0, null, null, 0, 0);
   }
 
-  public static MatchmakingStatusView searching(
+  public static MatchmakingStatusDto searching(
       Long selectedBotId,
       String selectedBotName,
       int selectedBotElo,
       String selectedBotDescription,
       long waitSeconds,
       int playersSearching) {
-    return new MatchmakingStatusView(
+    return new MatchmakingStatusDto(
         "searching",
         true,
         false,
@@ -41,7 +41,7 @@ public record MatchmakingStatusView(
         playersSearching);
   }
 
-  public static MatchmakingStatusView matched(
+  public static MatchmakingStatusDto matched(
       Long matchId,
       String redirectUrl,
       Long selectedBotId,
@@ -49,7 +49,7 @@ public record MatchmakingStatusView(
       int selectedBotElo,
       String selectedBotDescription,
       String opponentBotName) {
-    return new MatchmakingStatusView(
+    return new MatchmakingStatusDto(
         "matched",
         false,
         true,

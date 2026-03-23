@@ -15,82 +15,63 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  public ResponseEntity<ExceptionResponseDto> handleInvalidJson(
+      HttpMessageNotReadableException ex, HttpServletRequest request) {
 
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ExceptionResponseDto> handleInvalidJson(
-            HttpMessageNotReadableException ex, HttpServletRequest request) {
+    ExceptionResponseDto error =
+        new ExceptionResponseDto(ResponseConstants.BAD_JSON, LocalDateTime.now());
 
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+  }
 
-        ExceptionResponseDto error = new ExceptionResponseDto(
-                ResponseConstants.BAD_JSON,
-                LocalDateTime.now()
-        );
+  @ExceptionHandler(java.io.IOException.class)
+  public ResponseEntity<ExceptionResponseDto> handleImageUploadException(
+      Exception ex, HttpServletRequest request) {
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
-    }
+    ExceptionResponseDto error =
+        new ExceptionResponseDto(ResponseConstants.IMAGE_ERROR_UPLOAD, LocalDateTime.now());
 
-    @ExceptionHandler(java.io.IOException.class)
-    public ResponseEntity<ExceptionResponseDto> handleImageUploadException(
-            Exception ex, HttpServletRequest request) {
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+  }
 
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ResponseEntity<ExceptionResponseDto> handleIllegalArgument(
+      IllegalArgumentException ex, HttpServletRequest request) {
 
-        ExceptionResponseDto error = new ExceptionResponseDto(
-                ResponseConstants.IMAGE_ERROR_UPLOAD,
-                LocalDateTime.now()
-        );
+    ExceptionResponseDto error = new ExceptionResponseDto(ex.getMessage(), LocalDateTime.now());
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
-    }
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+  }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ExceptionResponseDto> handleIllegalArgument(
-            IllegalArgumentException ex, HttpServletRequest request) {
+  @ExceptionHandler(NoSuchElementException.class)
+  public ResponseEntity<ExceptionResponseDto> handleElementNotFound(
+      NoSuchElementException ex, HttpServletRequest request) {
 
+    ExceptionResponseDto error =
+        new ExceptionResponseDto(ResponseConstants.ELEMENT_NOT_FOUND, LocalDateTime.now());
 
-        ExceptionResponseDto error = new ExceptionResponseDto(
-                ex.getMessage(),
-                LocalDateTime.now()
-        );
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+  }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
-    }
+  @ExceptionHandler(MissingServletRequestParameterException.class)
+  public ResponseEntity<ExceptionResponseDto> handleMissingParams(
+      MissingServletRequestParameterException ex, HttpServletRequest request) {
 
-    @ExceptionHandler(NoSuchElementException.class)
-    public ResponseEntity<ExceptionResponseDto> handleElementNotFound(
-            NoSuchElementException ex, HttpServletRequest request) {
+    ExceptionResponseDto error =
+        new ExceptionResponseDto(
+            "Missing parameter: " + ex.getParameterName(), LocalDateTime.now());
 
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+  }
 
-        ExceptionResponseDto error = new ExceptionResponseDto(
-                ResponseConstants.ELEMENT_NOT_FOUND,
-                LocalDateTime.now()
-        );
+  @ExceptionHandler(Exception.class)
+  public ResponseEntity<ExceptionResponseDto> handleGenericException(
+      Exception ex, HttpServletRequest request) {
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
-    }
+    ExceptionResponseDto error =
+        new ExceptionResponseDto(ResponseConstants.INTERNAL_SERVER_ERROR, LocalDateTime.now());
 
-    @ExceptionHandler(MissingServletRequestParameterException.class)
-    public ResponseEntity<ExceptionResponseDto> handleMissingParams(
-            MissingServletRequestParameterException ex, HttpServletRequest request) {
-
-
-        ExceptionResponseDto error = new ExceptionResponseDto(
-                "Missing parameter: " + ex.getParameterName(),
-                LocalDateTime.now()
-        );
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
-    }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ExceptionResponseDto> handleGenericException(
-            Exception ex, HttpServletRequest request) {
-
-
-        ExceptionResponseDto error = new ExceptionResponseDto(
-                ResponseConstants.INTERNAL_SERVER_ERROR,
-                LocalDateTime.now()
-        );
-
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
-    }
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+  }
 }

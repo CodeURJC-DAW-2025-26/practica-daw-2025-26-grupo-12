@@ -1,16 +1,16 @@
 package es.codeurjc.grupo12.scissors_please.service.match;
 
+import es.codeurjc.grupo12.scissors_please.dto.MatchBattleDto;
+import es.codeurjc.grupo12.scissors_please.dto.MatchStartResultDto;
+import es.codeurjc.grupo12.scissors_please.dto.MatchStatsDto;
+import es.codeurjc.grupo12.scissors_please.dto.MatchmakingStatusDto;
+import es.codeurjc.grupo12.scissors_please.dto.RecentMatchesDto;
 import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.service.bot.BotService;
 import es.codeurjc.grupo12.scissors_please.service.user.UserService;
 import es.codeurjc.grupo12.scissors_please.views.BotOptionView;
-import es.codeurjc.grupo12.scissors_please.views.MatchBattleView;
 import es.codeurjc.grupo12.scissors_please.views.MatchListItem;
-import es.codeurjc.grupo12.scissors_please.views.MatchStartResult;
-import es.codeurjc.grupo12.scissors_please.views.MatchStatsView;
-import es.codeurjc.grupo12.scissors_please.views.MatchmakingStatusView;
-import es.codeurjc.grupo12.scissors_please.views.UserRecentMatchSection;
 import es.codeurjc.grupo12.scissors_please.views.WebFlowView;
 import es.codeurjc.grupo12.scissors_please.views.WebPageView;
 import es.codeurjc.grupo12.scissors_please.views.WebRedirectView;
@@ -58,7 +58,7 @@ public class MatchWebHandlerService {
           isAuthenticated(authentication)
               ? userService.getCurrentUser(authentication).getId()
               : null;
-      MatchStatsView matchStats = matchService.getMatchStatsView(matchId, currentUserId);
+      MatchStatsDto matchStats = matchService.getMatchStatsView(matchId, currentUserId);
       WebPageView view =
           WebPageView.of("match-stats")
               .attribute("stats", matchStats)
@@ -75,7 +75,7 @@ public class MatchWebHandlerService {
 
   public WebFlowView matchBattleHandler(Long matchId, Authentication authentication) {
     try {
-      MatchBattleView battleView = matchService.getMatchBattleView(matchId);
+      MatchBattleDto battleView = matchService.getMatchBattleView(matchId);
       Long userId = userService.getCurrentUser(authentication).getId();
       matchService.acknowledgeReadyMatch(userId, matchId);
       return WebPageView.of("match-battle").attribute("battle", battleView);
@@ -86,8 +86,7 @@ public class MatchWebHandlerService {
 
   public WebFlowView matchSearchHandler(Authentication authentication, Long selectedBotId) {
     User currentUser = userService.getCurrentUser(authentication);
-    MatchmakingStatusView matchmakingStatus =
-        matchService.getMatchmakingStatus(currentUser.getId());
+    MatchmakingStatusDto matchmakingStatus = matchService.getMatchmakingStatus(currentUser.getId());
     List<Bot> userBots = botService.getBotsForUser(currentUser, true);
     Long effectiveBotId =
         (matchmakingStatus.searching() || matchmakingStatus.matched()) && selectedBotId == null
@@ -120,7 +119,7 @@ public class MatchWebHandlerService {
   public WebFlowView startMatchHandler(Authentication authentication, Long botId) {
     User currentUser = userService.getCurrentUser(authentication);
     try {
-      MatchStartResult startResult =
+      MatchStartResultDto startResult =
           matchService.startMatchmaking(currentUser.getId(), currentUser.getUsername(), botId);
       if (startResult.matched()) {
         return WebRedirectView.to("/matches/battle?id=" + startResult.matchId());
@@ -147,7 +146,7 @@ public class MatchWebHandlerService {
     }
   }
 
-  public MatchmakingStatusView matchmakingStatusHandler(Authentication authentication) {
+  public MatchmakingStatusDto matchmakingStatusHandler(Authentication authentication) {
     Long userId = userService.getCurrentUser(authentication).getId();
     return matchService.getMatchmakingStatus(userId);
   }
@@ -174,7 +173,7 @@ public class MatchWebHandlerService {
 
   public WebFlowView recentMatchesHandler(Authentication authentication) {
     Long userId = userService.getCurrentUser(authentication).getId();
-    UserRecentMatchSection section = matchService.getUserRecentMatchSection(userId);
+    RecentMatchesDto section = matchService.getUserRecentMatchSection(userId);
 
     return WebPageView.of("recent-matches")
         .attribute("matches", section.matches())

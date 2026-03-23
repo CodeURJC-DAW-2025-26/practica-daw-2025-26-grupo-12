@@ -10,7 +10,7 @@ public class ResponseConstants {
   public static String BOT_NOT_FOUND = "The bot is no longer in the database.";
   public static String ACCESS_DENIED = "You do not have permission to access this resource.";
   public static String BAD_JSON = "Malformed JSON request";
-  public static String BAD_REQUEST="The request was wrong";
+  public static String BAD_REQUEST = "The request was wrong";
   public static String OK = "The request has been processed correctly";
 
   // For the models

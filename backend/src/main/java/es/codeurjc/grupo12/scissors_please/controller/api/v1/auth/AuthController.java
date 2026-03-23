@@ -8,11 +8,7 @@ import es.codeurjc.grupo12.scissors_please.security.jwt.LoginRequest;
 import es.codeurjc.grupo12.scissors_please.security.jwt.UserLoginService;
 import es.codeurjc.grupo12.scissors_please.service.user.UserService;
 import jakarta.servlet.http.HttpServletResponse;
-
 import java.time.LocalDateTime;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -24,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController("apiAuthController")
 @RequestMapping("/api/v1/auth")
 public class AuthController {
-
 
   private final UserLoginService userLoginService;
   private final UserService userService;
@@ -40,7 +35,8 @@ public class AuthController {
     if (userService.authenticate(loginRequest.getUsername(), loginRequest.getPassword())) {
       return userLoginService.login(response, loginRequest);
     }
-    ExceptionResponseDto error =new ExceptionResponseDto(ResponseConstants.ELEMENT_NOT_FOUND,LocalDateTime.now());
+    ExceptionResponseDto error =
+        new ExceptionResponseDto(ResponseConstants.ELEMENT_NOT_FOUND, LocalDateTime.now());
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
   }
 
@@ -50,7 +46,8 @@ public class AuthController {
     try {
       userService.registerUser(request.username(), request.email(), request.password());
     } catch (IllegalArgumentException e) {
-    ExceptionResponseDto error =new ExceptionResponseDto(ResponseConstants.BAD_REQUEST,LocalDateTime.now());
+      ExceptionResponseDto error =
+          new ExceptionResponseDto(ResponseConstants.BAD_REQUEST, LocalDateTime.now());
 
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
@@ -60,7 +57,8 @@ public class AuthController {
       return userLoginService.login(response, loginRequest);
     }
 
-    ExceptionResponseDto error =new ExceptionResponseDto(ResponseConstants.ELEMENT_NOT_FOUND, LocalDateTime.now());
+    ExceptionResponseDto error =
+        new ExceptionResponseDto(ResponseConstants.ELEMENT_NOT_FOUND, LocalDateTime.now());
 
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
   }

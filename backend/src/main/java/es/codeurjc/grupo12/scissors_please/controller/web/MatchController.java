@@ -1,7 +1,7 @@
 package es.codeurjc.grupo12.scissors_please.controller.web;
 
+import es.codeurjc.grupo12.scissors_please.dto.MatchmakingStatusDto;
 import es.codeurjc.grupo12.scissors_please.service.match.MatchWebHandlerService;
-import es.codeurjc.grupo12.scissors_please.views.MatchmakingStatusView;
 import es.codeurjc.grupo12.scissors_please.views.WebFlowView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -90,7 +90,7 @@ public class MatchController {
 
   @GetMapping("/search/status")
   @ResponseBody
-  public MatchmakingStatusView matchmakingStatus(Authentication authentication) {
+  public MatchmakingStatusDto matchmakingStatus(Authentication authentication) {
     return matchWebHandlerService.matchmakingStatusHandler(authentication);
   }
 

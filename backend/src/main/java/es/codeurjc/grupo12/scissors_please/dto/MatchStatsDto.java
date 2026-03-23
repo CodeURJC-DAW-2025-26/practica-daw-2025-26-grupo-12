@@ -1,8 +1,8 @@
-package es.codeurjc.grupo12.scissors_please.views;
+package es.codeurjc.grupo12.scissors_please.dto;
 
 import java.util.List;
 
-public record MatchStatsView(
+public record MatchStatsDto(
     Long matchId,
     Long bot1Id,
     String bot1Name,
@@ -16,4 +16,4 @@ public record MatchStatsView(
     int bot2Score,
     int totalRounds,
     String playedAt,
-    List<MatchRoundView> rounds) {}
+    List<MatchRoundDto> rounds) {}

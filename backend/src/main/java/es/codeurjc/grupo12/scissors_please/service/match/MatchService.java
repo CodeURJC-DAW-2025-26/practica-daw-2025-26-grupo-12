@@ -1,5 +1,11 @@
 package es.codeurjc.grupo12.scissors_please.service.match;
 
+import es.codeurjc.grupo12.scissors_please.dto.MatchBattleDto;
+import es.codeurjc.grupo12.scissors_please.dto.MatchRoundDto;
+import es.codeurjc.grupo12.scissors_please.dto.MatchStartResultDto;
+import es.codeurjc.grupo12.scissors_please.dto.MatchStatsDto;
+import es.codeurjc.grupo12.scissors_please.dto.MatchmakingStatusDto;
+import es.codeurjc.grupo12.scissors_please.dto.RecentMatchesDto;
 import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.Match;
 import es.codeurjc.grupo12.scissors_please.model.Round;
@@ -9,14 +15,8 @@ import es.codeurjc.grupo12.scissors_please.repository.MatchRepository;
 import es.codeurjc.grupo12.scissors_please.service.bot.BotService;
 import es.codeurjc.grupo12.scissors_please.service.notification.NotificationService;
 import es.codeurjc.grupo12.scissors_please.service.user.UserService;
-import es.codeurjc.grupo12.scissors_please.views.MatchBattleView;
 import es.codeurjc.grupo12.scissors_please.views.MatchListItem;
-import es.codeurjc.grupo12.scissors_please.views.MatchRoundView;
-import es.codeurjc.grupo12.scissors_please.views.MatchStartResult;
-import es.codeurjc.grupo12.scissors_please.views.MatchStatsView;
-import es.codeurjc.grupo12.scissors_please.views.MatchmakingStatusView;
 import es.codeurjc.grupo12.scissors_please.views.UserMatchItem;
-import es.codeurjc.grupo12.scissors_please.views.UserRecentMatchSection;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -69,7 +69,7 @@ public class MatchService {
     return matchRepository.findById(id);
   }
 
-  public MatchStartResult startMatchmaking(Long userId, String username, Long selectedBotId) {
+  public MatchStartResultDto startMatchmaking(Long userId, String username, Long selectedBotId) {
     Bot myBot = resolveMyBot(userId, selectedBotId);
     LocalDateTime now = LocalDateTime.now();
 
@@ -78,7 +78,7 @@ public class MatchService {
 
       ReadyMatch readyMatch = getValidReadyMatch(userId);
       if (readyMatch != null) {
-        return MatchStartResult.matched(
+        return MatchStartResultDto.matched(
             readyMatch.matchId(), readyMatch.myBotName(), readyMatch.opponentBotName());
       }
 
@@ -87,11 +87,11 @@ public class MatchService {
 
       ReadyMatch createdMatch = tryMatch(ticket, now);
       if (createdMatch != null) {
-        return MatchStartResult.matched(
+        return MatchStartResultDto.matched(
             createdMatch.matchId(), createdMatch.myBotName(), createdMatch.opponentBotName());
       }
 
-      return MatchStartResult.searching(resolveBotName(myBot));
+      return MatchStartResultDto.searching(resolveBotName(myBot));
     }
   }
 
@@ -199,7 +199,7 @@ public class MatchService {
     }
   }
 
-  public MatchmakingStatusView getMatchmakingStatus(Long userId) {
+  public MatchmakingStatusDto getMatchmakingStatus(Long userId) {
     LocalDateTime now = LocalDateTime.now();
 
     synchronized (matchmakingMonitor) {
@@ -208,7 +208,7 @@ public class MatchService {
       ReadyMatch readyMatch = getValidReadyMatch(userId);
       if (readyMatch != null) {
         if (!isReadyForRedirect(readyMatch, now)) {
-          return MatchmakingStatusView.searching(
+          return MatchmakingStatusDto.searching(
               readyMatch.myBotId(),
               readyMatch.myBotName(),
               readyMatch.myBotElo(),
@@ -216,7 +216,7 @@ public class MatchService {
               0,
               0);
         }
-        return MatchmakingStatusView.matched(
+        return MatchmakingStatusDto.matched(
             readyMatch.matchId(),
             readyMatch.redirectUrl(),
             readyMatch.myBotId(),
@@ -230,7 +230,7 @@ public class MatchService {
       if (pendingRematch != null) {
         long waitSeconds =
             Math.max(0, Duration.between(pendingRematch.createdAt(), now).getSeconds());
-        return MatchmakingStatusView.searching(
+        return MatchmakingStatusDto.searching(
             pendingRematch.requesterBot().getId(),
             resolveBotName(pendingRematch.requesterBot()),
             resolveBotElo(pendingRematch.requesterBot()),
@@ -241,12 +241,12 @@ public class MatchService {
 
       SearchTicket ticket = searchQueue.get(userId);
       if (ticket == null) {
-        return MatchmakingStatusView.idle();
+        return MatchmakingStatusDto.idle();
       }
 
       long waitSeconds = Math.max(0, Duration.between(ticket.createdAt(), now).getSeconds());
       int playersSearching = searchQueue.size();
-      return MatchmakingStatusView.searching(
+      return MatchmakingStatusDto.searching(
           ticket.bot().getId(),
           resolveBotName(ticket.bot()),
           resolveBotElo(ticket.bot()),
@@ -293,7 +293,7 @@ public class MatchService {
     }
   }
 
-  public MatchBattleView getMatchBattleView(Long matchId) {
+  public MatchBattleDto getMatchBattleView(Long matchId) {
     Match match = resolveMatch(matchId);
     Bot bot1 = match.getBot1();
     Bot bot2 = match.getBot2();
@@ -308,7 +308,7 @@ public class MatchService {
             ? userService.getUserById(bot2.getOwnerId()).getUsername()
             : "Unknown";
 
-    return new MatchBattleView(
+    return new MatchBattleDto(
         match.getId(),
         bot1 != null ? bot1.getId() : null,
         bot1Name,
@@ -323,7 +323,7 @@ public class MatchService {
         "/matches/stats?id=" + match.getId());
   }
 
-  public MatchStatsView getMatchStatsView(Long matchId, Long viewerUserId) {
+  public MatchStatsDto getMatchStatsView(Long matchId, Long viewerUserId) {
     Match match = resolveMatch(matchId);
     Bot bot1 = match.getBot1();
     Bot bot2 = match.getBot2();
@@ -354,13 +354,13 @@ public class MatchService {
             : resolveWinnerLabel(match, bot1Name, bot2Name);
     String winnerBadgeClass = resolveBadgeClass(winnerLabel);
 
-    List<MatchRoundView> rounds =
+    List<MatchRoundDto> rounds =
         Optional.ofNullable(match.getRounds()).orElse(List.of()).stream()
             .sorted(Comparator.comparingInt(Round::getRoundNumber))
             .map(round -> toRoundView(round, viewerBotIsSecond))
             .toList();
 
-    return new MatchStatsView(
+    return new MatchStatsDto(
         match.getId(),
         displayedBot1 != null ? displayedBot1.getId() : null,
         bot1Name,
@@ -400,7 +400,7 @@ public class MatchService {
         .toList();
   }
 
-  public UserRecentMatchSection getUserRecentMatchSection(Long userId) {
+  public RecentMatchesDto getUserRecentMatchSection(Long userId) {
     List<UserMatchItem> matches =
         matchRepository
             .findDistinctByBot1OwnerIdOrBot2OwnerIdOrderByTimestampDesc(userId, userId)
@@ -408,7 +408,7 @@ public class MatchService {
             .map(m -> toUserMatchItem(m, userId))
             .toList();
 
-    return new UserRecentMatchSection(matches);
+    return new RecentMatchesDto(matches);
   }
 
   @Scheduled(fixedDelay = 30000)
@@ -765,13 +765,13 @@ public class MatchService {
     return "Draw";
   }
 
-  private MatchRoundView toRoundView(Round round, boolean swapPerspective) {
+  private MatchRoundDto toRoundView(Round round, boolean swapPerspective) {
     String result =
         round.getResult() == null || round.getResult().isBlank() ? "Draw" : round.getResult();
     if (swapPerspective) {
       result = invertResult(result);
     }
-    return new MatchRoundView(
+    return new MatchRoundDto(
         round.getRoundNumber(),
         swapPerspective ? round.getBot2Move() : round.getBot1Move(),
         swapPerspective ? round.getBot1Move() : round.getBot2Move(),
