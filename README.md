@@ -530,17 +530,17 @@ Diagrama actualizado incluyendo los @RestController y su relación con los @Serv
 
 ### **Participación de Miembros en la Práctica 2**
 
-#### **Alumno 1 - [Nombre Completo]**
+#### **Alumno 1 - Alejandro García Prada**
 
-[Descripción de las tareas y responsabilidades principales del alumno en el proyecto]
+Me he encargado de organizar algunos DTOs de respuestas, de implementar el JWT y de generar algunos endpoints
 
 | Nº    | Commits      | Files      |
 |:------------: |:------------:| :------------:|
-|1| [Descripción commit 1](URL_commit_1)  | [Archivo1](URL_archivo_1)   |
-|2| [Descripción commit 2](URL_commit_2)  | [Archivo2](URL_archivo_2)   |
-|3| [Descripción commit 3](URL_commit_3)  | [Archivo3](URL_archivo_3)   |
-|4| [Descripción commit 4](URL_commit_4)  | [Archivo4](URL_archivo_4)   |
-|5| [Descripción commit 5](URL_commit_5)  | [Archivo5](URL_archivo_5)   |
+|1| [Some improvements](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/4632666f764789c2f2975cf8915c653cdd4ccd44)  | [LoginController.java](‎backend/src/main/java/es/codeurjc/grupo12/scissors_please/controller/api/v1/auth/LoginController.java)   |
+|2| [MatchDto and UserDto](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/8834e1e1cefa2cee4e5792aeb8b706612efa0c0d)  | [GlobalExceptionHandler.java‎](backend/src/main/java/es/codeurjc/grupo12/scissors_please/controller/api/v1/exceptions/GlobalExceptionHandler.java)   |
+|3| [security config and chart fix](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/fa84d2d083aa1d337bb4ed85f46c10735638b642)  | [SecurityConfig.java](backend/src/main/java/es/codeurjc/grupo12/scissors_please/security/SecurityConfig.java)   |
+|4| [Some more endpoints for admin actions](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/b85b7f2d81a6b0ab8d18aa943f165623e5ce698a)  | [UserController.java](backend/src/main/java/es/codeurjc/grupo12/scissors_please/controller/api/v1/user/UserController.java)   |
+|5| [ChartController](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/cffb69fad55eb09128c88518dcd75b21e13161a7)  | [ChartController.java](backend/src/main/java/es/codeurjc/grupo12/scissors_please/controller/api/v1/chart/ChartController.java)   |
 
 ---
 
