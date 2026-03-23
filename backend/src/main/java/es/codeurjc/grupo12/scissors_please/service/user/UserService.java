@@ -74,6 +74,21 @@ public class UserService {
     return pageResult;
   }
 
+  @Transactional(readOnly = true)
+  public Page<User> getActiveUserPageByUsername(String query, Pageable pageable) {
+    int safePage = Math.max(pageable.getPageNumber(), 0);
+    int safeSize = Math.min(Math.max(pageable.getPageSize(), 1), MAX_PAGE_SIZE);
+    Pageable safePageable = PageRequest.of(safePage, safeSize);
+
+    String normalizedQuery = query == null ? "" : query.trim();
+    if (normalizedQuery.isBlank()) {
+      return userRepository.findAllByDeleteDateIsNullOrderByUsernameAsc(safePageable);
+    }
+
+    return userRepository.findByUsernameContainingIgnoreCaseAndDeleteDateIsNullOrderByUsernameAsc(
+        normalizedQuery, safePageable);
+  }
+
   public User registerUser(String username, String email, String password) {
     if (username == null || username.isBlank()) {
       throw new IllegalArgumentException("Username cannot be empty");

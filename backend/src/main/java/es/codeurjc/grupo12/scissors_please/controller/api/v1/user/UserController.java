@@ -1,5 +1,6 @@
 package es.codeurjc.grupo12.scissors_please.controller.api.v1.user;
 
+import es.codeurjc.grupo12.scissors_please.dto.UserPageResponseDto;
 import es.codeurjc.grupo12.scissors_please.dto.UserResponseDto;
 import es.codeurjc.grupo12.scissors_please.model.Image;
 import es.codeurjc.grupo12.scissors_please.model.User;
@@ -7,6 +8,8 @@ import es.codeurjc.grupo12.scissors_please.service.image.ImageService;
 import es.codeurjc.grupo12.scissors_please.service.user.UserService;
 import java.io.IOException;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,6 +20,8 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/api/v1/users")
 public class UserController {
 
+  private static final int DEFAULT_PAGE_SIZE = 10;
+
   private final UserService userService;
   private final ImageService imageService;
   private final PasswordEncoder passwordEncoder;
@@ -26,6 +31,18 @@ public class UserController {
     this.userService = userService;
     this.imageService = imageService;
     this.passwordEncoder = passwordEncoder;
+  }
+
+  @GetMapping
+  public ResponseEntity<UserPageResponseDto> getUsers(
+      @RequestParam(value = "query", required = false) String query,
+      @RequestParam(value = "page", defaultValue = "0") int page,
+      @RequestParam(value = "size", defaultValue = "10") int size) {
+    PageRequest pageable = PageRequest.of(sanitizePage(page), sanitizeSize(size));
+    Page<UserResponseDto> userPage =
+        userService.getActiveUserPageByUsername(query, pageable).map(UserResponseDto::from);
+
+    return ResponseEntity.ok(UserPageResponseDto.fromPage(userPage));
   }
 
   @PutMapping("/{id}")
@@ -76,6 +93,14 @@ public class UserController {
   public ResponseEntity<UserResponseDto> getUserById(@PathVariable Long id) {
     User user = userService.getUserById(id);
     return ResponseEntity.ok(UserResponseDto.from(user));
+  }
+
+  private int sanitizePage(int page) {
+    return Math.max(page, 0);
+  }
+
+  private int sanitizeSize(int size) {
+    return size <= 0 ? DEFAULT_PAGE_SIZE : size;
   }
 
   private record UserUpdateRequest(String username, String email, String password) {}

@@ -40,6 +40,21 @@ public class BotController {
   @Autowired private BotService botService;
   @Autowired private UserService userService;
 
+  @GetMapping
+  public ResponseEntity<BotPageResponseDTO> getBots(
+      @RequestParam(value = "query", required = false) String query,
+      @RequestParam(value = "page", defaultValue = "0") int page,
+      @RequestParam(value = "size", defaultValue = "10") int size,
+      Authentication authentication) {
+    PageRequest pageable = PageRequest.of(sanitizePage(page), sanitizeSize(size));
+    Page<BotDTOWithSimpleImage> botPage =
+        botService
+            .getBotPage(resolveCurrentUser(authentication), query, pageable)
+            .map(this::toBotSummaryDto);
+
+    return ResponseEntity.ok(toBotPageResponseDto(botPage));
+  }
+
   @GetMapping("/{id}")
   public ResponseEntity<BotDTO> getBot(@PathVariable Long id, Authentication authentication) {
     Bot bot = botService.getUserBot(resolveCurrentUser(authentication), id);
