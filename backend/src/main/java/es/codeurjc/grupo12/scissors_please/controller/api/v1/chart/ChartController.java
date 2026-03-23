@@ -31,14 +31,14 @@ public class ChartController {
     return ResponseEntity.ok(base64Chart);
   }
 
-  @PostMapping("/elo")
+  @GetMapping("/elo")
   public ResponseEntity<String> getEloLineChart(@RequestBody List<Integer> eloHistory) {
     byte[] chartBytes = chartService.generateEloLineChart(eloHistory);
     String base64Chart = encodeToBase64(chartBytes);
     return ResponseEntity.ok(base64Chart);
   }
 
-  @PostMapping("/users")
+  @GetMapping("/users")
   public ResponseEntity<String> getUserHistoryChart(
       @RequestBody List<MonthlyUserCount> monthlyData) {
     byte[] chartBytes = chartService.generateUserHistory(monthlyData);
