@@ -48,15 +48,19 @@ public class DataInitializer {
       PasswordEncoder passwordEncoder) {
     return args -> {
       if (userRepository.count() == 0) {
-        List<User> users = new ArrayList<>();
-
         User adminUser = new User();
         adminUser.setUsername("admin");
         adminUser.setEmail("admin@scissors-please.com");
         adminUser.setPassword(passwordEncoder.encode("admin123"));
         adminUser.setBlocked(false);
         adminUser.setRoles(List.of("ADMIN", "USER"));
-        users.add(adminUser);
+        userRepository.save(adminUser);
+
+        if (!loadSampleData) {
+          return;
+        }
+
+        List<User> users = new ArrayList<>();
 
         User regularUser = new User();
         regularUser.setUsername("user");
@@ -81,10 +85,6 @@ public class DataInitializer {
         log.info("admin user created admin:admin123");
         log.info("ordinary user created user:user123");
         log.info("{} additional seed users created", SEEDED_REGULAR_USERS);
-      }
-
-      if (!loadSampleData) {
-        return;
       }
 
       if (tournamentRepository.count() == 0) {
