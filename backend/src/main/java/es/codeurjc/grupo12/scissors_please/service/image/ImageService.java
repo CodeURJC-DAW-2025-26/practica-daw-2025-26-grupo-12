@@ -1,5 +1,7 @@
 package es.codeurjc.grupo12.scissors_please.service.image;
 
+import es.codeurjc.grupo12.scissors_please.config.ResponseConstants;
+import es.codeurjc.grupo12.scissors_please.exception.ImageNotFoundException;
 import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.Image;
 import es.codeurjc.grupo12.scissors_please.model.Tournament;
@@ -10,8 +12,6 @@ import es.codeurjc.grupo12.scissors_please.repository.UserRepository;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URLConnection;
-import java.util.Objects;
-import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -66,16 +66,28 @@ public class ImageService {
     return img;
   }
 
-  public Optional<Image> getBotImage(Long id) {
-    return botRepository.findById(id).map(Bot::getImage).filter(Objects::nonNull);
+  public Image getBotImageOrThrow(Long id) {
+    Bot bot =
+        botRepository
+            .findById(id)
+            .orElseThrow(() -> new ImageNotFoundException(ResponseConstants.IMAGE_NOT_FOUND));
+    return requireImage(bot.getImage());
   }
 
-  public Optional<Image> getUserImage(Long id) {
-    return userRepository.findById(id).map(User::getImage).filter(Objects::nonNull);
+  public Image getUserImageOrThrow(Long id) {
+    User user =
+        userRepository
+            .findById(id)
+            .orElseThrow(() -> new ImageNotFoundException(ResponseConstants.IMAGE_NOT_FOUND));
+    return requireImage(user.getImage());
   }
 
-  public Optional<Image> getTournamentImage(Long id) {
-    return tournamentRepository.findById(id).map(Tournament::getImage).filter(Objects::nonNull);
+  public Image getTournamentImageOrThrow(Long id) {
+    Tournament tournament =
+        tournamentRepository
+            .findById(id)
+            .orElseThrow(() -> new ImageNotFoundException(ResponseConstants.IMAGE_NOT_FOUND));
+    return requireImage(tournament.getImage());
   }
 
   public MediaType resolveMediaType(Image image) {
@@ -93,10 +105,17 @@ public class ImageService {
           return MediaType.parseMediaType(guessedType);
         }
       } catch (IOException exception) {
-        // Fall back to JPEG when the content type cannot be detected.
+        // This should not break
       }
     }
 
     return MediaType.IMAGE_JPEG;
+  }
+
+  private Image requireImage(Image image) {
+    if (image == null) {
+      throw new ImageNotFoundException(ResponseConstants.IMAGE_NOT_FOUND);
+    }
+    return image;
   }
 }

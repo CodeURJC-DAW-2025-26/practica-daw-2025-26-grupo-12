@@ -5,6 +5,7 @@ import es.codeurjc.grupo12.scissors_please.dto.ExceptionResponseDto;
 import es.codeurjc.grupo12.scissors_please.exception.BotAccessDeniedException;
 import es.codeurjc.grupo12.scissors_please.exception.BotImageUploadException;
 import es.codeurjc.grupo12.scissors_please.exception.BotNotFoundException;
+import es.codeurjc.grupo12.scissors_please.exception.ImageNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
@@ -51,6 +52,15 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(BotNotFoundException.class)
   public ResponseEntity<ExceptionResponseDto> handleBotNotFound(
       BotNotFoundException ex, HttpServletRequest request) {
+
+    ExceptionResponseDto error = new ExceptionResponseDto(ex.getMessage(), LocalDateTime.now());
+
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+  }
+
+  @ExceptionHandler(ImageNotFoundException.class)
+  public ResponseEntity<ExceptionResponseDto> handleImageNotFound(
+      ImageNotFoundException ex, HttpServletRequest request) {
 
     ExceptionResponseDto error = new ExceptionResponseDto(ex.getMessage(), LocalDateTime.now());
 

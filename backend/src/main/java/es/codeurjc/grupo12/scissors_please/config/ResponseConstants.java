@@ -3,6 +3,7 @@ package es.codeurjc.grupo12.scissors_please.config;
 public class ResponseConstants {
 
   public static String IMAGE_ERROR_UPLOAD = "The image wasn't uploaded correctly.";
+  public static String IMAGE_NOT_FOUND = "The image is no longer in the database.";
   public static String INTERNAL_SERVER_ERROR = "Something went wrong";
   public static String TOURNAMENT_NOT_FOUND = "The tournament is no longer in the database.";
   public static String ELEMENT_NOT_FOUND = "The element is no longer in the database.";
