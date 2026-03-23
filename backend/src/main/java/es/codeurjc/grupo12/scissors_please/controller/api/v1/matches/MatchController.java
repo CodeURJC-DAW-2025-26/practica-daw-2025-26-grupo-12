@@ -1,46 +1,41 @@
 package es.codeurjc.grupo12.scissors_please.controller.api.v1.matches;
 
-import es.codeurjc.grupo12.scissors_please.config.ResponseConstants;
-import es.codeurjc.grupo12.scissors_please.dto.ResponseDto;
+import es.codeurjc.grupo12.scissors_please.dto.MatchBattleDto;
+import es.codeurjc.grupo12.scissors_please.dto.MatchDto;
+import es.codeurjc.grupo12.scissors_please.dto.MatchPageDto;
+import es.codeurjc.grupo12.scissors_please.dto.MatchStartResultDto;
+import es.codeurjc.grupo12.scissors_please.dto.MatchStatsDto;
+import es.codeurjc.grupo12.scissors_please.dto.MatchmakingStatusDto;
+import es.codeurjc.grupo12.scissors_please.dto.RecentMatchesDto;
+import es.codeurjc.grupo12.scissors_please.model.Match;
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.service.match.MatchService;
 import es.codeurjc.grupo12.scissors_please.service.user.UserService;
-import es.codeurjc.grupo12.scissors_please.views.MatchStartResult;
-import es.codeurjc.grupo12.scissors_please.views.MatchmakingStatusView;
+import es.codeurjc.grupo12.scissors_please.views.MatchListItem;
+import java.util.NoSuchElementException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController("apiMatchController")
 @RequestMapping("/api/v1/matches")
 public class MatchController {
 
-  @Autowired MatchService matchService;
-  @Autowired UserService userService;
+  @Autowired private MatchService matchService;
+  @Autowired private UserService userService;
 
   @GetMapping("/{id}")
-  public ResponseDto getMatch(@PathVariable Long id) {
-    return matchService
-        .getMatchById(id)
-        .map(
-            match ->
-                new ResponseDto(false, ResponseConstants.OK_CODE_INT, ResponseConstants.OK, match))
-        .orElse(
-            new ResponseDto(
-                true,
-                ResponseConstants.NOT_FOUND_CODE_INT,
-                ResponseConstants.ELEMENT_NOT_FOUND,
-                null));
+  public ResponseEntity<MatchDto> getMatch(@PathVariable Long id) {
+    Match match = matchService.getMatchById(id).orElseThrow(NoSuchElementException::new);
+
+    return ResponseEntity.ok(MatchDto.from(match));
   }
 
   @GetMapping
-  public ResponseDto getMatches(
+  public ResponseEntity<MatchPageDto> getMatches(
       @RequestParam(value = "page", defaultValue = "0") int page,
       @RequestParam(value = "size", defaultValue = "10") int size) {
 
@@ -49,109 +44,76 @@ public class MatchController {
 
     PageRequest pageable = PageRequest.of(safePage, safeSize);
 
-    var matchPage = matchService.getBestMatchPage(pageable);
+    Page<MatchListItem> matchPage = matchService.getBestMatchPage(pageable);
 
-    return new ResponseDto(false, ResponseConstants.OK_CODE_INT, ResponseConstants.OK, matchPage);
+    return ResponseEntity.ok(MatchPageDto.fromPage(matchPage));
   }
 
   @GetMapping("/{id}/stats")
-  public ResponseDto getMatchStats(@PathVariable Long id, Authentication authentication) {
-    try {
-      Long currentUserId =
-          authentication != null ? userService.getCurrentUser(authentication).getId() : null;
-
-      var matchStats = matchService.getMatchStatsView(id, currentUserId);
-
-      if (currentUserId != null) {
-        matchService.acknowledgeReadyMatch(currentUserId, id);
-      }
-
-      return new ResponseDto(
-          false, ResponseConstants.OK_CODE_INT, ResponseConstants.OK, matchStats);
-    } catch (IllegalArgumentException e) {
-      return new ResponseDto(true, ResponseConstants.NOT_FOUND_CODE_INT, e.getMessage(), null);
-    }
+  public ResponseEntity<MatchStatsDto> getMatchStats(
+      @PathVariable Long id, Authentication authentication) {
+    Long currentUserId =
+        authentication != null ? userService.getCurrentUser(authentication).getId() : null;
+    MatchStatsDto matchStats = matchService.getMatchStatsView(id, currentUserId);
+    if (currentUserId != null) matchService.acknowledgeReadyMatch(currentUserId, id);
+    return ResponseEntity.ok(matchStats);
   }
 
   @GetMapping("/{id}/battle")
-  public ResponseDto getMatchBattle(@PathVariable Long id, Authentication authentication) {
-    try {
-      var battleView = matchService.getMatchBattleView(id);
-
-      if (authentication != null) {
-        Long userId = userService.getCurrentUser(authentication).getId();
-        matchService.acknowledgeReadyMatch(userId, id);
-      }
-
-      return new ResponseDto(
-          false, ResponseConstants.OK_CODE_INT, ResponseConstants.OK, battleView);
-    } catch (IllegalArgumentException e) {
-      return new ResponseDto(true, ResponseConstants.NOT_FOUND_CODE_INT, e.getMessage(), null);
+  public ResponseEntity<MatchBattleDto> getMatchBattle(
+      @PathVariable Long id, Authentication authentication) {
+    MatchBattleDto battleView = matchService.getMatchBattleView(id);
+    if (authentication != null) {
+      Long userId = userService.getCurrentUser(authentication).getId();
+      matchService.acknowledgeReadyMatch(userId, id);
     }
+    return ResponseEntity.ok(battleView);
   }
 
   @GetMapping("/recent")
-  public ResponseDto getRecentMatches(Authentication authentication) {
+  public ResponseEntity<RecentMatchesDto> getRecentMatches(Authentication authentication) {
     Long userId = userService.getCurrentUser(authentication).getId();
-    var section = matchService.getUserRecentMatchSection(userId);
-
-    return new ResponseDto(false, ResponseConstants.OK_CODE_INT, ResponseConstants.OK, section);
+    RecentMatchesDto section = matchService.getUserRecentMatchSection(userId);
+    return ResponseEntity.ok(section);
   }
 
   @GetMapping("/matchmaking/status")
-  public ResponseDto getMatchmakingStatus(Authentication authentication) {
+  public ResponseEntity<MatchmakingStatusDto> getMatchmakingStatus(Authentication authentication) {
     Long userId = userService.getCurrentUser(authentication).getId();
-    MatchmakingStatusView status = matchService.getMatchmakingStatus(userId);
-
-    return new ResponseDto(false, ResponseConstants.OK_CODE_INT, ResponseConstants.OK, status);
+    MatchmakingStatusDto status = matchService.getMatchmakingStatus(userId);
+    return ResponseEntity.ok(status);
   }
 
   @PostMapping("/matchmaking/start")
-  public ResponseDto startMatchmaking(
+  public ResponseEntity<MatchStartResultDto> startMatchmaking(
       @RequestParam(name = "botId", required = false) Long botId, Authentication authentication) {
+
     User currentUser = userService.getCurrentUser(authentication);
-    try {
-      MatchStartResult result =
-          matchService.startMatchmaking(currentUser.getId(), currentUser.getUsername(), botId);
-      return new ResponseDto(false, ResponseConstants.OK_CODE_INT, ResponseConstants.OK, result);
-    } catch (IllegalArgumentException e) {
-      return new ResponseDto(true, ResponseConstants.BAD_REQUEST_CODE_INT, e.getMessage(), null);
-    }
+    MatchStartResultDto result =
+        matchService.startMatchmaking(currentUser.getId(), currentUser.getUsername(), botId);
+    return ResponseEntity.ok(result);
   }
 
   @PostMapping("/matchmaking/cancel")
-  public ResponseDto cancelMatchmaking(Authentication authentication) {
+  public ResponseEntity<Void> cancelMatchmaking(Authentication authentication) {
     Long userId = userService.getCurrentUser(authentication).getId();
-    try {
-      matchService.cancelMatchmaking(userId);
-      return new ResponseDto(false, ResponseConstants.OK_CODE_INT, ResponseConstants.OK, null);
-    } catch (IllegalArgumentException e) {
-      return new ResponseDto(true, ResponseConstants.CONFLICT_CODE_INT, e.getMessage(), null);
-    }
+    matchService.cancelMatchmaking(userId);
+    return ResponseEntity.ok().build();
   }
 
   @PostMapping("/{id}/rematch/request")
-  public ResponseDto requestRematch(@PathVariable Long id, Authentication authentication) {
+  public ResponseEntity<String> requestRematch(
+      @PathVariable Long id, Authentication authentication) {
     User currentUser = userService.getCurrentUser(authentication);
-    try {
-      String invitationId = matchService.requestRematch(id, currentUser);
-      return new ResponseDto(
-          false, ResponseConstants.OK_CODE_INT, ResponseConstants.OK, invitationId);
-    } catch (IllegalArgumentException e) {
-      return new ResponseDto(true, ResponseConstants.BAD_REQUEST_CODE_INT, e.getMessage(), null);
-    }
+    String invitationId = matchService.requestRematch(id, currentUser);
+    return ResponseEntity.ok(invitationId);
   }
 
   @PostMapping("/rematch/{invitationId}/accept")
-  public ResponseDto acceptRematch(
+  public ResponseEntity<String> acceptRematch(
       @PathVariable String invitationId, Authentication authentication) {
     User currentUser = userService.getCurrentUser(authentication);
-    try {
-      String redirectUrl = matchService.acceptRematch(invitationId, currentUser);
-      return new ResponseDto(
-          false, ResponseConstants.OK_CODE_INT, ResponseConstants.OK, redirectUrl);
-    } catch (IllegalArgumentException e) {
-      return new ResponseDto(true, ResponseConstants.BAD_REQUEST_CODE_INT, e.getMessage(), null);
-    }
+    String redirectUrl = matchService.acceptRematch(invitationId, currentUser);
+    return ResponseEntity.ok(redirectUrl);
   }
 }

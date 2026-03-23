@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +40,7 @@ public class TournamentService {
 
   private static final int MAX_PAGE_SIZE = 20;
   private static final TournamentStatus STATUS_UPCOMING = TournamentStatus.UPCOMING;
+  private static final Sort TOURNAMENT_PAGE_SORT = Sort.by(Sort.Direction.ASC, "startDate");
   private static final DateTimeFormatter TOURNAMENT_DATE_FORMATTER =
       DateTimeFormatter.ofPattern("MMM dd, yyyy", Locale.ENGLISH);
 
@@ -69,16 +71,40 @@ public class TournamentService {
     tournament.setName(title);
     tournament.setStartDate(startDate);
     tournament.setSlots(maxPlayers);
-    tournament.setStatus(
-        startDate.isAfter(LocalDate.now())
-            ? TournamentStatus.UPCOMING
-            : TournamentStatus.IN_PROGRESS);
+    tournament.setStatus(resolveTournamentStatus(startDate));
     tournament.setDescription(buildDescription(description, maxPlayers, registrationStart, prize));
     return tournamentRepository.save(tournament);
   }
 
   public Tournament save(Tournament tournament) {
     return tournamentRepository.save(tournament);
+  }
+
+  public Optional<Tournament> updateTournament(
+      Long id,
+      String name,
+      Image image,
+      String description,
+      TournamentStatus status,
+      int slots,
+      LocalDate registrationStart,
+      LocalDate startDate,
+      String prize) {
+    return tournamentRepository
+        .findById(id)
+        .map(
+            tournament -> {
+              tournament.setName(name);
+              tournament.setDescription(
+                  buildDescription(description, slots, registrationStart, prize));
+              tournament.setStatus(resolveTournamentStatus(startDate));
+              tournament.setStartDate(startDate);
+              tournament.setSlots(slots);
+              if (image != null) {
+                tournament.setImage(image);
+              }
+              return tournamentRepository.save(tournament);
+            });
   }
 
   @Transactional(readOnly = true)
@@ -274,14 +300,28 @@ public class TournamentService {
   public Page<TournamentListItem> getTournamentPage(String query, Pageable pageable) {
     int safePage = Math.max(pageable.getPageNumber(), 0);
     int safeSize = Math.min(Math.max(pageable.getPageSize(), 1), MAX_PAGE_SIZE);
-    Pageable safePageable = PageRequest.of(safePage, safeSize);
+    Pageable safePageable = PageRequest.of(safePage, safeSize, TOURNAMENT_PAGE_SORT);
 
     String normalizedQuery = query == null ? "" : query.trim();
     Page<Tournament> pageResult =
         normalizedQuery.isBlank()
-            ? tournamentRepository.findAllByOrderByStartDateAsc(safePageable)
-            : tournamentRepository.findByNameContainingIgnoreCaseOrderByStartDateAsc(
-                normalizedQuery, safePageable);
+            ? tournamentRepository.findAll(safePageable)
+            : tournamentRepository.findByNameContainingIgnoreCase(normalizedQuery, safePageable);
+    return pageResult.map(this::toListItem);
+  }
+
+  public Page<TournamentListItem> getUserTournamentPage(
+      Long userId, String query, Pageable pageable) {
+    int safePage = Math.max(pageable.getPageNumber(), 0);
+    int safeSize = Math.min(Math.max(pageable.getPageSize(), 1), MAX_PAGE_SIZE);
+    Pageable safePageable = PageRequest.of(safePage, safeSize, TOURNAMENT_PAGE_SORT);
+
+    String normalizedQuery = query == null ? "" : query.trim();
+    Page<Tournament> pageResult =
+        normalizedQuery.isBlank()
+            ? tournamentRepository.findDistinctByParticipantsOwnerId(userId, safePageable)
+            : tournamentRepository.findDistinctByParticipantsOwnerIdAndNameContainingIgnoreCase(
+                userId, normalizedQuery, safePageable);
     return pageResult.map(this::toListItem);
   }
 
@@ -453,6 +493,15 @@ public class TournamentService {
       sections.add("Prize: " + prize);
     }
     return String.join(" - ", sections);
+  }
+
+  private TournamentStatus resolveTournamentStatus(LocalDate startDate) {
+    if (startDate == null) {
+      return TournamentStatus.UPCOMING;
+    }
+    return startDate.isAfter(LocalDate.now())
+        ? TournamentStatus.UPCOMING
+        : TournamentStatus.IN_PROGRESS;
   }
 
   public Optional<Tournament> getTournamentById(Long id) {

@@ -1,6 +1,6 @@
-package es.codeurjc.grupo12.scissors_please.views;
+package es.codeurjc.grupo12.scissors_please.dto;
 
-public record MatchBattleView(
+public record MatchBattleDto(
     Long matchId,
     Long bot1Id,
     String bot1Name,

@@ -110,7 +110,16 @@ public class SecurityConfig {
         authorize ->
             authorize
                 // PRIVATE ENDPOINTS TODO:Fill this
-
+                .requestMatchers(HttpMethod.GET, "/api/v1/tournaments/my-tournaments")
+                .hasRole("USER")
+                .requestMatchers(HttpMethod.POST, "/api/v1/tournaments/join")
+                .hasRole("USER")
+                .requestMatchers(HttpMethod.POST, "/api/v1/tournaments")
+                .hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/v1/tournaments/*")
+                .hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/tournaments/*")
+                .hasRole("ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/v1/matches/recent")
                 .authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/v1/matches/matchmaking/status")

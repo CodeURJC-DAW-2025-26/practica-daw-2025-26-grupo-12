@@ -1,14 +1,15 @@
 package es.codeurjc.grupo12.scissors_please.controller.api.v1.auth;
 
 import es.codeurjc.grupo12.scissors_please.config.ResponseConstants;
-import es.codeurjc.grupo12.scissors_please.dto.ResponseDto;
+import es.codeurjc.grupo12.scissors_please.dto.ExceptionResponseDto;
 import es.codeurjc.grupo12.scissors_please.security.jwt.AuthResponse;
 import es.codeurjc.grupo12.scissors_please.security.jwt.AuthResponse.Status;
 import es.codeurjc.grupo12.scissors_please.security.jwt.LoginRequest;
 import es.codeurjc.grupo12.scissors_please.security.jwt.UserLoginService;
 import es.codeurjc.grupo12.scissors_please.service.user.UserService;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.time.LocalDateTime;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,41 +21,46 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
-  @Autowired private UserLoginService userLoginService;
-  @Autowired private UserService userService;
+  private final UserLoginService userLoginService;
+  private final UserService userService;
+
+  public AuthController(UserLoginService userLoginService, UserService userService) {
+    this.userLoginService = userLoginService;
+    this.userService = userService;
+  }
 
   @PostMapping("/login")
-  public ResponseDto login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
+  public ResponseEntity<?> login(
+      @RequestBody LoginRequest loginRequest, HttpServletResponse response) {
     if (userService.authenticate(loginRequest.getUsername(), loginRequest.getPassword())) {
-      return new ResponseDto(
-          false,
-          ResponseConstants.OK_CODE_INT,
-          ResponseConstants.OK,
-          userLoginService.login(response, loginRequest));
+      return userLoginService.login(response, loginRequest);
     }
-    return new ResponseDto(
-        true, ResponseConstants.NOT_FOUND_CODE_INT, ResponseConstants.ELEMENT_NOT_FOUND, null);
+    ExceptionResponseDto error =
+        new ExceptionResponseDto(ResponseConstants.ELEMENT_NOT_FOUND, LocalDateTime.now());
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
   }
 
   @PostMapping("/register")
-  public ResponseDto register(@RequestBody RegisterRequest request, HttpServletResponse response) {
+  public ResponseEntity<?> register(
+      @RequestBody RegisterRequest request, HttpServletResponse response) {
     try {
       userService.registerUser(request.username(), request.email(), request.password());
-    } catch (IllegalArgumentException error) {
-      return new ResponseDto(
-          true, ResponseConstants.BAD_REQUEST_CODE_INT, error.getMessage(), null);
+    } catch (IllegalArgumentException e) {
+      ExceptionResponseDto error =
+          new ExceptionResponseDto(ResponseConstants.BAD_REQUEST, LocalDateTime.now());
+
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
     LoginRequest loginRequest = new LoginRequest(request.username(), request.password());
     if (userService.authenticate(loginRequest.getUsername(), loginRequest.getPassword())) {
-      return new ResponseDto(
-          false,
-          ResponseConstants.OK_CODE_INT,
-          ResponseConstants.OK,
-          userLoginService.login(response, loginRequest));
+      return userLoginService.login(response, loginRequest);
     }
-    return new ResponseDto(
-        true, ResponseConstants.NOT_FOUND_CODE_INT, ResponseConstants.ELEMENT_NOT_FOUND, null);
+
+    ExceptionResponseDto error =
+        new ExceptionResponseDto(ResponseConstants.ELEMENT_NOT_FOUND, LocalDateTime.now());
+
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
   }
 
   @PostMapping("/refresh")

@@ -9,10 +9,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface TournamentRepository extends JpaRepository<Tournament, Long> {
-  Page<Tournament> findAllByOrderByStartDateAsc(Pageable pageable);
+  Page<Tournament> findByNameContainingIgnoreCase(String name, Pageable pageable);
 
-  Page<Tournament> findByNameContainingIgnoreCaseOrderByStartDateAsc(
-      String name, Pageable pageable);
+  Page<Tournament> findDistinctByParticipantsOwnerId(Long ownerId, Pageable pageable);
+
+  Page<Tournament> findDistinctByParticipantsOwnerIdAndNameContainingIgnoreCase(
+      Long ownerId, String name, Pageable pageable);
 
   List<Tournament> findAllByOrderByStartDateAsc();
 

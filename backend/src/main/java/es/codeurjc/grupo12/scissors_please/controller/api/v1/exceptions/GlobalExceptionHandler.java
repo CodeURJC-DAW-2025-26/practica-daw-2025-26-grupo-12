@@ -1,79 +1,77 @@
 package es.codeurjc.grupo12.scissors_please.controller.api.v1.exceptions;
 
 import es.codeurjc.grupo12.scissors_please.config.ResponseConstants;
-import es.codeurjc.grupo12.scissors_please.dto.ResponseDto;
+import es.codeurjc.grupo12.scissors_please.dto.ExceptionResponseDto;
 import jakarta.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-  private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
-
   @ExceptionHandler(HttpMessageNotReadableException.class)
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ResponseDto handleInvalidJson(
+  public ResponseEntity<ExceptionResponseDto> handleInvalidJson(
       HttpMessageNotReadableException ex, HttpServletRequest request) {
-    log.error("JSON syntax error at {}: {}", request.getRequestURI(), ex.getMessage());
-    return new ResponseDto(
-        true, ResponseConstants.BAD_REQUEST_CODE_INT, ResponseConstants.BAD_JSON, null);
+
+    ExceptionResponseDto error =
+        new ExceptionResponseDto(ResponseConstants.BAD_JSON, LocalDateTime.now());
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
   }
 
   @ExceptionHandler(java.io.IOException.class)
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ResponseDto handleImageUploadException(Exception ex, HttpServletRequest request) {
-    log.error("Image upload error at {}: {}", request.getRequestURI(), ex.getMessage());
-    return new ResponseDto(
-        true, ResponseConstants.BAD_REQUEST_CODE_INT, ResponseConstants.IMAGE_ERROR_UPLOAD, null);
+  public ResponseEntity<ExceptionResponseDto> handleImageUploadException(
+      Exception ex, HttpServletRequest request) {
+
+    ExceptionResponseDto error =
+        new ExceptionResponseDto(ResponseConstants.IMAGE_ERROR_UPLOAD, LocalDateTime.now());
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
   }
 
   @ExceptionHandler(IllegalArgumentException.class)
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ResponseDto handleIllegalArgument(
+  public ResponseEntity<ExceptionResponseDto> handleIllegalArgument(
       IllegalArgumentException ex, HttpServletRequest request) {
 
-    log.error("Bad request at {}: {}", request.getRequestURI(), ex.getMessage());
+    ExceptionResponseDto error = new ExceptionResponseDto(ex.getMessage(), LocalDateTime.now());
 
-    return new ResponseDto(true, ResponseConstants.BAD_REQUEST_CODE_INT, ex.getMessage(), null);
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
   }
 
   @ExceptionHandler(NoSuchElementException.class)
-  @ResponseStatus(HttpStatus.NOT_FOUND)
-  public ResponseDto handleElementNotFound(NoSuchElementException ex, HttpServletRequest request) {
-    log.error("Element not found at {}: {}", request.getRequestURI(), ex.getMessage());
-    return new ResponseDto(
-        true, ResponseConstants.NOT_FOUND_CODE_INT, ResponseConstants.ELEMENT_NOT_FOUND, null);
+  public ResponseEntity<ExceptionResponseDto> handleElementNotFound(
+      NoSuchElementException ex, HttpServletRequest request) {
+
+    ExceptionResponseDto error =
+        new ExceptionResponseDto(ResponseConstants.ELEMENT_NOT_FOUND, LocalDateTime.now());
+
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
   }
 
   @ExceptionHandler(MissingServletRequestParameterException.class)
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ResponseDto handleMissingParams(
+  public ResponseEntity<ExceptionResponseDto> handleMissingParams(
       MissingServletRequestParameterException ex, HttpServletRequest request) {
-    log.error(
-        "Missing request parameter at {}: {}", request.getRequestURI(), ex.getParameterName());
-    return new ResponseDto(
-        true,
-        ResponseConstants.BAD_REQUEST_CODE_INT,
-        "Missing parameter: " + ex.getParameterName(),
-        null);
+
+    ExceptionResponseDto error =
+        new ExceptionResponseDto(
+            "Missing parameter: " + ex.getParameterName(), LocalDateTime.now());
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
   }
 
   @ExceptionHandler(Exception.class)
-  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-  public ResponseDto handleGenericException(Exception ex, HttpServletRequest request) {
-    log.error("Unexpected error at {}: {}", request.getRequestURI(), ex.getMessage(), ex);
-    return new ResponseDto(
-        true,
-        ResponseConstants.INTERNAL_SERVER_ERROR_CODE_INT,
-        ResponseConstants.INTERNAL_SERVER_ERROR,
-        null);
+  public ResponseEntity<ExceptionResponseDto> handleGenericException(
+      Exception ex, HttpServletRequest request) {
+
+    ExceptionResponseDto error =
+        new ExceptionResponseDto(ResponseConstants.INTERNAL_SERVER_ERROR, LocalDateTime.now());
+
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
   }
 }

@@ -34,7 +34,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"user1\",\n  \"password\": \"1234\"\n}"
+              "raw": "{\n  \"username\": \"user\",\n  \"password\": \"user123\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/auth/login",
@@ -75,7 +75,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"user1\",\n  \"password\": \"1234\"\n}"
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/auth/login",
@@ -620,7 +620,7 @@
                 {
                   "key": "request",
                   "type": "text",
-                  "value": "{\n  \"name\": \"Tournament 1\",\n  \"description\": \"Test\",\n  \"status\": \"OPEN\",\n  \"slots\": 16,\n  \"registrationStarts\": \"2025-01-01\",\n  \"startDate\": \"2025-02-01\",\n  \"price\": \"10€\"\n}"
+                  "value": "{\n  \"name\": \"Tournament 1\",\n  \"description\": \"Test\",\n  \"slots\": 16,\n  \"registrationStarts\": \"2026-04-01\",\n  \"startDate\": \"2026-05-01\",\n  \"price\": \"10€\"\n}"
                 },
                 {
                   "key": "imageFile",
@@ -638,6 +638,39 @@
                 "api",
                 "v1",
                 "tournaments"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Tournaments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tournaments?page=0&size=5&query=Tournament",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tournaments"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "5"
+                },
+                {
+                  "key": "query",
+                  "value": "Tournament"
+                }
               ]
             }
           },
@@ -664,29 +697,35 @@
           "response": []
         },
         {
-          "name": "Get Tournament Page",
+          "name": "Update Tournament",
           "request": {
-            "method": "GET",
+            "method": "PUT",
             "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "request",
+                  "type": "text",
+                  "value": "{\n  \"name\": \"Tournament 1 Updated\",\n  \"description\": \"Updated description\",\n  \"status\": \"REGISTRATION_OPEN\",\n  \"slots\": 32,\n  \"registrationStarts\": \"2026-04-10\",\n  \"startDate\": \"2026-05-10\",\n  \"price\": \"20€\"\n}"
+                },
+                {
+                  "key": "imageFile",
+                  "type": "file",
+                  "value": ""
+                }
+              ]
+            },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/tournaments?page=0&size=5",
+              "raw": "{{baseUrl}}/api/v1/tournaments/1",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "tournaments"
-              ],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "5"
-                }
+                "tournaments",
+                "1"
               ]
             }
           },
@@ -696,9 +735,18 @@
           "name": "Join Tournament",
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tournamentId\": 1,\n  \"botId\": 1\n}"
+            },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/tournaments/1/join?botId=1",
+              "raw": "{{baseUrl}}/api/v1/tournaments/join",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -706,13 +754,40 @@
                 "api",
                 "v1",
                 "tournaments",
-                "1",
                 "join"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Tournaments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tournaments/my-tournaments?page=0&size=5&query=Tournament",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tournaments",
+                "my-tournaments"
               ],
               "query": [
                 {
-                  "key": "botId",
-                  "value": "1"
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "5"
+                },
+                {
+                  "key": "query",
+                  "value": "Tournament"
                 }
               ]
             }
