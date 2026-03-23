@@ -7,7 +7,7 @@ public record UserResponseDto(
     Long id,
     String username,
     String email,
-    Long imageId,
+    String imageUrl,
     LocalDateTime createdAt,
     boolean blocked) {
   public static UserResponseDto from(User user) {
@@ -15,8 +15,15 @@ public record UserResponseDto(
         user.getId(),
         user.getUsername(),
         user.getEmail(),
-        user.getImage() != null ? user.getImage().getId() : null,
+        buildImageUrl(user),
         user.getCreatedAt(),
         user.isBlocked());
+  }
+
+  private static String buildImageUrl(User user) {
+    if (user == null || user.getId() == null || user.getImage() == null) {
+      return null;
+    }
+    return "/api/v1/images/users/" + user.getId();
   }
 }

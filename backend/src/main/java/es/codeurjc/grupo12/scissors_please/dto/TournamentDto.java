@@ -11,7 +11,7 @@ public record TournamentDto(
     TournamentStatus status,
     int slots,
     LocalDate startDate,
-    Long imageId) {
+    String imageUrl) {
   public static TournamentDto from(Tournament tournament) {
     return new TournamentDto(
         tournament.getId(),
@@ -20,6 +20,13 @@ public record TournamentDto(
         tournament.getStatus(),
         tournament.getSlots(),
         tournament.getStartDate(),
-        tournament.getImage() != null ? tournament.getImage().getId() : null);
+        buildImageUrl(tournament));
+  }
+
+  private static String buildImageUrl(Tournament tournament) {
+    if (tournament == null || tournament.getId() == null || tournament.getImage() == null) {
+      return null;
+    }
+    return "/api/v1/images/tournaments/" + tournament.getId();
   }
 }

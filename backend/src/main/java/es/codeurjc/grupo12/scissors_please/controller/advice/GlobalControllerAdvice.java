@@ -4,10 +4,12 @@ import es.codeurjc.grupo12.scissors_please.config.ResponseConstants;
 import es.codeurjc.grupo12.scissors_please.exception.BotAccessDeniedException;
 import es.codeurjc.grupo12.scissors_please.exception.BotImageUploadException;
 import es.codeurjc.grupo12.scissors_please.exception.BotNotFoundException;
+import es.codeurjc.grupo12.scissors_please.exception.ImageNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Optional;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -52,6 +54,11 @@ public class GlobalControllerAdvice {
     model.addAttribute("errorMessage", exception.getMessage());
     model.addAttribute("errorCode", ResponseConstants.BAD_REQUEST_CODE);
     return "error";
+  }
+
+  @ExceptionHandler(ImageNotFoundException.class)
+  public ResponseEntity<Void> handleImageNotFound(ImageNotFoundException exception) {
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
   }
 
   public static class CsrfDummy {

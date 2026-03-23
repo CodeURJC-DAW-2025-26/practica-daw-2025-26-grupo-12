@@ -208,6 +208,6 @@ public class BotController {
     if (bot == null || bot.getId() == null || !bot.isHasImage()) {
       return null;
     }
-    return "/bot-images/" + bot.getId();
+    return "/api/v1/images/bots/" + bot.getId();
   }
 }
