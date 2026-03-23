@@ -24,12 +24,9 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/api/v1/users")
 public class UserController {
 
-  @Autowired
-  private UserService userService;
-  @Autowired
-  private ImageService imageService;
-  @Autowired
-  private PasswordEncoder passwordEncoder;
+  @Autowired private UserService userService;
+  @Autowired private ImageService imageService;
+  @Autowired private PasswordEncoder passwordEncoder;
 
   @PutMapping("/{id}")
   public ResponseDto updateProfile(
@@ -80,23 +77,19 @@ public class UserController {
 
     User user = userService.getUserById(id);
 
-    UserResponse response = new UserResponse(
-        user.getId(),
-        user.getUsername(),
-        user.getEmail(),
-        user.getImage() != null ? user.getImage().getId() : null,
-        user.getCreatedAt(),
-        user.isBlocked());
+    UserResponse response =
+        new UserResponse(
+            user.getId(),
+            user.getUsername(),
+            user.getEmail(),
+            user.getImage() != null ? user.getImage().getId() : null,
+            user.getCreatedAt(),
+            user.isBlocked());
 
-    return new ResponseDto(
-        false,
-        ResponseConstants.OK_CODE_INT,
-        ResponseConstants.OK,
-        response);
+    return new ResponseDto(false, ResponseConstants.OK_CODE_INT, ResponseConstants.OK, response);
   }
 
-  private record UserUpdateRequest(String username, String email, String password) {
-  }
+  private record UserUpdateRequest(String username, String email, String password) {}
 
   private record UserResponse(
       Long id,
@@ -104,6 +97,5 @@ public class UserController {
       String email,
       Long imageId,
       LocalDateTime createdAt,
-      boolean blocked) {
-  }
+      boolean blocked) {}
 }

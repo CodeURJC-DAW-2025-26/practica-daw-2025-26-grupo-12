@@ -36,18 +36,15 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(IllegalArgumentException.class)
-@ResponseStatus(HttpStatus.BAD_REQUEST)
-public ResponseDto handleIllegalArgument(
-    IllegalArgumentException ex, HttpServletRequest request) {
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ResponseDto handleIllegalArgument(
+      IllegalArgumentException ex, HttpServletRequest request) {
 
-  log.error("Bad request at {}: {}", request.getRequestURI(), ex.getMessage());
+    log.error("Bad request at {}: {}", request.getRequestURI(), ex.getMessage());
 
-  return new ResponseDto(
-      true,
-      ResponseConstants.BAD_REQUEST_CODE_INT,
-      ex.getMessage(),
-      null);
-}
+    return new ResponseDto(true, ResponseConstants.BAD_REQUEST_CODE_INT, ex.getMessage(), null);
+  }
+
   @ExceptionHandler(NoSuchElementException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
   public ResponseDto handleElementNotFound(NoSuchElementException ex, HttpServletRequest request) {
