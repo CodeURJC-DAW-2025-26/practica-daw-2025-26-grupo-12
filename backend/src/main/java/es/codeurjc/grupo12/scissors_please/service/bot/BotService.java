@@ -248,7 +248,7 @@ public class BotService {
   }
 
   public void deleteBot(User requester, Long botId) {
-    Bot bot = botRepository.findById(botId).orElseThrow();
+    Bot bot = botRepository.findById(botId).orElseThrow(new BotNotFoundException(ResponseConstants.BOT_NOT_FOUND));
     if (canManageBot(requester, bot)) {
       bot.setDeleted(true);
       botRepository.save(bot);
