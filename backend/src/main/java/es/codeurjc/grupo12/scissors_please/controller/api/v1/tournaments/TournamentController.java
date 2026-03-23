@@ -5,13 +5,16 @@ import es.codeurjc.grupo12.scissors_please.dto.ResponseDto;
 import es.codeurjc.grupo12.scissors_please.model.Image;
 import es.codeurjc.grupo12.scissors_please.model.Tournament;
 import es.codeurjc.grupo12.scissors_please.model.TournamentStatus;
+import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.service.image.ImageService;
 import es.codeurjc.grupo12.scissors_please.service.tournament.TournamentService;
+import es.codeurjc.grupo12.scissors_please.service.user.UserService;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +32,7 @@ public class TournamentController {
 
   @Autowired TournamentService tournamentService;
   @Autowired ImageService imageService;
+  @Autowired UserService userService;
 
   @PostMapping
   public ResponseDto createTournament(
@@ -105,6 +109,65 @@ public class TournamentController {
 
     return new ResponseDto(
         false, ResponseConstants.OK_CODE_INT, ResponseConstants.OK, tournamentPage);
+  }
+
+  @GetMapping("/{id}/join")
+  public ResponseDto getTournamentJoinPage(@PathVariable Long id, Authentication authentication) {
+    if (authentication == null || !authentication.isAuthenticated()) {
+      return new ResponseDto(
+          true, ResponseConstants.UNAUTHORIZED_CODE_INT, ResponseConstants.ACCESS_DENIED, null);
+    }
+
+    User currentUser = userService.getCurrentUser(authentication);
+    var joinPage = tournamentService.getTournamentJoinPage(id, currentUser);
+
+    return new ResponseDto(false, ResponseConstants.OK_CODE_INT, ResponseConstants.OK, joinPage);
+  }
+
+  @PostMapping("/{id}/join")
+  public ResponseDto joinTournament(
+      @PathVariable Long id,
+      @RequestParam(required = false) Long botId,
+      Authentication authentication) {
+    if (authentication == null || !authentication.isAuthenticated()) {
+      return new ResponseDto(
+          true, ResponseConstants.UNAUTHORIZED_CODE_INT, ResponseConstants.ACCESS_DENIED, null);
+    }
+
+    User currentUser = userService.getCurrentUser(authentication);
+    var result = tournamentService.joinTournament(id, botId, currentUser);
+
+    return switch (result.status()) {
+      case JOINED ->
+          new ResponseDto(
+              false, ResponseConstants.OK_CODE_INT, ResponseConstants.OK, result.message());
+      case TOURNAMENT_NOT_FOUND ->
+          new ResponseDto(true, ResponseConstants.NOT_FOUND_CODE_INT, result.message(), null);
+      case INVALID_USER, ADMIN_NOT_ALLOWED ->
+          new ResponseDto(true, ResponseConstants.FORBIDDEN_CODE_INT, result.message(), null);
+      case INVALID_BOT ->
+          new ResponseDto(true, ResponseConstants.BAD_REQUEST_CODE_INT, result.message(), null);
+      case ALREADY_REGISTERED,
+          BOT_ALREADY_REGISTERED,
+          REGISTRATION_CLOSED,
+          REGISTRATION_NOT_OPEN,
+          TOURNAMENT_FULL ->
+          new ResponseDto(true, ResponseConstants.CONFLICT_CODE_INT, result.message(), null);
+    };
+  }
+
+  @GetMapping("/my-tournaments")
+  public ResponseDto getMyTournaments(
+      @RequestParam(name = "q", required = false) String query, Authentication authentication) {
+    if (authentication == null || !authentication.isAuthenticated()) {
+      return new ResponseDto(
+          true, ResponseConstants.UNAUTHORIZED_CODE_INT, ResponseConstants.ACCESS_DENIED, null);
+    }
+
+    User currentUser = userService.getCurrentUser(authentication);
+    var section = tournamentService.getUserTournamentSection(currentUser.getId(), query);
+
+    return new ResponseDto(false, ResponseConstants.OK_CODE_INT, ResponseConstants.OK, section);
   }
 
   private record TournamentRequest(
