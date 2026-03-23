@@ -10,6 +10,7 @@ public class ResponseConstants {
   public static String BOT_NOT_FOUND = "The bot is no longer in the database.";
   public static String ACCESS_DENIED = "You do not have permission to access this resource.";
   public static String BAD_JSON = "Malformed JSON request";
+  public static String BAD_REQUEST="The request was wrong";
   public static String OK = "The request has been processed correctly";
 
   // For the models
@@ -20,14 +21,4 @@ public class ResponseConstants {
   public static final String CONFLICT_CODE = "409";
   public static final String INTERNAL_SERVER_ERROR_CODE = "500";
   public static final String NOT_IMPLEMENTED_CODE = "501";
-
-  // For de APi Rest
-  public static final int BAD_REQUEST_CODE_INT = 400;
-  public static final int UNAUTHORIZED_CODE_INT = 401;
-  public static final int FORBIDDEN_CODE_INT = 403;
-  public static final int NOT_FOUND_CODE_INT = 404;
-  public static final int CONFLICT_CODE_INT = 409;
-  public static final int INTERNAL_SERVER_ERROR_CODE_INT = 500;
-  public static final int NOT_IMPLEMENTED_CODE_INT = 501;
-  public static final int OK_CODE_INT = 200;
 }
