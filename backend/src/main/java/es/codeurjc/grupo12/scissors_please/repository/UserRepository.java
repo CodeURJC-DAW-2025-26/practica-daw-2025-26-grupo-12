@@ -22,6 +22,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
   Page<User> findAllByDeleteDateIsNullOrderByUsernameAsc(Pageable pageable);
 
+  Page<User> findByUsernameContainingIgnoreCaseAndDeleteDateIsNullOrderByUsernameAsc(
+      String username, Pageable pageable);
+
   @Query(
       "SELECT u FROM User u "
           + "WHERE u.deleteDate IS NULL "

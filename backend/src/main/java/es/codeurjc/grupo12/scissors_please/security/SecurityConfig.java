@@ -151,8 +151,6 @@ public class SecurityConfig {
                 .hasRole("USER")
                 .requestMatchers(HttpMethod.POST, "/api/v1/bots")
                 .hasRole("USER")
-                .requestMatchers(HttpMethod.GET, "/api/v1/bots/user/*")
-                .hasRole("USER")
                 .requestMatchers(HttpMethod.GET, "/api/v1/tournaments/my-tournaments")
                 .hasRole("USER")
                 .requestMatchers(HttpMethod.POST, "/api/v1/tournaments/join")
@@ -168,6 +166,12 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/v1/matches/rematch/*/accept")
                 .authenticated()
                 // PUBLIC ENDPOINTS
+                .requestMatchers(HttpMethod.GET, "/api/v1/users")
+                .permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/bots")
+                .permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/bots/user/*")
+                .permitAll()
                 .anyRequest()
                 .permitAll());
 

@@ -100,6 +100,25 @@ public class BotService {
   }
 
   @Transactional(readOnly = true)
+  public Page<Bot> getBotPage(Optional<User> requesterUser, String query, Pageable pageable) {
+    Pageable safePageable = PageableUtils.sanitize(pageable, MAX_PAGE_SIZE);
+    String normalizedQuery = query == null ? "" : query.trim();
+    boolean includePrivateBots = requesterUser.map(userService::isAdmin).orElse(false);
+
+    if (includePrivateBots) {
+      return normalizedQuery.isBlank()
+          ? botRepository.findAllByDeletedFalseOrderByIdDesc(safePageable)
+          : botRepository.findByNameContainingIgnoreCaseAndDeletedFalseOrderByIdDesc(
+              normalizedQuery, safePageable);
+    }
+
+    return normalizedQuery.isBlank()
+        ? botRepository.findByIsPublicAndDeletedFalseOrderByIdDesc(true, safePageable)
+        : botRepository.findByNameContainingIgnoreCaseAndIsPublicAndDeletedFalseOrderByIdDesc(
+            normalizedQuery, true, safePageable);
+  }
+
+  @Transactional(readOnly = true)
   public List<Bot> getBotsForUser(User user, boolean includePrivate) {
     Long ownerId = requireOwnerId(user);
     if (includePrivate) {
