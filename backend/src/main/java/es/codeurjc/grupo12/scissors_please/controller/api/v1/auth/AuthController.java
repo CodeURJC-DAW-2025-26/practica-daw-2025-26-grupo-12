@@ -46,8 +46,7 @@ public class AuthController {
     try {
       userService.registerUser(request.username(), request.email(), request.password());
     } catch (IllegalArgumentException e) {
-      ExceptionResponseDto error =
-          new ExceptionResponseDto(ResponseConstants.BAD_REQUEST, LocalDateTime.now());
+      ExceptionResponseDto error = new ExceptionResponseDto(e.getMessage(), LocalDateTime.now());
 
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
