@@ -446,7 +446,7 @@ Me he encargado de la página de detalle de la mayoría de las entidades. Ademá
 ## 🛠 **Práctica 2: Incorporación de una API REST a la aplicación web, despliegue con Docker y despliegue remoto**
 
 ### **Vídeo de Demostración**
-📹 **[Enlace al vídeo en YouTube](https://www.youtube.com/watch?v=x91MPoITQ3I)**
+📹 **[Enlace al vídeo en YouTube](https://www.youtube.com/watch?v=Tgngz2ipdcU)**
 > Vídeo mostrando las principales funcionalidades de la aplicación web.
 
 ### **Documentación de la API REST**
