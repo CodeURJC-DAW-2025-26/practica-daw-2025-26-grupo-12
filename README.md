@@ -560,17 +560,17 @@ En esta fase, me he encargado principalmente de la parte de despliegue con Docke
 
 ---
 
-#### **Alumno 3 - [Nombre Completo]**
+#### **Alumno 3 - Jorge Cimadeevilla Aniz**
 
-[Descripción de las tareas y responsabilidades principales del alumno en el proyecto]
+Me he centrado sobre todo en la evolución de la API REST, añadiendo paginación para usuarios y bots, documentando los controladores con OpenAPI y reorganizando los DTOs para mantener contratos más claros y consistentes. Además, he hecho ajustes finales en controladores, respuestas de autenticación y tests para cerrar la práctica con la API bien alineada.
 
 | Nº    | Commits      | Files      |
 |:------------: |:------------:| :------------:|
-|1| [Descripción commit 1](URL_commit_1)  | [Archivo1](URL_archivo_1)   |
-|2| [Descripción commit 2](URL_commit_2)  | [Archivo2](URL_archivo_2)   |
-|3| [Descripción commit 3](URL_commit_3)  | [Archivo3](URL_archivo_3)   |
-|4| [Descripción commit 4](URL_commit_4)  | [Archivo4](URL_archivo_4)   |
-|5| [Descripción commit 5](URL_commit_5)  | [Archivo5](URL_archivo_5)   |
+|1| [Paginación de usuarios y bots con actualización de Postman](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/ea81be390fad87a0d90f05db8bb2661681fbe9d3)  | [UserController.java](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/backend/src/main/java/es/codeurjc/grupo12/scissors_please/controller/api/v1/user/UserController.java)   |
+|2| [Documentación OpenAPI para los controladores REST](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/cb84e804b56e9a700db6f3c29f937967c3ee98a8)  | [OpenApiConfig.java](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/backend/src/main/java/es/codeurjc/grupo12/scissors_please/config/OpenApiConfig.java)   |
+|3| [Refactorización de DTOs para unificar contratos de la API](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/058dfe494183459209e4a3160d50c7b0864e8db2)  | [UserResponseDto.java](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/backend/src/main/java/es/codeurjc/grupo12/scissors_please/dto/users/UserResponseDto.java)   |
+|4| [Ajustes finales de Swagger y respuesta de autenticación](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/91c6ee79619e65ddc3bf370225d6a41af9fbc948)  | [AuthResponse.java](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/backend/src/main/java/es/codeurjc/grupo12/scissors_please/security/jwt/AuthResponse.java)   |
+|5| [Pulido final de paginación y pruebas de endpoints](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/c24902e95290b3b1b9987676fd9b4eb3b38175e7)  | [PaginationEndpointsTest.java](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/backend/src/test/java/es/codeurjc/grupo12/scissors_please/controller/api/v1/PaginationEndpointsTest.java)   |
 
 ---
 
