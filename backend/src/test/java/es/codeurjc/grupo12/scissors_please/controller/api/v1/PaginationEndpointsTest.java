@@ -14,9 +14,9 @@ import es.codeurjc.grupo12.scissors_please.repository.TournamentRepository;
 import es.codeurjc.grupo12.scissors_please.repository.UserRepository;
 import es.codeurjc.grupo12.scissors_please.security.CustomUserDetailsService;
 import es.codeurjc.grupo12.scissors_please.security.jwt.JwtTokenProvider;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,7 +92,8 @@ class PaginationEndpointsTest {
     String suffix = UUID.randomUUID().toString();
     User user = createUser("user-" + suffix, "user-" + suffix + "@mail.com");
     String accessToken =
-        jwtTokenProvider.generateAccessToken(userDetailsService.loadUserByUsername(user.getUsername()));
+        jwtTokenProvider.generateAccessToken(
+            userDetailsService.loadUserByUsername(user.getUsername()));
     MockMultipartFile requestPart =
         new MockMultipartFile(
             "request",
@@ -120,7 +121,8 @@ class PaginationEndpointsTest {
     User admin = createUser("admin-" + suffix, "admin-" + suffix + "@mail.com", List.of("ADMIN"));
     Tournament tournament = createTournament("tournament-" + suffix);
     String accessToken =
-        jwtTokenProvider.generateAccessToken(userDetailsService.loadUserByUsername(admin.getUsername()));
+        jwtTokenProvider.generateAccessToken(
+            userDetailsService.loadUserByUsername(admin.getUsername()));
     MockMultipartFile requestPart =
         new MockMultipartFile(
             "request",

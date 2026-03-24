@@ -1,4 +1,5 @@
 package es.codeurjc.grupo12.scissors_please.controller.api.v1.tournaments;
+
 import es.codeurjc.grupo12.scissors_please.dto.tournaments.TournamentCreateRequestDto;
 import es.codeurjc.grupo12.scissors_please.dto.tournaments.TournamentDto;
 import es.codeurjc.grupo12.scissors_please.dto.tournaments.TournamentJoinRequestDto;
@@ -48,9 +49,7 @@ public class TournamentController {
   private final UserService userService;
 
   public TournamentController(
-      TournamentService tournamentService,
-      ImageService imageService,
-      UserService userService) {
+      TournamentService tournamentService, ImageService imageService, UserService userService) {
     this.tournamentService = tournamentService;
     this.imageService = imageService;
     this.userService = userService;
