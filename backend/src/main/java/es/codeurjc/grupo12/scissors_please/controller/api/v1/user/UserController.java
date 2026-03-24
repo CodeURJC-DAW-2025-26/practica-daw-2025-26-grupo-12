@@ -1,5 +1,25 @@
 package es.codeurjc.grupo12.scissors_please.controller.api.v1.user;
 
+import java.io.IOException;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
 import es.codeurjc.grupo12.scissors_please.dto.ExceptionResponseDto;
 import es.codeurjc.grupo12.scissors_please.dto.users.UpdateProfileRequestDto;
 import es.codeurjc.grupo12.scissors_please.dto.users.UserPageResponseDto;
@@ -16,22 +36,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.io.IOException;
-import java.util.Optional;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController("apiUserController")
 @RequestMapping("/api/v1/users")
@@ -39,6 +43,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserController {
 
   private static final int DEFAULT_PAGE_SIZE = 10;
+  private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
   private final UserService userService;
   private final ImageService imageService;
@@ -143,32 +148,88 @@ public class UserController {
       @Parameter(
               name = "imageFile",
               description = "New profile image",
-              required = true,
+              required = false,
               content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE))
-          @RequestPart("imageFile")
+          @RequestPart(value = "imageFile", required = false)
           MultipartFile imageFile,
       @Parameter(hidden = true) Authentication authentication)
       throws IOException {
+    log.debug("updateProfile[{}] - start", id);
+    log.debug(
+        "updateProfile[{}] - auth present={}, authenticated={}, principal={}",
+        id,
+        authentication != null,
+        authentication != null && authentication.isAuthenticated(),
+        authentication != null ? authentication.getName() : null);
+    log.debug(
+        "updateProfile[{}] - request present={}, username={}, email={}, passwordPresent={}",
+        id,
+        request != null,
+        request != null ? request.username() : null,
+        request != null ? request.email() : null,
+        request != null && request.password() != null && !request.password().isBlank());
+    log.debug(
+        "updateProfile[{}] - image present={}, empty={}, contentType={}, filename={}",
+        id,
+        imageFile != null,
+        imageFile != null && imageFile.isEmpty(),
+        imageFile != null ? imageFile.getContentType() : null,
+        imageFile != null ? imageFile.getOriginalFilename() : null);
 
     if (authentication == null || !authentication.isAuthenticated()) {
+      log.debug("updateProfile[{}] - abort unauthenticated", id);
       return ResponseEntity.status(401).build();
     }
 
+    log.debug("updateProfile[{}] - loading user", id);
     User userToUpdate = userService.getUserById(id);
+    log.debug(
+        "updateProfile[{}] - loaded user username={}, email={}, hasImage={}",
+        id,
+        userToUpdate.getUsername(),
+        userToUpdate.getEmail(),
+        userToUpdate.getImage() != null);
+
+    log.debug("updateProfile[{}] - converting image", id);
     Image image = imageService.convertToImage(imageFile);
+    log.debug("updateProfile[{}] - image converted={}", id, image != null);
 
     if (request.username() != null && !request.username().isBlank()) {
+      log.debug(
+          "updateProfile[{}] - updating username from {} to {}",
+          id,
+          userToUpdate.getUsername(),
+          request.username());
       userToUpdate.setUsername(request.username());
+    } else {
+      log.debug("updateProfile[{}] - username unchanged", id);
     }
     if (request.email() != null && !request.email().isBlank()) {
+      log.debug(
+          "updateProfile[{}] - updating email from {} to {}",
+          id,
+          userToUpdate.getEmail(),
+          request.email());
       userToUpdate.setEmail(request.email());
+    } else {
+      log.debug("updateProfile[{}] - email unchanged", id);
     }
     if (request.password() != null && !request.password().isBlank()) {
+      log.debug("updateProfile[{}] - updating password", id);
       userToUpdate.setPassword(passwordEncoder.encode(request.password()));
+    } else {
+      log.debug("updateProfile[{}] - password unchanged", id);
     }
-    userToUpdate.setImage(image);
+    if (image != null) {
+      log.debug("updateProfile[{}] - assigning new image to user", id);
+      userToUpdate.setImage(image);
+    } else {
+      log.debug("updateProfile[{}] - image unchanged", id);
+    }
 
+    log.debug("updateProfile[{}] - persisting user", id);
     userService.updateUser(userToUpdate);
+    log.debug("updateProfile[{}] - completed", id);
 
     return ResponseEntity.ok(UserResponseDto.from(userToUpdate));
   }

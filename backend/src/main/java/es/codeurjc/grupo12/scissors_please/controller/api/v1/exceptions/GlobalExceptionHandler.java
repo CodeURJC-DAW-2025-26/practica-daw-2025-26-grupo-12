@@ -9,6 +9,8 @@ import es.codeurjc.grupo12.scissors_please.exception.ImageNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -16,13 +18,27 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
+import tools.jackson.core.JacksonException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+  private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
   @ExceptionHandler(HttpMessageNotReadableException.class)
   public ResponseEntity<ExceptionResponseDto> handleInvalidJson(
       HttpMessageNotReadableException ex, HttpServletRequest request) {
+
+    ExceptionResponseDto error =
+        new ExceptionResponseDto(ResponseConstants.BAD_JSON, LocalDateTime.now());
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+  }
+
+  @ExceptionHandler(JacksonException.class)
+  public ResponseEntity<ExceptionResponseDto> handleJacksonException(
+      JacksonException ex, HttpServletRequest request) {
 
     ExceptionResponseDto error =
         new ExceptionResponseDto(ResponseConstants.BAD_JSON, LocalDateTime.now());
@@ -115,9 +131,20 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
   }
 
+  @ExceptionHandler(MissingServletRequestPartException.class)
+  public ResponseEntity<ExceptionResponseDto> handleMissingPart(
+      MissingServletRequestPartException ex, HttpServletRequest request) {
+
+    ExceptionResponseDto error =
+        new ExceptionResponseDto("Missing part: " + ex.getRequestPartName(), LocalDateTime.now());
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+  }
+
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ExceptionResponseDto> handleGenericException(
       Exception ex, HttpServletRequest request) {
+    log.error("Unhandled exception for {} {}", request.getMethod(), request.getRequestURI(), ex);
 
     ExceptionResponseDto error =
         new ExceptionResponseDto(ResponseConstants.INTERNAL_SERVER_ERROR, LocalDateTime.now());

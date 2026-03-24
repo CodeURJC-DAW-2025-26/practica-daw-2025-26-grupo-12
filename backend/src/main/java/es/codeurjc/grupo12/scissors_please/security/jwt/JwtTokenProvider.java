@@ -55,6 +55,14 @@ public class JwtTokenProvider {
     return validateToken(token);
   }
 
+  public Claims validateTokenFromRequest(HttpServletRequest req) {
+    try {
+      return validateToken(req, false);
+    } catch (Exception headerException) {
+      return validateToken(req, true);
+    }
+  }
+
   public Claims validateToken(String token) {
     return jwtParser.parseSignedClaims(token).getPayload();
   }

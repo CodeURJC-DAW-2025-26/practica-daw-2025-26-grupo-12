@@ -33,7 +33,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
       throws ServletException, IOException {
 
     try {
-      var claims = jwtTokenProvider.validateToken(request, true);
+      var claims = jwtTokenProvider.validateTokenFromRequest(request);
       var userDetails = userDetailsService.loadUserByUsername(claims.getSubject());
 
       UsernamePasswordAuthenticationToken authentication =

@@ -1,8 +1,8 @@
 {
 	"info": {
 		"_postman_id": "98c590ed-f2b8-4e4c-9e02-4a86883266b9",
-		"name": "Scissors Please API Copy",
-		"description": "Colección completa para probar la API",
+		"name": "Scissors Please API",
+		"description": "Coleccion de Postman alineada con la API REST actual. La autenticacion REST usa cookies JWT, asi que tras ejecutar Login Postman reutiliza automaticamente la sesion para el resto de peticiones del mismo dominio.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "14660628",
 		"_collection_link": "https://interstellar-firefly-163504.postman.co/workspace/Team-Workspace~f29ebd37-3369-4cac-82d6-ffb88251a9ab/collection/14660628-98c590ed-f2b8-4e4c-9e02-4a86883266b9?action=share&source=collection_link&creator=14660628"
@@ -18,8 +18,10 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test('Status 200', () => pm.response.code === 200);",
-									"pm.test('Login success false error', () => pm.response.json().error === false);"
+									"const body = pm.response.json();",
+									"pm.test('Login returns 200', () => pm.response.code === 200);",
+									"pm.test('Login response reports success', () => body.status === 'SUCCESS');",
+									"pm.collectionVariables.set('currentUsername', 'user');"
 								],
 								"type": "text/javascript"
 							}
@@ -52,8 +54,10 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test('Status 200', () => pm.response.code === 200);",
-									"pm.test('Login success false error', () => pm.response.json().error === false);"
+									"const body = pm.response.json();",
+									"pm.test('Admin login returns 200', () => pm.response.code === 200);",
+									"pm.test('Admin login response reports success', () => body.status === 'SUCCESS');",
+									"pm.collectionVariables.set('adminUsername', 'admin');"
 								],
 								"type": "text/javascript"
 							}
@@ -103,6 +107,30 @@
 				},
 				{
 					"name": "Register",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const suffix = String(Date.now());",
+									"pm.collectionVariables.set('registeredUsername', `postman-user-${suffix}`);",
+									"pm.collectionVariables.set('registeredEmail', `postman-user-${suffix}@example.com`);"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const body = pm.response.json();",
+									"pm.test('Register returns 200', () => pm.response.code === 200);",
+									"pm.test('Register response reports success', () => body.status === 'SUCCESS');"
+								]
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -113,7 +141,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"username\": \"newUser\",\n  \"email\": \"test@test.com\",\n  \"password\": \"1234\"\n}"
+							"raw": "{\n  \"username\": \"{{registeredUsername}}\",\n  \"email\": \"{{registeredEmail}}\",\n  \"password\": \"1234\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/v1/auth/register",
@@ -125,6 +153,19 @@
 				},
 				{
 					"name": "Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const body = pm.response.json();",
+									"pm.test('Refresh returns 200', () => pm.response.code === 200);",
+									"pm.test('Refresh response reports success', () => body.status === 'SUCCESS');"
+								]
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -138,6 +179,20 @@
 				},
 				{
 					"name": "Logout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const body = pm.response.json();",
+									"pm.test('Logout returns 200', () => pm.response.code === 200);",
+									"pm.test('Logout response reports success', () => body.status === 'SUCCESS');"
+								]
+							}
+						}
+					],
+					"description": "Cierra la sesion actual invalidando las cookies JWT en Postman.",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -296,9 +351,9 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/matches/1",
+							"raw": "{{baseUrl}}/api/v1/matches/{{matchId}}",
 							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "matches", "1"]
+							"path": ["api", "v1", "matches", "{{matchId}}"]
 						}
 					},
 					"response": []
@@ -345,9 +400,9 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/matches/1/stats",
+							"raw": "{{baseUrl}}/api/v1/matches/{{matchId}}/stats",
 							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "matches", "1", "stats"]
+							"path": ["api", "v1", "matches", "{{matchId}}", "stats"]
 						}
 					},
 					"response": []
@@ -358,9 +413,9 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/matches/1/battle",
+							"raw": "{{baseUrl}}/api/v1/matches/{{matchId}}/battle",
 							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "matches", "1", "battle"]
+							"path": ["api", "v1", "matches", "{{matchId}}", "battle"]
 						}
 					},
 					"response": []
@@ -403,7 +458,7 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/matches/matchmaking/start?botId=1",
+							"raw": "{{baseUrl}}/api/v1/matches/matchmaking/start?botId={{publicBotId}}",
 							"host": ["{{baseUrl}}"],
 							"path": [
 								"api",
@@ -415,7 +470,7 @@
 							"query": [
 								{
 									"key": "botId",
-									"value": "1"
+									"value": "{{publicBotId}}"
 								}
 							]
 						}
@@ -443,17 +498,31 @@
 				},
 				{
 					"name": "Request Rematch",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const invitationId = pm.response.text().trim();",
+									"pm.test('Rematch request returns 200', () => pm.response.code === 200);",
+									"pm.test('Rematch invitation id is returned', () => invitationId.length > 0);",
+									"pm.collectionVariables.set('rematchInvitationId', invitationId);"
+								]
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/matches/1/rematch/request",
+							"raw": "{{baseUrl}}/api/v1/matches/{{matchId}}/rematch/request",
 							"host": ["{{baseUrl}}"],
 							"path": [
 								"api",
 								"v1",
 								"matches",
-								"1",
+								"{{matchId}}",
 								"rematch",
 								"request"
 							]
@@ -463,18 +532,19 @@
 				},
 				{
 					"name": "Accept Rematch",
+					"description": "Usa el identificador devuelto por la peticion Request Rematch.",
 					"request": {
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/matches/rematch/INV123/accept",
+							"raw": "{{baseUrl}}/api/v1/matches/rematch/{{rematchInvitationId}}/accept",
 							"host": ["{{baseUrl}}"],
 							"path": [
 								"api",
 								"v1",
 								"matches",
 								"rematch",
-								"INV123",
+								"{{rematchInvitationId}}",
 								"accept"
 							]
 						}
@@ -488,6 +558,19 @@
 			"item": [
 				{
 					"name": "Create Tournament",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const body = pm.response.json();",
+									"pm.test('Tournament is created', () => pm.response.code === 201);",
+									"pm.collectionVariables.set('tournamentId', String(body.id));"
+								]
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -496,13 +579,15 @@
 							"formdata": [
 								{
 									"key": "request",
-									"value": "{\n  \"name\": \"Tournament 1\",\n  \"description\": \"Test\",\n  \"slots\": 16,\n  \"registrationStarts\": \"2026-04-01\",\n  \"startDate\": \"2026-05-01\",\n  \"price\": \"10€\"\n}",
-									"type": "text"
+									"value": "{\n  \"name\": \"Tournament {{$timestamp}}\",\n  \"description\": \"Test tournament created from Postman\",\n  \"slots\": 16,\n  \"registrationStarts\": \"2026-04-01\",\n  \"startDate\": \"2026-05-01\",\n  \"price\": \"10€\"\n}",
+									"type": "text",
+									"contentType": "application/json"
 								},
 								{
 									"key": "imageFile",
-									"value": "",
-									"type": "file"
+									"type": "file",
+									"src": "{{tournamentImagePath}}",
+									"disabled": true
 								}
 							]
 						},
@@ -547,9 +632,9 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/tournaments/1",
+							"raw": "{{baseUrl}}/api/v1/tournaments/{{tournamentId}}",
 							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "tournaments", "1"]
+							"path": ["api", "v1", "tournaments", "{{tournamentId}}"]
 						}
 					},
 					"response": []
@@ -565,19 +650,21 @@
 								{
 									"key": "request",
 									"value": "{\n  \"name\": \"Tournament 1 Updated\",\n  \"description\": \"Updated description\",\n  \"status\": \"REGISTRATION_OPEN\",\n  \"slots\": 32,\n  \"registrationStarts\": \"2026-04-10\",\n  \"startDate\": \"2026-05-10\",\n  \"price\": \"20€\"\n}",
-									"type": "text"
+									"type": "text",
+									"contentType": "application/json"
 								},
 								{
 									"key": "imageFile",
-									"value": "",
-									"type": "file"
+									"type": "file",
+									"src": "{{tournamentImagePath}}",
+									"disabled": true
 								}
 							]
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/tournaments/1",
+							"raw": "{{baseUrl}}/api/v1/tournaments/{{tournamentId}}",
 							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "tournaments", "1"]
+							"path": ["api", "v1", "tournaments", "{{tournamentId}}"]
 						}
 					},
 					"response": []
@@ -594,7 +681,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"tournamentId\": 1,\n  \"botId\": 1\n}"
+							"raw": "{\n  \"tournamentId\": {{tournamentId}},\n  \"botId\": {{publicBotId}}\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/v1/tournaments/join",
@@ -642,9 +729,9 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/tournaments/1",
+							"raw": "{{baseUrl}}/api/v1/tournaments/{{tournamentId}}",
 							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "tournaments", "1"]
+							"path": ["api", "v1", "tournaments", "{{tournamentId}}"]
 						}
 					},
 					"response": []
@@ -660,9 +747,9 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/users/1",
+							"raw": "{{baseUrl}}/api/v1/users/{{userId}}",
 							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "users", "1"]
+							"path": ["api", "v1", "users", "{{userId}}"]
 						}
 					},
 					"response": []
@@ -722,20 +809,22 @@
 							"formdata": [
 								{
 									"key": "request",
-									"value": "{ \"username\": \"updatedUser\", \"email\": \"new@mail.com\" }",
-									"type": "text"
+									"value": "{ \"username\": \"updatedUser\", \"email\": \"new@mail.com\", \"password\": \"user123\" }",
+									"type": "text",
+									"contentType": "application/json"
 								},
 								{
 									"key": "imageFile",
-									"value": "",
-									"type": "file"
+									"type": "file",
+									"src": "{{userImagePath}}",
+									"disabled": true
 								}
 							]
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/users/1",
+							"raw": "{{baseUrl}}/api/v1/users/{{userId}}",
 							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "users", "1"]
+							"path": ["api", "v1", "users", "{{userId}}"]
 						}
 					},
 					"response": []
@@ -746,9 +835,9 @@
 						"method": "PUT",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/users/2/block",
+							"raw": "{{baseUrl}}/api/v1/users/{{targetUserId}}/block",
 							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "users", "2", "block"]
+							"path": ["api", "v1", "users", "{{targetUserId}}", "block"]
 						}
 					},
 					"response": []
@@ -1191,7 +1280,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"message\": \"Hello, User!\"\n}",
+							"raw": "{\n  \"usernames\": [\"{{currentUsername}}\"],\n  \"message\": \"Hello, User!\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1207,16 +1296,8 @@
 					"response": []
 				}
 			]
-		},
-		{
-			"name": "New Request",
-			"request": {
-				"method": "GET",
-				"header": []
-			},
-			"response": []
-		}
-	],
+			}
+		],
 	"variable": [
 		{
 			"key": "baseUrl",
@@ -1224,7 +1305,7 @@
 		},
 		{
 			"key": "userId",
-			"value": "",
+			"value": "1",
 			"type": "string"
 		},
 		{
@@ -1240,6 +1321,51 @@
 		{
 			"key": "tournamentId",
 			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "matchId",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "targetUserId",
+			"value": "2",
+			"type": "string"
+		},
+		{
+			"key": "rematchInvitationId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "currentUsername",
+			"value": "user",
+			"type": "string"
+		},
+		{
+			"key": "adminUsername",
+			"value": "admin",
+			"type": "string"
+		},
+		{
+			"key": "registeredUsername",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "registeredEmail",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userImagePath",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "tournamentImagePath",
+			"value": "",
 			"type": "string"
 		}
 	]

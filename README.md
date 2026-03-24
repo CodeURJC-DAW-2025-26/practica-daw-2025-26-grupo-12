@@ -513,14 +513,14 @@ Diagrama actualizado incluyendo los @RestController y su relación con los @Serv
    
    Ejemplo:
    ```bash
-   ssh -i ssh-keys/app.key vmuser@10.100.139.XXX
+   ssh -i ssh-keys/app.key vmuser@10.100.139.87
    ```
 
 2. **AQUÍ LOS SIGUIENTES PASOS**:
 
 ### **URL de la Aplicación Desplegada**
 
-🌐 **URL de acceso**: `https://[nombre-app].etsii.urjc.es:8443`
+🌐 **URL de acceso**: `https://appWeb12.etsii.urjc.es:8443`
 
 #### **Credenciales de Usuarios de Ejemplo**
 

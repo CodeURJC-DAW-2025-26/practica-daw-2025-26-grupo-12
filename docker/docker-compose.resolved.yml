@@ -1,10 +1,12 @@
 services:
   web:
-    image: sa4dus/scissors-please:latest
+    image: lamoara/scissors-please:latest
     platform: linux/amd64
     ports:
     - 8443:8443
     environment:
+    - APP_LOAD_SAMPLE_DATA=${APP_LOAD_SAMPLE_DATA:-true}
+    - SPRING_PROFILES_ACTIVE=mysql,https
     - SPRING_DATASOURCE_URL=jdbc:mysql://db/${DB_NAME:-scissors_please}
     - SPRING_DATASOURCE_USERNAME=${DB_USERNAME:-root}
     - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-password}

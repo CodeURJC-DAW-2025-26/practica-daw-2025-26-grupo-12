@@ -1,5 +1,4 @@
 package es.codeurjc.grupo12.scissors_please.controller.api.v1.tournaments;
-
 import es.codeurjc.grupo12.scissors_please.dto.tournaments.TournamentCreateRequestDto;
 import es.codeurjc.grupo12.scissors_please.dto.tournaments.TournamentDto;
 import es.codeurjc.grupo12.scissors_please.dto.tournaments.TournamentJoinRequestDto;
@@ -8,6 +7,7 @@ import es.codeurjc.grupo12.scissors_please.dto.tournaments.TournamentPageDto;
 import es.codeurjc.grupo12.scissors_please.dto.tournaments.TournamentRequestDto;
 import es.codeurjc.grupo12.scissors_please.model.Image;
 import es.codeurjc.grupo12.scissors_please.model.Tournament;
+import es.codeurjc.grupo12.scissors_please.model.TournamentStatus;
 import es.codeurjc.grupo12.scissors_please.service.image.ImageService;
 import es.codeurjc.grupo12.scissors_please.service.tournament.TournamentService;
 import es.codeurjc.grupo12.scissors_please.service.user.UserService;
@@ -48,7 +48,9 @@ public class TournamentController {
   private final UserService userService;
 
   public TournamentController(
-      TournamentService tournamentService, ImageService imageService, UserService userService) {
+      TournamentService tournamentService,
+      ImageService imageService,
+      UserService userService) {
     this.tournamentService = tournamentService;
     this.imageService = imageService;
     this.userService = userService;
@@ -80,7 +82,7 @@ public class TournamentController {
               content =
                   @Content(schema = @Schema(implementation = TournamentCreateRequestDto.class)))
           @RequestPart("request")
-          TournamentCreateRequestDto request,
+          TournamentCreateRequestDto tournamentRequest,
       @Parameter(
               description = "Optional tournament image",
               content =
@@ -93,13 +95,13 @@ public class TournamentController {
     Image image = imageService.convertToImage(imageFile);
     Tournament tournament =
         tournamentService.createTournament(
-            request.name(),
+            tournamentRequest.name(),
             image,
-            request.description(),
-            request.slots(),
-            request.registrationStarts(),
-            request.startDate(),
-            request.price());
+            tournamentRequest.description(),
+            tournamentRequest.slots(),
+            tournamentRequest.registrationStarts(),
+            tournamentRequest.startDate(),
+            tournamentRequest.price());
     return ResponseEntity.status(HttpStatus.CREATED).body(TournamentDto.from(tournament));
   }
 
@@ -155,7 +157,7 @@ public class TournamentController {
               required = true,
               content = @Content(schema = @Schema(implementation = TournamentRequestDto.class)))
           @RequestPart("request")
-          TournamentRequestDto request,
+          TournamentRequestDto tournamentRequest,
       @Parameter(
               description = "Optional tournament image",
               content =
@@ -166,19 +168,32 @@ public class TournamentController {
           MultipartFile imageFile)
       throws IOException {
     Image image = imageService.convertToImage(imageFile);
+    TournamentStatus status = parseTournamentStatus(tournamentRequest.status());
     return tournamentService
         .updateTournament(
             id,
-            request.name(),
+            tournamentRequest.name(),
             image,
-            request.description(),
-            request.status(),
-            request.slots(),
-            request.registrationStarts(),
-            request.startDate(),
-            request.price())
+            tournamentRequest.description(),
+            status,
+            tournamentRequest.slots(),
+            tournamentRequest.registrationStarts(),
+            tournamentRequest.startDate(),
+            tournamentRequest.price())
         .map(tournament -> ResponseEntity.ok(TournamentDto.from(tournament)))
         .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+  }
+
+  private TournamentStatus parseTournamentStatus(String rawStatus) {
+    if (rawStatus == null || rawStatus.isBlank()) {
+      return null;
+    }
+
+    TournamentStatus status = TournamentStatus.fromDisplayName(rawStatus);
+    if (status == null) {
+      throw new IllegalArgumentException("Invalid tournament status: " + rawStatus);
+    }
+    return status;
   }
 
   @Operation(summary = "Get a tournament", description = "Returns a tournament by its id.")

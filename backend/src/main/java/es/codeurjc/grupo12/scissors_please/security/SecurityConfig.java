@@ -1,8 +1,5 @@
 package es.codeurjc.grupo12.scissors_please.security;
 
-import es.codeurjc.grupo12.scissors_please.security.jwt.JwtRequestFilter;
-import es.codeurjc.grupo12.scissors_please.security.jwt.JwtTokenProvider;
-import es.codeurjc.grupo12.scissors_please.security.jwt.UnauthorizedHandlerJwt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +20,10 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
+
+import es.codeurjc.grupo12.scissors_please.security.jwt.JwtRequestFilter;
+import es.codeurjc.grupo12.scissors_please.security.jwt.JwtTokenProvider;
+import es.codeurjc.grupo12.scissors_please.security.jwt.UnauthorizedHandlerJwt;
 
 @Configuration
 @EnableWebSecurity
@@ -124,6 +125,8 @@ public class SecurityConfig {
                 .hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/v1/users/*/block")
                 .hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/v1/users/*")
+                .hasAnyRole("USER", "ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/v1/matches/rematch/*/accept")
                 .hasRole("USER")
                 .requestMatchers(HttpMethod.POST, "/api/v1/matches/*/rematch/request")
@@ -149,7 +152,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.DELETE, "/api/v1/bots/*")
                 .hasRole("USER")
                 .requestMatchers(HttpMethod.PUT, "/api/v1/bots/*")
-                .hasRole("USER")
+                .hasAnyRole("USER", "ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/v1/bots")
                 .hasRole("USER")
                 .requestMatchers(HttpMethod.GET, "/api/v1/tournaments/my-tournaments")
