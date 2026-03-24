@@ -20,6 +20,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
+import org.springframework.http.MediaType;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -32,6 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController("apiBotController")
 @RequestMapping("/api/v1/bots")
+@Tag(name = "Bots", description = "Operations for listing, creating, updating and deleting bots")
 public class BotController {
 
   private static final int DEFAULT_PAGE_SIZE = 10;
@@ -41,11 +51,24 @@ public class BotController {
   @Autowired private UserService userService;
 
   @GetMapping
+  @Operation(
+      summary = "List bots",
+      description = "Returns a paginated list of bots filtered by query and contextualized by the authenticated user.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Bots returned successfully",
+            content =
+                @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = BotPageResponseDTO.class)))
+      })
   public ResponseEntity<BotPageResponseDTO> getBots(
       @RequestParam(value = "query", required = false) String query,
       @RequestParam(value = "page", defaultValue = "0") int page,
       @RequestParam(value = "size", defaultValue = "10") int size,
-      Authentication authentication) {
+      @Parameter(hidden = true) Authentication authentication) {
     PageRequest pageable = PageRequest.of(sanitizePage(page), sanitizeSize(size));
     Page<BotDTOWithSimpleImage> botPage =
         botService
@@ -56,17 +79,46 @@ public class BotController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<BotDTO> getBot(@PathVariable Long id, Authentication authentication) {
+  @Operation(
+      summary = "Get bot by id",
+      description = "Returns the detailed data for a bot that the current user can access.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Bot returned successfully",
+            content =
+                @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = BotDTO.class))),
+        @ApiResponse(responseCode = "401", description = "Authentication required", content = @Content),
+        @ApiResponse(responseCode = "404", description = "Bot not found", content = @Content)
+      })
+  public ResponseEntity<BotDTO> getBot(
+      @PathVariable Long id, @Parameter(hidden = true) Authentication authentication) {
     Bot bot = botService.getUserBot(resolveCurrentUser(authentication), id);
     return ResponseEntity.ok(toBotDto(bot));
   }
 
   @GetMapping("/user/{userId}")
+  @Operation(
+      summary = "List bots by user",
+      description = "Returns the public bots for the selected user, with extra context for the requester when authenticated.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Bots returned successfully",
+            content =
+                @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = BotPageResponseDTO.class)))
+      })
   public ResponseEntity<BotPageResponseDTO> getUserBots(
       @PathVariable Long userId,
       @RequestParam(value = "page", defaultValue = "0") int page,
       @RequestParam(value = "size", defaultValue = "10") int size,
-      Authentication authentication) {
+      @Parameter(hidden = true) Authentication authentication) {
     PageRequest pageable = PageRequest.of(sanitizePage(page), sanitizeSize(size));
     Optional<Long> requesterId = resolveCurrentUser(authentication).map(User::getId);
     Page<BotDTOWithSimpleImage> botPage =
@@ -76,8 +128,30 @@ public class BotController {
   }
 
   @PostMapping
+  @Operation(
+      summary = "Create bot",
+      description = "Creates a new bot for the authenticated user using multipart/form-data.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Bot created successfully",
+            content =
+                @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = BotDTO.class))),
+        @ApiResponse(responseCode = "401", description = "Authentication required", content = @Content),
+        @ApiResponse(responseCode = "403", description = "Access denied", content = @Content)
+      })
   public ResponseEntity<BotDTO> createBot(
-      @ModelAttribute BotCreateRequestDTO request, Authentication authentication) {
+      @RequestBody(
+              content =
+                  @Content(
+                      mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+                      schema = @Schema(implementation = BotCreateRequestDTO.class)))
+          @ModelAttribute
+          BotCreateRequestDTO request,
+      @Parameter(hidden = true) Authentication authentication) {
     User currentUser = requireCurrentUser(authentication);
     if (userService.isAdmin(currentUser)) {
       throw new BotAccessDeniedException(ResponseConstants.ACCESS_DENIED);
@@ -95,10 +169,32 @@ public class BotController {
   }
 
   @PutMapping("/{id}")
+  @Operation(
+      summary = "Update bot",
+      description = "Updates an editable bot using multipart/form-data.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Bot updated successfully",
+            content =
+                @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = BotDTO.class))),
+        @ApiResponse(responseCode = "401", description = "Authentication required", content = @Content),
+        @ApiResponse(responseCode = "403", description = "Access denied", content = @Content),
+        @ApiResponse(responseCode = "404", description = "Bot not found", content = @Content)
+      })
   public ResponseEntity<BotDTO> updateBot(
       @PathVariable Long id,
-      @ModelAttribute BotUpdateRequestDTO request,
-      Authentication authentication) {
+      @RequestBody(
+              content =
+                  @Content(
+                      mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+                      schema = @Schema(implementation = BotUpdateRequestDTO.class)))
+          @ModelAttribute
+          BotUpdateRequestDTO request,
+      @Parameter(hidden = true) Authentication authentication) {
     User currentUser = requireCurrentUser(authentication);
     Bot updatedBot =
         botService.updateBot(
@@ -115,8 +211,24 @@ public class BotController {
   }
 
   @DeleteMapping("/{id}")
+  @Operation(
+      summary = "Delete bot",
+      description = "Deletes an editable bot and returns the deleted bot summary.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Bot deleted successfully",
+            content =
+                @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = BotDTOWithSimpleImage.class))),
+        @ApiResponse(responseCode = "401", description = "Authentication required", content = @Content),
+        @ApiResponse(responseCode = "403", description = "Access denied", content = @Content),
+        @ApiResponse(responseCode = "404", description = "Bot not found", content = @Content)
+      })
   public ResponseEntity<BotDTOWithSimpleImage> deleteBot(
-      @PathVariable Long id, Authentication authentication) {
+      @PathVariable Long id, @Parameter(hidden = true) Authentication authentication) {
     User currentUser = requireCurrentUser(authentication);
     Bot botToDelete = botService.getEditableBotOrThrow(id, currentUser);
     botService.deleteBot(currentUser, id);

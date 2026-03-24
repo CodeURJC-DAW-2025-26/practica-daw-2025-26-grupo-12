@@ -12,10 +12,18 @@ import es.codeurjc.grupo12.scissors_please.service.image.ImageService;
 import es.codeurjc.grupo12.scissors_please.service.tournament.TournamentService;
 import es.codeurjc.grupo12.scissors_please.service.user.UserService;
 import es.codeurjc.grupo12.scissors_please.views.JoinTournamentResult;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.IOException;
 import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+@Tag(name = "Tournaments", description = "Tournament management endpoints")
 @RestController("apiTournamentController")
 @RequestMapping("/api/v1/tournaments")
 public class TournamentController {
@@ -45,9 +54,37 @@ public class TournamentController {
     this.userService = userService;
   }
 
+  @Operation(
+      summary = "Create a tournament",
+      description = "Creates a new tournament and optionally uploads its image.")
+  @ApiResponses({
+    @ApiResponse(
+        responseCode = "201",
+        description = "Tournament created",
+        content = @Content(schema = @Schema(implementation = TournamentDto.class))),
+    @ApiResponse(responseCode = "400", description = "Invalid multipart request"),
+    @ApiResponse(responseCode = "401", description = "Authentication required"),
+    @ApiResponse(responseCode = "403", description = "Not allowed to create tournaments")
+  })
+  @io.swagger.v3.oas.annotations.parameters.RequestBody(
+      required = true,
+      content =
+          @Content(
+              mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+              schema = @Schema(type = "object")))
   @PostMapping
   public ResponseEntity<TournamentDto> createTournament(
+      @Parameter(
+          description = "Tournament data",
+          required = true,
+          content = @Content(schema = @Schema(implementation = TournamentCreateRequestDto.class)))
       @RequestPart("request") TournamentCreateRequestDto request,
+      @Parameter(
+          description = "Optional tournament image",
+          content =
+              @Content(
+                  mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE,
+                  schema = @Schema(type = "string", format = "binary")))
       @RequestPart(value = "imageFile", required = false) MultipartFile imageFile)
       throws IOException {
     Image image = imageService.convertToImage(imageFile);
@@ -63,8 +100,21 @@ public class TournamentController {
     return ResponseEntity.status(HttpStatus.CREATED).body(TournamentDto.from(tournament));
   }
 
+  @Operation(
+      summary = "Delete a tournament",
+      description = "Deletes a tournament by its id and returns the deleted representation.")
+  @ApiResponses({
+    @ApiResponse(
+        responseCode = "200",
+        description = "Tournament deleted",
+        content = @Content(schema = @Schema(implementation = TournamentDto.class))),
+    @ApiResponse(responseCode = "401", description = "Authentication required"),
+    @ApiResponse(responseCode = "403", description = "Not allowed to delete tournaments"),
+    @ApiResponse(responseCode = "404", description = "Tournament not found")
+  })
   @DeleteMapping("/{id}")
-  public ResponseEntity<TournamentDto> deleteTournament(@PathVariable Long id) {
+  public ResponseEntity<TournamentDto> deleteTournament(
+      @Parameter(description = "Tournament id", required = true) @PathVariable Long id) {
     Optional<Tournament> tournament = tournamentService.getTournamentById(id);
     if (tournament.isEmpty()) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -75,10 +125,39 @@ public class TournamentController {
     return ResponseEntity.ok(deletedTournament);
   }
 
+  @Operation(
+      summary = "Update a tournament",
+      description = "Updates tournament fields and optionally replaces its image.")
+  @ApiResponses({
+    @ApiResponse(
+        responseCode = "200",
+        description = "Tournament updated",
+        content = @Content(schema = @Schema(implementation = TournamentDto.class))),
+    @ApiResponse(responseCode = "400", description = "Invalid multipart request"),
+    @ApiResponse(responseCode = "401", description = "Authentication required"),
+    @ApiResponse(responseCode = "403", description = "Not allowed to update tournaments"),
+    @ApiResponse(responseCode = "404", description = "Tournament not found")
+  })
+  @io.swagger.v3.oas.annotations.parameters.RequestBody(
+      required = true,
+      content =
+          @Content(
+              mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+              schema = @Schema(type = "object")))
   @PutMapping("/{id}")
   public ResponseEntity<TournamentDto> updateTournament(
-      @PathVariable Long id,
+      @Parameter(description = "Tournament id", required = true) @PathVariable Long id,
+      @Parameter(
+          description = "Tournament data",
+          required = true,
+          content = @Content(schema = @Schema(implementation = TournamentRequestDto.class)))
       @RequestPart("request") TournamentRequestDto request,
+      @Parameter(
+          description = "Optional tournament image",
+          content =
+              @Content(
+                  mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE,
+                  schema = @Schema(type = "string", format = "binary")))
       @RequestPart(value = "imageFile", required = false) MultipartFile imageFile)
       throws IOException {
     Image image = imageService.convertToImage(imageFile);
@@ -97,28 +176,69 @@ public class TournamentController {
         .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
   }
 
+  @Operation(summary = "Get a tournament", description = "Returns a tournament by its id.")
+  @ApiResponses({
+    @ApiResponse(
+        responseCode = "200",
+        description = "Tournament found",
+        content = @Content(schema = @Schema(implementation = TournamentDto.class))),
+    @ApiResponse(responseCode = "404", description = "Tournament not found")
+  })
   @GetMapping("/{id}")
-  public ResponseEntity<TournamentDto> getTournament(@PathVariable Long id) {
+  public ResponseEntity<TournamentDto> getTournament(
+      @Parameter(description = "Tournament id", required = true) @PathVariable Long id) {
     return tournamentService
         .getTournamentById(id)
         .map(t -> ResponseEntity.ok(TournamentDto.from(t)))
         .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
   }
 
+  @Operation(
+      summary = "List tournaments",
+      description = "Returns a paginated list of tournaments, optionally filtered by query.")
+  @ApiResponses({
+    @ApiResponse(
+        responseCode = "200",
+        description = "Page of tournaments",
+        content = @Content(schema = @Schema(implementation = TournamentPageDto.class)))
+  })
   @GetMapping
   public ResponseEntity<TournamentPageDto> getTournamentPage(
-      @RequestParam(value = "query", required = false) String query,
-      @RequestParam(value = "page", defaultValue = "0") int page,
-      @RequestParam(value = "size", defaultValue = "10") int size) {
+      @Parameter(description = "Optional search query")
+          @RequestParam(value = "query", required = false)
+          String query,
+      @Parameter(description = "Zero-based page index", example = "0")
+          @RequestParam(value = "page", defaultValue = "0") int page,
+      @Parameter(description = "Page size", example = "10")
+          @RequestParam(value = "size", defaultValue = "10") int size) {
     PageRequest pageable = PageRequest.of(page, size);
     TournamentPageDto tournamentPage =
         TournamentPageDto.fromPage(tournamentService.getTournamentPage(query, pageable));
     return ResponseEntity.ok(tournamentPage);
   }
 
+  @Operation(
+      summary = "Join a tournament",
+      description = "Registers the current user and optionally a bot in a tournament.")
+  @ApiResponses({
+    @ApiResponse(
+        responseCode = "200",
+        description = "Joined successfully",
+        content = @Content(schema = @Schema(implementation = TournamentJoinResultDto.class))),
+    @ApiResponse(responseCode = "400", description = "Invalid request payload"),
+    @ApiResponse(responseCode = "401", description = "Authentication required"),
+    @ApiResponse(responseCode = "403", description = "User or bot not allowed"),
+    @ApiResponse(responseCode = "404", description = "Tournament not found"),
+    @ApiResponse(responseCode = "409", description = "Tournament cannot accept the join request")
+  })
   @PostMapping("/join")
   public ResponseEntity<TournamentJoinResultDto> joinTournament(
-      @RequestBody TournamentJoinRequestDto request, Authentication authentication) {
+      @Parameter(
+          description = "Join request payload",
+          required = true,
+          content = @Content(schema = @Schema(implementation = TournamentJoinRequestDto.class)))
+      @RequestBody TournamentJoinRequestDto request,
+      @Parameter(hidden = true) Authentication authentication) {
     if (request == null || request.tournamentId() == null) {
       return ResponseEntity.badRequest().build();
     }
@@ -141,12 +261,26 @@ public class TournamentController {
     };
   }
 
+  @Operation(
+      summary = "List my tournaments",
+      description = "Returns the tournaments associated with the authenticated user.")
+  @ApiResponses({
+    @ApiResponse(
+        responseCode = "200",
+        description = "Page of user tournaments",
+        content = @Content(schema = @Schema(implementation = TournamentPageDto.class))),
+    @ApiResponse(responseCode = "401", description = "Authentication required")
+  })
   @GetMapping("/my-tournaments")
   public ResponseEntity<TournamentPageDto> getMyTournaments(
-      @RequestParam(value = "query", required = false) String query,
-      @RequestParam(value = "page", defaultValue = "0") int page,
-      @RequestParam(value = "size", defaultValue = "10") int size,
-      Authentication authentication) {
+      @Parameter(description = "Optional search query")
+          @RequestParam(value = "query", required = false)
+          String query,
+      @Parameter(description = "Zero-based page index", example = "0")
+          @RequestParam(value = "page", defaultValue = "0") int page,
+      @Parameter(description = "Page size", example = "10")
+          @RequestParam(value = "size", defaultValue = "10") int size,
+      @Parameter(hidden = true) Authentication authentication) {
     Long currentUserId = userService.getCurrentUser(authentication).getId();
     PageRequest pageable = PageRequest.of(page, size);
     TournamentPageDto tournamentPage =
