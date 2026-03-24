@@ -1,4 +1,4 @@
-package es.codeurjc.grupo12.scissors_please.dto;
+package es.codeurjc.grupo12.scissors_please.dto.tournaments;
 
 import es.codeurjc.grupo12.scissors_please.views.JoinTournamentResult;
 import es.codeurjc.grupo12.scissors_please.views.JoinTournamentStatus;

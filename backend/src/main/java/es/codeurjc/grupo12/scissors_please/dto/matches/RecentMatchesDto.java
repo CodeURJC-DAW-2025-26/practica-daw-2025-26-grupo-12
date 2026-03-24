@@ -1,4 +1,4 @@
-package es.codeurjc.grupo12.scissors_please.dto;
+package es.codeurjc.grupo12.scissors_please.dto.matches;
 
 import es.codeurjc.grupo12.scissors_please.views.UserMatchItem;
 import java.util.List;
