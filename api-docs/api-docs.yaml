@@ -1,0 +1,1026 @@
+openapi: 3.0.3
+info:
+  title: Scissors Please REST API
+  description: API for managing rock-paper-scissors bots, tournaments, matches and user profiles.
+  version: 1.0.0
+servers:
+  - url: /
+    description: Default server
+tags:
+  - name: Authentication
+    description: JWT authentication endpoints
+  - name: Bots
+    description: Bot lifecycle and discovery
+  - name: Users
+    description: User profiles and management
+  - name: Tournaments
+    description: Competition organization
+  - name: Matches
+    description: Game sessions and matchmaking
+  - name: Charts
+    description: Visualization data as Base64
+  - name: Images
+    description: Binary asset retrieval
+  - name: Notifications
+    description: Real-time event communication
+
+paths:
+  /api/v1/auth/login:
+    post:
+      tags: [Authentication]
+      summary: Log in with username and password
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '404':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+
+  /api/v1/auth/register:
+    post:
+      tags: [Authentication]
+      summary: Register a new user
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '200':
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Invalid payload or user already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+
+  /api/v1/auth/refresh:
+    post:
+      tags: [Authentication]
+      summary: Refresh current session
+      operationId: refresh
+      responses:
+        '200':
+          description: New token issued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid refresh token
+
+  /api/v1/auth/logout:
+    post:
+      tags: [Authentication]
+      summary: End session
+      operationId: logout
+      responses:
+        '200':
+          description: Successfully logged out
+
+  /api/v1/bots:
+    get:
+      tags: [Bots]
+      summary: List all accessible bots
+      parameters:
+        - name: query
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Paginated results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BotPage'
+    post:
+      tags: [Bots]
+      summary: Create a new bot
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name: {type: string}
+                description: {type: string}
+                tags: {type: string, description: "Comma separated tags"}
+                imageFile: {type: string, format: binary}
+                public: {type: boolean}
+      responses:
+        '200':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BotDetail'
+
+  /api/v1/bots/{id}:
+    get:
+      tags: [Bots]
+      summary: Get details of a bot
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: {type: integer}
+      responses:
+        '200':
+          description: Bot data returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BotDetail'
+        '404':
+          description: Bot not found
+    put:
+      tags: [Bots]
+      summary: Update bot information
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: {type: integer}
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name: {type: string}
+                description: {type: string}
+                code: {type: string}
+                tags: {type: string, description: "Comma separated tags"}
+                imageFile: {type: string, format: binary}
+                public: {type: boolean}
+      responses:
+        '200':
+          description: Updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BotDetail'
+    delete:
+      tags: [Bots]
+      summary: Remove a bot
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: {type: integer}
+      responses:
+        '200':
+          description: Deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BotSummary'
+
+  /api/v1/bots/user/{userId}:
+    get:
+      tags: [Bots]
+      summary: List bots by user
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema: {type: integer}
+        - name: page
+          in: query
+          schema: {type: integer, default: 0}
+        - name: size
+          in: query
+          schema: {type: integer, default: 10}
+      responses:
+        '200':
+          description: Paginated user results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BotPage'
+
+  /api/v1/users:
+    get:
+      tags: [Users]
+      summary: Search users
+      parameters:
+        - name: query
+          in: query
+          schema: {type: string}
+        - name: page
+          in: query
+          schema: {type: integer, default: 0}
+        - name: size
+          in: query
+          schema: {type: integer, default: 10}
+      responses:
+        '200':
+          description: Paginated user list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPage'
+
+  /api/v1/users/{id}:
+    get:
+      tags: [Users]
+      summary: Get user profile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: {type: integer}
+      responses:
+        '200':
+          description: Profile data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetail'
+        '404':
+          description: User not found
+    put:
+      tags: [Users]
+      summary: Modify profile details
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: {type: integer}
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [request]
+              properties:
+                request:
+                  type: object
+                  properties:
+                    username: {type: string}
+                    email: {type: string}
+                    password: {type: string}
+                imageFile: {type: string, format: binary}
+      responses:
+        '200':
+          description: Profile modified
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetail'
+        '401':
+          description: Unauthorized
+
+  /api/v1/users/{id}/block:
+    put:
+      tags: [Users]
+      summary: Block a specific user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: {type: integer}
+      responses:
+        '200':
+          description: User state changed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetail'
+        '403':
+          description: Insufficient privileges
+
+  /api/v1/tournaments:
+    get:
+      tags: [Tournaments]
+      summary: Browse tournaments
+      parameters:
+        - name: query
+          in: query
+          schema: {type: string}
+        - name: page
+          in: query
+          schema: {type: integer, default: 0}
+        - name: size
+          in: query
+          schema: {type: integer, default: 10}
+      responses:
+        '200':
+          description: Paginated tournament list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TournamentPage'
+    post:
+      tags: [Tournaments]
+      summary: Host a new tournament
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [request]
+              properties:
+                request:
+                  $ref: '#/components/schemas/TournamentCreateRequest'
+                imageFile: {type: string, format: binary}
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TournamentDetail'
+
+  /api/v1/tournaments/{id}:
+    get:
+      tags: [Tournaments]
+      summary: Tournament information
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: {type: integer}
+      responses:
+        '200':
+          description: Retrieved tournament
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TournamentDetail'
+    put:
+      tags: [Tournaments]
+      summary: Update tournament setup
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: {type: integer}
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [request]
+              properties:
+                request:
+                  $ref: '#/components/schemas/TournamentUpdateRequest'
+                imageFile: {type: string, format: binary}
+      responses:
+        '200':
+          description: Updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TournamentDetail'
+    delete:
+      tags: [Tournaments]
+      summary: Delete tournament
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: {type: integer}
+      responses:
+        '200':
+          description: Deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TournamentDetail'
+
+  /api/v1/tournaments/join:
+    post:
+      tags: [Tournaments]
+      summary: Register for a tournament
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TournamentJoinRequest'
+      responses:
+        '200':
+          description: Success or failure description
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TournamentJoinResult'
+
+  /api/v1/tournaments/my-tournaments:
+    get:
+      tags: [Tournaments]
+      summary: List user's tournaments
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: query
+          in: query
+          schema: {type: string}
+        - name: page
+          in: query
+          schema: {type: integer, default: 0}
+        - name: size
+          in: query
+          schema: {type: integer, default: 10}
+      responses:
+        '200':
+          description: Paginated user tournaments
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TournamentPage'
+
+  /api/v1/matches:
+    get:
+      tags: [Matches]
+      summary: Browse top matches
+      parameters:
+        - name: page
+          in: query
+          schema: {type: integer, default: 0}
+        - name: size
+          in: query
+          schema: {type: integer, default: 10}
+      responses:
+        '200':
+          description: Best matches list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchPage'
+
+  /api/v1/matches/{id}:
+    get:
+      tags: [Matches]
+      summary: Specific match details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: {type: integer}
+      responses:
+        '200':
+          description: Match data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchDetail'
+
+  /api/v1/matches/{id}/stats:
+    get:
+      tags: [Matches]
+      summary: Detailed match statistics
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: {type: integer}
+      responses:
+        '200':
+          description: All rounds data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchStats'
+
+  /api/v1/matches/{id}/battle:
+    get:
+      tags: [Matches]
+      summary: Match battle metadata
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: {type: integer}
+      responses:
+        '200':
+          description: Battle view details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchBattle'
+
+  /api/v1/matches/recent:
+    get:
+      tags: [Matches]
+      summary: Fetch user recent matches
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User match history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecentMatches'
+
+  /api/v1/matches/matchmaking/status:
+    get:
+      tags: [Matches]
+      summary: Check current queue status
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Status of user session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchmakingStatus'
+
+  /api/v1/matches/matchmaking/start:
+    post:
+      tags: [Matches]
+      summary: Enter matchmaking
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: botId
+          in: query
+          schema: {type: integer}
+      responses:
+        '200':
+          description: Queue entry confirmed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchStartResult'
+
+  /api/v1/matches/matchmaking/cancel:
+    post:
+      tags: [Matches]
+      summary: Exit matchmaking
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successfully cancelled
+
+  /api/v1/matches/{id}/rematch/request:
+    post:
+      tags: [Matches]
+      summary: Propose a rematch
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: {type: integer}
+      responses:
+        '200':
+          description: Invitation created
+          content:
+            application/json:
+              schema: {type: string}
+
+  /api/v1/matches/rematch/{invitationId}/accept:
+    post:
+      tags: [Matches]
+      summary: Agree to rematch proposal
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: invitationId
+          in: path
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Redirect location or status
+          content:
+            application/json:
+              schema: {type: string}
+
+  /api/v1/charts/results:
+    get:
+      tags: [Charts]
+      summary: Bot/User results pie chart
+      parameters:
+        - name: wins
+          in: query
+          required: true
+          schema: {type: integer}
+        - name: losses
+          in: query
+          required: true
+          schema: {type: integer}
+        - name: draws
+          in: query
+          required: true
+          schema: {type: integer}
+      responses:
+        '200':
+          description: Base64 image string
+          content:
+            text/plain: {schema: {type: string}}
+
+  /api/v1/charts/elo:
+    get:
+      tags: [Charts]
+      summary: Elo history line chart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items: {type: integer}
+      responses:
+        '200':
+          description: Base64 image string
+          content:
+            text/plain: {schema: {type: string}}
+
+  /api/v1/charts/users:
+    get:
+      tags: [Charts]
+      summary: Registration histogram chart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  year: {type: integer}
+                  month: {type: integer}
+                  count: {type: integer}
+      responses:
+        '200':
+          description: Base64 image string
+          content:
+            text/plain: {schema: {type: string}}
+
+  /api/v1/charts/progress:
+    get:
+      tags: [Charts]
+      summary: Generic progress bar generator
+      parameters:
+        - name: current
+          in: query
+          required: true
+          schema: {type: integer}
+        - name: max
+          in: query
+          required: true
+          schema: {type: integer}
+        - name: color
+          in: query
+          schema: {type: string, default: "34,197,94"}
+      responses:
+        '200':
+          description: Base64 image string
+          content:
+            text/plain: {schema: {type: string}}
+
+  /api/v1/images/bots/{id}:
+    get:
+      tags: [Images]
+      summary: Download bot photo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: {type: integer}
+      responses:
+        '200':
+          description: Raw image data
+          content:
+            application/octet-stream:
+              schema: {type: string, format: binary}
+
+  /api/v1/images/users/{id}:
+    get:
+      tags: [Images]
+      summary: Download profile avatar
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: {type: integer}
+      responses:
+        '200':
+          description: Raw image data
+          content:
+            application/octet-stream:
+              schema: {type: string, format: binary}
+
+  /api/v1/images/tournaments/{id}:
+    get:
+      tags: [Images]
+      summary: Download tournament banner
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: {type: integer}
+      responses:
+        '200':
+          description: Raw image data
+          content:
+            application/octet-stream:
+              schema: {type: string, format: binary}
+
+  /api/v1/notifications/subscribe:
+    get:
+      tags: [Notifications]
+      summary: Open SSE event stream
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Event stream session started
+          content:
+            text/event-stream:
+              schema: {type: string}
+
+  /api/v1/notifications/admin:
+    post:
+      tags: [Notifications]
+      summary: Send push messages to users
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                usernames:
+                  type: array
+                  items: {type: string}
+                message: {type: string}
+      responses:
+        '200':
+          description: Notifications queued
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  
+  schemas:
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username: {type: string, example: "admin"}
+        password: {type: string, example: "admin123"}
+    
+    RegisterRequest:
+      type: object
+      required: [username, password, email]
+      properties:
+        username: {type: string, example: "jane.doe"}
+        password: {type: string, example: "StrongPass123!"}
+        email: {type: string, example: "jane@example.com"}
+
+    AuthResponse:
+      type: object
+      properties:
+        status: {type: string, enum: [SUCCESS, ERROR]}
+        message: {type: string}
+
+    ExceptionResponse:
+      type: object
+      properties:
+        message: {type: string}
+        timestamp: {type: string, format: date-time}
+
+    BotDetail:
+      type: object
+      properties:
+        id: {type: integer}
+        name: {type: string}
+        description: {type: string}
+        code: {type: string}
+        isPublic: {type: boolean}
+        elo: {type: integer}
+        ownerId: {type: integer}
+        wins: {type: integer}
+        losses: {type: integer}
+        draws: {type: integer}
+        tags: {type: array, items: {type: string}}
+        eloHistory: {type: array, items: {type: integer}}
+        hasImage: {type: boolean}
+        imageUrl: {type: string}
+        createdAt: {type: string, format: date-time}
+        updatedAt: {type: string, format: date-time}
+
+    BotSummary:
+      type: object
+      properties:
+        id: {type: integer}
+        name: {type: string}
+        description: {type: string}
+        isPublic: {type: boolean}
+        elo: {type: integer}
+        ownerId: {type: integer}
+        wins: {type: integer}
+        losses: {type: integer}
+        draws: {type: integer}
+        tags: {type: array, items: {type: string}}
+        hasImage: {type: boolean}
+        imageUrl: {type: string}
+        createdAt: {type: string, format: date-time}
+        updatedAt: {type: string, format: date-time}
+
+    BotPage:
+      type: object
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/BotSummary'}}
+        page: {type: integer}
+        size: {type: integer}
+        totalItems: {type: integer}
+        totalPages: {type: integer}
+        hasNext: {type: boolean}
+        hasPrevious: {type: boolean}
+
+    UserDetail:
+      type: object
+      properties:
+        id: {type: integer}
+        username: {type: string}
+        email: {type: string}
+        imageUrl: {type: string}
+        createdAt: {type: string, format: date-time}
+        blocked: {type: boolean}
+
+    UserPage:
+      type: object
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/UserDetail'}}
+        page: {type: integer}
+        size: {type: integer}
+        totalItems: {type: integer}
+        totalPages: {type: integer}
+
+    TournamentDetail:
+      type: object
+      properties:
+        id: {type: integer}
+        name: {type: string}
+        description: {type: string}
+        status: {type: string, enum: [REGISTRATION_OPEN, REGISTRATION_CLOSED, IN_PROGRESS, COMPLETED]}
+        slots: {type: integer}
+        startDate: {type: string, format: date}
+        imageUrl: {type: string}
+
+    TournamentPage:
+      type: object
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/TournamentDetail'}}
+        page: {type: integer}
+        size: {type: integer}
+        totalItems: {type: integer}
+        totalPages: {type: integer}
+
+    TournamentCreateRequest:
+      type: object
+      properties:
+        name: {type: string}
+        description: {type: string}
+        slots: {type: integer}
+        registrationStarts: {type: string, format: date-time}
+        startDate: {type: string, format: date-time}
+        price: {type: number}
+
+    TournamentUpdateRequest:
+      type: object
+      properties:
+        name: {type: string}
+        description: {type: string}
+        status: {type: string}
+        slots: {type: integer}
+        registrationStarts: {type: string, format: date-time}
+        startDate: {type: string, format: date-time}
+        price: {type: number}
+
+    TournamentJoinRequest:
+      type: object
+      properties:
+        tournamentId: {type: integer}
+        botId: {type: integer}
+
+    TournamentJoinResult:
+      type: object
+      properties:
+        status: {type: string}
+        message: {type: string}
+
+    MatchDetail:
+      type: object
+      properties:
+        id: {type: integer}
+        bot1Name: {type: string}
+        bot2Name: {type: string}
+        bot1Score: {type: integer}
+        bot2Score: {type: integer}
+        result: {type: string}
+        timestamp: {type: string, format: date-time}
+
+    MatchPage:
+      type: object
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/MatchDetail'}}
+        page: {type: integer}
+        size: {type: integer}
+        totalItems: {type: integer}
+        totalPages: {type: integer}
+
+    MatchStats:
+      type: object
+      properties:
+        matchId: {type: integer}
+        rounds: 
+          type: array
+          items:
+            type: object
+            properties:
+              roundNumber: {type: integer}
+              bot1Move: {type: string}
+              bot2Move: {type: string}
+              winner: {type: string}
+
+    MatchBattle:
+      type: object
+      properties:
+        matchId: {type: integer}
+        bot1: {type: object}
+        bot2: {type: object}
+        status: {type: string}
+
+    RecentMatches:
+      type: object
+      properties:
+        matches: {type: array, items: {$ref: '#/components/schemas/MatchDetail'}}
+
+    MatchmakingStatus:
+      type: object
+      properties:
+        inQueue: {type: boolean}
+        matchFound: {type: boolean}
+        matchId: {type: integer}
+
+    MatchStartResult:
+      type: object
+      properties:
+        status: {type: string}
+        matchId: {type: integer}
