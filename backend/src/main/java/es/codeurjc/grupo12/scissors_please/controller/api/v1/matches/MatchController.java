@@ -1,11 +1,11 @@
 package es.codeurjc.grupo12.scissors_please.controller.api.v1.matches;
 
+import es.codeurjc.grupo12.scissors_please.dto.MatchmakingStatusDto;
 import es.codeurjc.grupo12.scissors_please.dto.matches.MatchBattleDto;
 import es.codeurjc.grupo12.scissors_please.dto.matches.MatchDto;
 import es.codeurjc.grupo12.scissors_please.dto.matches.MatchPageDto;
 import es.codeurjc.grupo12.scissors_please.dto.matches.MatchStartResultDto;
 import es.codeurjc.grupo12.scissors_please.dto.matches.MatchStatsDto;
-import es.codeurjc.grupo12.scissors_please.dto.MatchmakingStatusDto;
 import es.codeurjc.grupo12.scissors_please.dto.matches.RecentMatchesDto;
 import es.codeurjc.grupo12.scissors_please.model.Match;
 import es.codeurjc.grupo12.scissors_please.model.User;

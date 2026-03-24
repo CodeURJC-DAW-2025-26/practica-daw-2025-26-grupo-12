@@ -245,5 +245,4 @@ public class UserController {
   private int sanitizeSize(int size) {
     return size <= 0 ? DEFAULT_PAGE_SIZE : size;
   }
-
 }

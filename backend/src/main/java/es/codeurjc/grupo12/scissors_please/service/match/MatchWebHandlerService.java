@@ -1,9 +1,9 @@
 package es.codeurjc.grupo12.scissors_please.service.match;
 
+import es.codeurjc.grupo12.scissors_please.dto.MatchmakingStatusDto;
 import es.codeurjc.grupo12.scissors_please.dto.matches.MatchBattleDto;
 import es.codeurjc.grupo12.scissors_please.dto.matches.MatchStartResultDto;
 import es.codeurjc.grupo12.scissors_please.dto.matches.MatchStatsDto;
-import es.codeurjc.grupo12.scissors_please.dto.MatchmakingStatusDto;
 import es.codeurjc.grupo12.scissors_please.dto.matches.RecentMatchesDto;
 import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.User;
