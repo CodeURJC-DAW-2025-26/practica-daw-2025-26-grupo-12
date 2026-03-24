@@ -534,7 +534,7 @@ Diagrama actualizado incluyendo los @RestController y su relación con los @Serv
 
 #### **Alumno 1 - Alejandro García Prada**
 
-Me he encargado de organizar algunos DTOs de respuestas, de implementar el JWT y de generar algunos endpoints
+En esta práctica me he encargado principalmente de organizar los Response DTOs para mejorar la estructura y consistencia de las respuestas de la API, así como de implementar el sistema de autenticación basado en JWT. Además, he desarrollado varios endpoints REST relacionados con la gestión de usuarios, el login, las partidas (match) y los torneos, cubriendo distintas funcionalidades clave del backend. Por último, también he implementado un GlobalExceptionHandler para centralizar el manejo de errores y ofrecer respuestas más claras y controladas desde la API.
 
 | Nº    | Commits      | Files      |
 |:------------: |:------------:| :------------:|
