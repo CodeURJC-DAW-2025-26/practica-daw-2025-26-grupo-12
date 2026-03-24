@@ -1,11 +1,22 @@
 package es.codeurjc.grupo12.scissors_please.security.jwt;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "Resultado de una operacion de autenticacion")
 public class AuthResponse {
 
+  @Schema(description = "Estado de la operacion", example = "SUCCESS")
   private Status status;
+
+  @Schema(description = "Mensaje asociado al resultado", example = "Login successful")
   private String message;
+
+  @Schema(
+      description = "Descripcion del error si la operacion falla",
+      example = "Invalid credentials")
   private String error;
 
+  @Schema(description = "Estados posibles de una respuesta de autenticacion")
   public enum Status {
     SUCCESS,
     FAILURE

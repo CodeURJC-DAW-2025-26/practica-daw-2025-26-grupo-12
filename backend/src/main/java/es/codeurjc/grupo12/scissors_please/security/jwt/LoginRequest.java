@@ -1,8 +1,14 @@
 package es.codeurjc.grupo12.scissors_please.security.jwt;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "Credenciales usadas para iniciar sesion")
 public class LoginRequest {
 
+  @Schema(description = "Nombre de usuario", example = "player1")
   private String username;
+
+  @Schema(description = "Contrasena del usuario", example = "s3cret")
   private String password;
 
   public LoginRequest() {}
