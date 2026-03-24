@@ -459,11 +459,12 @@ Me he encargado de la página de detalle de la mayoría de las entidades. Ademá
 
 > La documentación de la API REST se encuentra en la carpeta `/api-docs` del repositorio. Se ha generado automáticamente con SpringDoc a partir de las anotaciones en el código Java.
 
-### **Diagrama de Clases y Templates Actualizado**
+### **Diagrama de Clases**
+![Diagrama de Clases P2](images/P2/DiagramaClases.svg)
 
 Diagrama actualizado incluyendo los @RestController y su relación con los @Service compartidos:
 
-![Diagrama de Clases Actualizado](images/complete-classes-diagram.png)
+![Diagrama de Clases Actualizado](images/P2/WebDiagram.svg)
 
 ### **Instrucciones de Ejecución con Docker**
 
