@@ -124,8 +124,8 @@ public class SecurityConfig {
                 .hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/v1/users/*/block")
                 .hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/v1/users/*")
-                .hasRole("USER")
+
+                
                 .requestMatchers(HttpMethod.POST, "/api/v1/matches/rematch/*/accept")
                 .hasRole("USER")
                 .requestMatchers(HttpMethod.POST, "/api/v1/matches/*/rematch/request")
@@ -163,6 +163,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/v1/notifications/admin")
                 .hasRole("ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/v1/matches/recent")
+                .authenticated()
+                .requestMatchers(HttpMethod.PUT, "/api/v1/users/*")
                 .authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/v1/matches/matchmaking/status")
                 .authenticated()
