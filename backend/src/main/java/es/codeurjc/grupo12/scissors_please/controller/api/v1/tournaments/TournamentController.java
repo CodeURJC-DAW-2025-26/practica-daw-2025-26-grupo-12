@@ -75,17 +75,20 @@ public class TournamentController {
   @PostMapping
   public ResponseEntity<TournamentDto> createTournament(
       @Parameter(
-          description = "Tournament data",
-          required = true,
-          content = @Content(schema = @Schema(implementation = TournamentCreateRequestDto.class)))
-      @RequestPart("request") TournamentCreateRequestDto request,
+              description = "Tournament data",
+              required = true,
+              content =
+                  @Content(schema = @Schema(implementation = TournamentCreateRequestDto.class)))
+          @RequestPart("request")
+          TournamentCreateRequestDto request,
       @Parameter(
-          description = "Optional tournament image",
-          content =
-              @Content(
-                  mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE,
-                  schema = @Schema(type = "string", format = "binary")))
-      @RequestPart(value = "imageFile", required = false) MultipartFile imageFile)
+              description = "Optional tournament image",
+              content =
+                  @Content(
+                      mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE,
+                      schema = @Schema(type = "string", format = "binary")))
+          @RequestPart(value = "imageFile", required = false)
+          MultipartFile imageFile)
       throws IOException {
     Image image = imageService.convertToImage(imageFile);
     Tournament tournament =
@@ -148,17 +151,19 @@ public class TournamentController {
   public ResponseEntity<TournamentDto> updateTournament(
       @Parameter(description = "Tournament id", required = true) @PathVariable Long id,
       @Parameter(
-          description = "Tournament data",
-          required = true,
-          content = @Content(schema = @Schema(implementation = TournamentRequestDto.class)))
-      @RequestPart("request") TournamentRequestDto request,
+              description = "Tournament data",
+              required = true,
+              content = @Content(schema = @Schema(implementation = TournamentRequestDto.class)))
+          @RequestPart("request")
+          TournamentRequestDto request,
       @Parameter(
-          description = "Optional tournament image",
-          content =
-              @Content(
-                  mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE,
-                  schema = @Schema(type = "string", format = "binary")))
-      @RequestPart(value = "imageFile", required = false) MultipartFile imageFile)
+              description = "Optional tournament image",
+              content =
+                  @Content(
+                      mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE,
+                      schema = @Schema(type = "string", format = "binary")))
+          @RequestPart(value = "imageFile", required = false)
+          MultipartFile imageFile)
       throws IOException {
     Image image = imageService.convertToImage(imageFile);
     return tournamentService
@@ -208,9 +213,11 @@ public class TournamentController {
           @RequestParam(value = "query", required = false)
           String query,
       @Parameter(description = "Zero-based page index", example = "0")
-          @RequestParam(value = "page", defaultValue = "0") int page,
+          @RequestParam(value = "page", defaultValue = "0")
+          int page,
       @Parameter(description = "Page size", example = "10")
-          @RequestParam(value = "size", defaultValue = "10") int size) {
+          @RequestParam(value = "size", defaultValue = "10")
+          int size) {
     PageRequest pageable = PageRequest.of(page, size);
     TournamentPageDto tournamentPage =
         TournamentPageDto.fromPage(tournamentService.getTournamentPage(query, pageable));
@@ -234,10 +241,11 @@ public class TournamentController {
   @PostMapping("/join")
   public ResponseEntity<TournamentJoinResultDto> joinTournament(
       @Parameter(
-          description = "Join request payload",
-          required = true,
-          content = @Content(schema = @Schema(implementation = TournamentJoinRequestDto.class)))
-      @RequestBody TournamentJoinRequestDto request,
+              description = "Join request payload",
+              required = true,
+              content = @Content(schema = @Schema(implementation = TournamentJoinRequestDto.class)))
+          @RequestBody
+          TournamentJoinRequestDto request,
       @Parameter(hidden = true) Authentication authentication) {
     if (request == null || request.tournamentId() == null) {
       return ResponseEntity.badRequest().build();
@@ -277,9 +285,11 @@ public class TournamentController {
           @RequestParam(value = "query", required = false)
           String query,
       @Parameter(description = "Zero-based page index", example = "0")
-          @RequestParam(value = "page", defaultValue = "0") int page,
+          @RequestParam(value = "page", defaultValue = "0")
+          int page,
       @Parameter(description = "Page size", example = "10")
-          @RequestParam(value = "size", defaultValue = "10") int size,
+          @RequestParam(value = "size", defaultValue = "10")
+          int size,
       @Parameter(hidden = true) Authentication authentication) {
     Long currentUserId = userService.getCurrentUser(authentication).getId();
     PageRequest pageable = PageRequest.of(page, size);

@@ -129,8 +129,7 @@ public class UserController {
                 schema = @Schema(implementation = ExceptionResponseDto.class)))
   })
   public ResponseEntity<UserResponseDto> updateProfile(
-      @Parameter(description = "Identifier of the user to update", example = "1")
-          @PathVariable
+      @Parameter(description = "Identifier of the user to update", example = "1") @PathVariable
           Long id,
       @Parameter(
               name = "request",
@@ -200,8 +199,7 @@ public class UserController {
                 schema = @Schema(implementation = ExceptionResponseDto.class)))
   })
   public ResponseEntity<UserResponseDto> blockUser(
-      @Parameter(description = "Identifier of the user to block", example = "1")
-          @PathVariable
+      @Parameter(description = "Identifier of the user to block", example = "1") @PathVariable
           Long id,
       @Parameter(hidden = true) Authentication authentication) {
     String username = authentication.getName();

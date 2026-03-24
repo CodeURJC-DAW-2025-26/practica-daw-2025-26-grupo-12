@@ -57,7 +57,9 @@ public class AdminNotificationController {
         example = "[\"alice\", \"bob\"]")
     private List<String> usernames;
 
-    @Schema(description = "Notification message to send", example = "Tournament starts in 10 minutes")
+    @Schema(
+        description = "Notification message to send",
+        example = "Tournament starts in 10 minutes")
     private String message;
   }
 }

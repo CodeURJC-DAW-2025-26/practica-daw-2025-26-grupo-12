@@ -7,15 +7,15 @@ import es.codeurjc.grupo12.scissors_please.security.jwt.AuthResponse.Status;
 import es.codeurjc.grupo12.scissors_please.security.jwt.LoginRequest;
 import es.codeurjc.grupo12.scissors_please.security.jwt.UserLoginService;
 import es.codeurjc.grupo12.scissors_please.service.user.UserService;
-import jakarta.servlet.http.HttpServletResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -159,11 +159,12 @@ public class AuthController {
   @PostMapping("/refresh")
   public ResponseEntity<AuthResponse> refreshToken(
       @Parameter(
-          name = "RefreshToken",
-          description = "Refresh token cookie used to renew the session",
-          in = ParameterIn.COOKIE,
-          required = false)
-      @CookieValue(name = "RefreshToken", required = false) String refreshToken,
+              name = "RefreshToken",
+              description = "Refresh token cookie used to renew the session",
+              in = ParameterIn.COOKIE,
+              required = false)
+          @CookieValue(name = "RefreshToken", required = false)
+          String refreshToken,
       HttpServletResponse response) {
 
     return userLoginService.refresh(response, refreshToken);

@@ -2,9 +2,6 @@ package es.codeurjc.grupo12.scissors_please.controller.api.v1.chart;
 
 import es.codeurjc.grupo12.scissors_please.repository.UserRepository.MonthlyUserCount;
 import es.codeurjc.grupo12.scissors_please.service.chart.ChartService;
-import java.awt.Color;
-import java.util.Base64;
-import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -13,6 +10,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.awt.Color;
+import java.util.Base64;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,7 +34,8 @@ public class ChartController {
   @GetMapping("/results")
   @Operation(
       summary = "Generate a results pie chart",
-      description = "Returns a pie chart encoded as Base64 using the provided wins, losses and draws.")
+      description =
+          "Returns a pie chart encoded as Base64 using the provided wins, losses and draws.")
   @ApiResponses(
       value = {
         @ApiResponse(
@@ -43,12 +44,11 @@ public class ChartController {
             content =
                 @Content(
                     mediaType = "text/plain",
-                    schema =
-                        @Schema(
-                            type = "string",
-                            example =
-                                "iVBORw0KGgoAAAANSUhEUgAA..."))),
-        @ApiResponse(responseCode = "400", description = "Invalid query parameters", content = @Content)
+                    schema = @Schema(type = "string", example = "iVBORw0KGgoAAAANSUhEUgAA..."))),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Invalid query parameters",
+            content = @Content)
       })
   public ResponseEntity<String> getResultsPieChart(
       @Parameter(description = "Number of wins", example = "12") @RequestParam int wins,
@@ -72,11 +72,7 @@ public class ChartController {
             content =
                 @Content(
                     mediaType = "text/plain",
-                    schema =
-                        @Schema(
-                            type = "string",
-                            example =
-                                "iVBORw0KGgoAAAANSUhEUgAA..."))),
+                    schema = @Schema(type = "string", example = "iVBORw0KGgoAAAANSUhEUgAA..."))),
         @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content)
       })
   public ResponseEntity<String> getEloLineChart(
@@ -86,9 +82,7 @@ public class ChartController {
               content =
                   @Content(
                       mediaType = "application/json",
-                      array =
-                          @ArraySchema(
-                              schema = @Schema(type = "integer", example = "1500"))))
+                      array = @ArraySchema(schema = @Schema(type = "integer", example = "1500"))))
           List<Integer> eloHistory) {
     byte[] chartBytes = chartService.generateEloLineChart(eloHistory);
     String base64Chart = encodeToBase64(chartBytes);
@@ -108,11 +102,7 @@ public class ChartController {
             content =
                 @Content(
                     mediaType = "text/plain",
-                    schema =
-                        @Schema(
-                            type = "string",
-                            example =
-                                "iVBORw0KGgoAAAANSUhEUgAA..."))),
+                    schema = @Schema(type = "string", example = "iVBORw0KGgoAAAANSUhEUgAA..."))),
         @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content)
       })
   public ResponseEntity<String> getUserHistoryChart(
@@ -122,7 +112,8 @@ public class ChartController {
               content =
                   @Content(
                       mediaType = "application/json",
-                      array = @ArraySchema(schema = @Schema(implementation = MonthlyUserCount.class))))
+                      array =
+                          @ArraySchema(schema = @Schema(implementation = MonthlyUserCount.class))))
           List<MonthlyUserCount> monthlyData) {
     byte[] chartBytes = chartService.generateUserHistory(monthlyData);
     String base64Chart = encodeToBase64(chartBytes);
@@ -142,19 +133,16 @@ public class ChartController {
             content =
                 @Content(
                     mediaType = "text/plain",
-                    schema =
-                        @Schema(
-                            type = "string",
-                            example =
-                                "iVBORw0KGgoAAAANSUhEUgAA..."))),
-        @ApiResponse(responseCode = "400", description = "Invalid query parameters", content = @Content)
+                    schema = @Schema(type = "string", example = "iVBORw0KGgoAAAANSUhEUgAA..."))),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Invalid query parameters",
+            content = @Content)
       })
   public ResponseEntity<String> getProgressBar(
       @Parameter(description = "Current progress value", example = "75") @RequestParam int current,
       @Parameter(description = "Maximum progress value", example = "100") @RequestParam int max,
-      @Parameter(
-              description = "Optional RGB color in the format R,G,B",
-              example = "34,197,94")
+      @Parameter(description = "Optional RGB color in the format R,G,B", example = "34,197,94")
           @RequestParam(required = false, defaultValue = "34,197,94")
           String color) {
 

@@ -53,7 +53,8 @@ public class MatchController {
         content = @Content(schema = @Schema(implementation = MatchDto.class))),
     @ApiResponse(responseCode = "404", description = "Match not found", content = @Content)
   })
-  public ResponseEntity<MatchDto> getMatch(@Parameter(description = "Match identifier", example = "1") @PathVariable Long id) {
+  public ResponseEntity<MatchDto> getMatch(
+      @Parameter(description = "Match identifier", example = "1") @PathVariable Long id) {
     Match match = matchService.getMatchById(id).orElseThrow(NoSuchElementException::new);
 
     return ResponseEntity.ok(MatchDto.from(match));
@@ -244,8 +245,8 @@ public class MatchController {
     @ApiResponse(responseCode = "404", description = "Invitation not found", content = @Content)
   })
   public ResponseEntity<String> acceptRematch(
-      @Parameter(description = "Rematch invitation identifier", example = "abc123")
-          @PathVariable String invitationId,
+      @Parameter(description = "Rematch invitation identifier", example = "abc123") @PathVariable
+          String invitationId,
       @Parameter(hidden = true) Authentication authentication) {
     User currentUser = userService.getCurrentUser(authentication);
     String redirectUrl = matchService.acceptRematch(invitationId, currentUser);

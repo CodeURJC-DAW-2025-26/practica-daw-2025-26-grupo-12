@@ -11,16 +11,6 @@ import es.codeurjc.grupo12.scissors_please.model.Bot;
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.service.bot.BotService;
 import es.codeurjc.grupo12.scissors_please.service.user.UserService;
-import java.util.List;
-import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.authentication.InsufficientAuthenticationException;
-import org.springframework.security.core.Authentication;
-import org.springframework.http.MediaType;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -29,6 +19,16 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
+import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -53,7 +53,8 @@ public class BotController {
   @GetMapping
   @Operation(
       summary = "List bots",
-      description = "Returns a paginated list of bots filtered by query and contextualized by the authenticated user.")
+      description =
+          "Returns a paginated list of bots filtered by query and contextualized by the authenticated user.")
   @ApiResponses(
       value = {
         @ApiResponse(
@@ -91,7 +92,10 @@ public class BotController {
                 @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = BotDTO.class))),
-        @ApiResponse(responseCode = "401", description = "Authentication required", content = @Content),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Authentication required",
+            content = @Content),
         @ApiResponse(responseCode = "404", description = "Bot not found", content = @Content)
       })
   public ResponseEntity<BotDTO> getBot(
@@ -103,7 +107,8 @@ public class BotController {
   @GetMapping("/user/{userId}")
   @Operation(
       summary = "List bots by user",
-      description = "Returns the public bots for the selected user, with extra context for the requester when authenticated.")
+      description =
+          "Returns the public bots for the selected user, with extra context for the requester when authenticated.")
   @ApiResponses(
       value = {
         @ApiResponse(
@@ -140,7 +145,10 @@ public class BotController {
                 @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = BotDTO.class))),
-        @ApiResponse(responseCode = "401", description = "Authentication required", content = @Content),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Authentication required",
+            content = @Content),
         @ApiResponse(responseCode = "403", description = "Access denied", content = @Content)
       })
   public ResponseEntity<BotDTO> createBot(
@@ -181,7 +189,10 @@ public class BotController {
                 @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = BotDTO.class))),
-        @ApiResponse(responseCode = "401", description = "Authentication required", content = @Content),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Authentication required",
+            content = @Content),
         @ApiResponse(responseCode = "403", description = "Access denied", content = @Content),
         @ApiResponse(responseCode = "404", description = "Bot not found", content = @Content)
       })
@@ -223,7 +234,10 @@ public class BotController {
                 @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = BotDTOWithSimpleImage.class))),
-        @ApiResponse(responseCode = "401", description = "Authentication required", content = @Content),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Authentication required",
+            content = @Content),
         @ApiResponse(responseCode = "403", description = "Access denied", content = @Content),
         @ApiResponse(responseCode = "404", description = "Bot not found", content = @Content)
       })

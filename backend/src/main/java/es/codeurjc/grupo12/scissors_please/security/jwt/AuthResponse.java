@@ -11,7 +11,9 @@ public class AuthResponse {
   @Schema(description = "Mensaje asociado al resultado", example = "Login successful")
   private String message;
 
-  @Schema(description = "Descripcion del error si la operacion falla", example = "Invalid credentials")
+  @Schema(
+      description = "Descripcion del error si la operacion falla",
+      example = "Invalid credentials")
   private String error;
 
   @Schema(description = "Estados posibles de una respuesta de autenticacion")
