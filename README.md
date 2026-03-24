@@ -475,8 +475,8 @@ Diagrama actualizado incluyendo los @RestController y su relación con los @Serv
 
 1. **Clonar el repositorio** (si no lo has hecho ya):
    ```bash
-   git clone https://github.com/[usuario]/[repositorio].git
-   cd [repositorio]
+   git clone https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12
+   cd practica-daw-2025-26-grupo-12
    ```
 
 2. **AQUÍ LOS SIGUIENTES PASOS**:
@@ -488,10 +488,11 @@ Diagrama actualizado incluyendo los @RestController y su relación con los @Serv
 
 #### **Pasos para construir y publicar la imagen:**
 
-1. **Navegar al directorio de Docker**:
-   ```bash
-   cd docker
-   ```
+```bash
+./docker/create_image.sh <user>/scissors-please
+./docker/publish_image.sh <user>/scissors-please
+./docker/publish_docker-compose.sh <user>/scissors-please-compose <user>/scissors-please
+```
 
 2. **AQUÍ LOS SIGUIENTES PASOS**
 
@@ -544,35 +545,21 @@ Me he encargado de organizar algunos DTOs de respuestas, de implementar el JWT y
 
 ---
 
-#### **Alumno 2 - [Nombre Completo]**
+#### **Alumno 2 - Marcelo Atanasio Domínguez**
 
-[Descripción de las tareas y responsabilidades principales del alumno en el proyecto]
+En esta fase, me he encargado principalmente de la parte de despliegue con Docker, asegurándome de que la aplicación sea fácil de desplegar de manera personalizable y consistente, así como con los datos de inicio adecuados según el modo. Además, he resuelto *bugs* relacionados con el `GlobalExceptionHandler` e implementado los controladores REST relativos a las notificaciones, partidas y torneos.
 
 | Nº    | Commits      | Files      |
 |:------------: |:------------:| :------------:|
-|1| [Descripción commit 1](URL_commit_1)  | [Archivo1](URL_archivo_1)   |
-|2| [Descripción commit 2](URL_commit_2)  | [Archivo2](URL_archivo_2)   |
-|3| [Descripción commit 3](URL_commit_3)  | [Archivo3](URL_archivo_3)   |
-|4| [Descripción commit 4](URL_commit_4)  | [Archivo4](URL_archivo_4)   |
-|5| [Descripción commit 5](URL_commit_5)  | [Archivo5](URL_archivo_5)   |
+|1| [Setup docker](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/64375ef60c50eda6ced956387875c230c8b0c33f)  | [docker/Dockerfile](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/docker/Dockerfile)   |
+|2| [Deploy app with https on the server](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/5015fd0eb7bf686a70e3a444239d00455a7e4471)  | [docker/docker_compose.yml](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/docker/docker_compose.yml)   |
+|3| [Add notifications and postman](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/11c264d864cdeeed6706ba93b86267021ea630a6)  | [backend/src/main/java/es/codeurjc/grupo12/scissors_please/controller/api/v1/notifications/AdminNotificationRestController.java](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/backend/src/main/java/es/codeurjc/grupo12/scissors_please/controller/api/v1/notifications/AdminNotificationRestController.java)   |
+|4| [Add tournament join related endpoints](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/7b81cda620e73be18d08422a14a048fdb73a14dd)  | [backend/src/main/java/es/codeurjc/grupo12/scissors_please/controller/api/v1/tournaments/TournamentController.java](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/backend/src/main/java/es/codeurjc/grupo12/scissors_please/controller/api/v1/tournaments/TournamentController.java)   |
+|5| [Add most match related REST endpoints](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/90379899d10b3d0aae77edf3b582b1155bc06721)  | [backend/src/main/java/es/codeurjc/grupo12/scissors_please/controller/api/v1/matches/MatchController.java](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/backend/src/main/java/es/codeurjc/grupo12/scissors_please/controller/api/v1/matches/MatchController.java)   |
 
 ---
 
 #### **Alumno 3 - [Nombre Completo]**
-
-[Descripción de las tareas y responsabilidades principales del alumno en el proyecto]
-
-| Nº    | Commits      | Files      |
-|:------------: |:------------:| :------------:|
-|1| [Descripción commit 1](URL_commit_1)  | [Archivo1](URL_archivo_1)   |
-|2| [Descripción commit 2](URL_commit_2)  | [Archivo2](URL_archivo_2)   |
-|3| [Descripción commit 3](URL_commit_3)  | [Archivo3](URL_archivo_3)   |
-|4| [Descripción commit 4](URL_commit_4)  | [Archivo4](URL_archivo_4)   |
-|5| [Descripción commit 5](URL_commit_5)  | [Archivo5](URL_archivo_5)   |
-
----
-
-#### **Alumno 4 - [Nombre Completo]**
 
 [Descripción de las tareas y responsabilidades principales del alumno en el proyecto]
 
