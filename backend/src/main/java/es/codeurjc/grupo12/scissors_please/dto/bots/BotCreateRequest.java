@@ -1,4 +1,4 @@
-package es.codeurjc.grupo12.scissors_please.dto;
+package es.codeurjc.grupo12.scissors_please.dto.bots;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

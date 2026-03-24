@@ -1,8 +1,10 @@
 package es.codeurjc.grupo12.scissors_please.controller.api.v1.user;
 
 import es.codeurjc.grupo12.scissors_please.dto.ExceptionResponseDto;
-import es.codeurjc.grupo12.scissors_please.dto.UserPageResponseDto;
-import es.codeurjc.grupo12.scissors_please.dto.UserResponseDto;
+import es.codeurjc.grupo12.scissors_please.dto.users.UpdateProfileRequestDto;
+import es.codeurjc.grupo12.scissors_please.dto.users.UserPageResponseDto;
+import es.codeurjc.grupo12.scissors_please.dto.users.UserResponseDto;
+import es.codeurjc.grupo12.scissors_please.dto.users.UserUpdateRequestDto;
 import es.codeurjc.grupo12.scissors_please.model.Image;
 import es.codeurjc.grupo12.scissors_please.model.User;
 import es.codeurjc.grupo12.scissors_please.service.image.ImageService;
@@ -97,7 +99,7 @@ public class UserController {
               content =
                   @Content(
                       mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
-                      schema = @Schema(implementation = UpdateProfileRequest.class))))
+                      schema = @Schema(implementation = UpdateProfileRequestDto.class))))
   @ApiResponses({
     @ApiResponse(
         responseCode = "200",
@@ -135,9 +137,9 @@ public class UserController {
               name = "request",
               description = "Multipart part with the editable profile fields serialized as JSON",
               required = true,
-              content = @Content(schema = @Schema(implementation = UserUpdateRequest.class)))
+              content = @Content(schema = @Schema(implementation = UserUpdateRequestDto.class)))
           @RequestPart("request")
-          UserUpdateRequest request,
+          UserUpdateRequestDto request,
       @Parameter(
               name = "imageFile",
               description = "New profile image",
@@ -244,13 +246,4 @@ public class UserController {
     return size <= 0 ? DEFAULT_PAGE_SIZE : size;
   }
 
-  private record UserUpdateRequest(
-      @Schema(description = "New username", example = "new-user") String username,
-      @Schema(description = "New email address", example = "new-user@example.com") String email,
-      @Schema(description = "New raw password", example = "secret123") String password) {}
-
-  private record UpdateProfileRequest(
-      @Schema(description = "Editable profile fields") UserUpdateRequest request,
-      @Schema(description = "Profile image file", type = "string", format = "binary")
-          MultipartFile imageFile) {}
 }

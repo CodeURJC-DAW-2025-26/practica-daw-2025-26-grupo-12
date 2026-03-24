@@ -2,6 +2,7 @@ package es.codeurjc.grupo12.scissors_please.controller.api.v1.auth;
 
 import es.codeurjc.grupo12.scissors_please.config.ResponseConstants;
 import es.codeurjc.grupo12.scissors_please.dto.ExceptionResponseDto;
+import es.codeurjc.grupo12.scissors_please.dto.auth.RegisterRequest;
 import es.codeurjc.grupo12.scissors_please.security.jwt.AuthResponse;
 import es.codeurjc.grupo12.scissors_please.security.jwt.AuthResponse.Status;
 import es.codeurjc.grupo12.scissors_please.security.jwt.LoginRequest;
@@ -187,12 +188,4 @@ public class AuthController {
   public ResponseEntity<AuthResponse> logOut(HttpServletResponse response) {
     return ResponseEntity.ok(new AuthResponse(Status.SUCCESS, userLoginService.logout(response)));
   }
-
-  private record RegisterRequest(
-      @Schema(description = "Unique username for the new account", example = "jane.doe")
-          String username,
-      @Schema(description = "Password for the new account", example = "StrongPass123!")
-          String password,
-      @Schema(description = "Email address for the new account", example = "jane@example.com")
-          String email) {}
 }

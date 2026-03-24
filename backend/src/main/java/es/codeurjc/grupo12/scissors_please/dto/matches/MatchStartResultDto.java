@@ -1,4 +1,4 @@
-package es.codeurjc.grupo12.scissors_please.dto;
+package es.codeurjc.grupo12.scissors_please.dto.matches;
 
 public record MatchStartResultDto(
     boolean matched, Long matchId, String myBotName, String opponentBotName, boolean searching) {

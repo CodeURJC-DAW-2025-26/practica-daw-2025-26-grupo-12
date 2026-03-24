@@ -1,10 +1,7 @@
 package es.codeurjc.grupo12.scissors_please.controller.api.v1.notifications;
 
+import es.codeurjc.grupo12.scissors_please.dto.notifications.NotificationRequest;
 import es.codeurjc.grupo12.scissors_please.service.notification.NotificationService;
-import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,13 +20,5 @@ public class AdminNotificationRestController {
   public ResponseEntity<Void> sendNotification(@RequestBody NotificationRequest request) {
     notificationService.createAndSendNotification(request.getUsernames(), request.getMessage());
     return ResponseEntity.ok().build();
-  }
-
-  @Data
-  @NoArgsConstructor
-  @AllArgsConstructor
-  public static class NotificationRequest {
-    private List<String> usernames;
-    private String message;
   }
 }

@@ -1,11 +1,11 @@
 package es.codeurjc.grupo12.scissors_please.controller.api.v1.tournaments;
 
-import es.codeurjc.grupo12.scissors_please.dto.TournamentCreateRequestDto;
-import es.codeurjc.grupo12.scissors_please.dto.TournamentDto;
-import es.codeurjc.grupo12.scissors_please.dto.TournamentJoinRequestDto;
-import es.codeurjc.grupo12.scissors_please.dto.TournamentJoinResultDto;
-import es.codeurjc.grupo12.scissors_please.dto.TournamentPageDto;
-import es.codeurjc.grupo12.scissors_please.dto.TournamentRequestDto;
+import es.codeurjc.grupo12.scissors_please.dto.tournaments.TournamentCreateRequestDto;
+import es.codeurjc.grupo12.scissors_please.dto.tournaments.TournamentDto;
+import es.codeurjc.grupo12.scissors_please.dto.tournaments.TournamentJoinRequestDto;
+import es.codeurjc.grupo12.scissors_please.dto.tournaments.TournamentJoinResultDto;
+import es.codeurjc.grupo12.scissors_please.dto.tournaments.TournamentPageDto;
+import es.codeurjc.grupo12.scissors_please.dto.tournaments.TournamentRequestDto;
 import es.codeurjc.grupo12.scissors_please.model.Image;
 import es.codeurjc.grupo12.scissors_please.model.Tournament;
 import es.codeurjc.grupo12.scissors_please.service.image.ImageService;

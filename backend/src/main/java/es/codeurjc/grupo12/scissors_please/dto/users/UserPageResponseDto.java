@@ -1,4 +1,4 @@
-package es.codeurjc.grupo12.scissors_please.dto;
+package es.codeurjc.grupo12.scissors_please.dto.users;
 
 import java.util.List;
 import org.springframework.data.domain.Page;

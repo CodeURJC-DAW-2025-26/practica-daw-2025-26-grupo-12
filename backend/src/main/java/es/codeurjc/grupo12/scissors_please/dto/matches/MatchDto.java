@@ -1,4 +1,4 @@
-package es.codeurjc.grupo12.scissors_please.dto;
+package es.codeurjc.grupo12.scissors_please.dto.matches;
 
 import es.codeurjc.grupo12.scissors_please.model.Match;
 import java.time.LocalDateTime;
