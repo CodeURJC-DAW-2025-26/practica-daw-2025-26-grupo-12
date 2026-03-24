@@ -124,8 +124,6 @@ public class SecurityConfig {
                 .hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/v1/users/*/block")
                 .hasRole("ADMIN")
-
-                
                 .requestMatchers(HttpMethod.POST, "/api/v1/matches/rematch/*/accept")
                 .hasRole("USER")
                 .requestMatchers(HttpMethod.POST, "/api/v1/matches/*/rematch/request")
