@@ -1,16 +1,22 @@
 import Header from "~/components/header";
-import type { Route } from "./+types/home";
 import Footer from "~/components/footer";
-export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
-  ];
+import GuestHomeContent from "~/components/guestHomeContent";
+import { useLoaderData } from "react-router";
+
+export async function loader() {
+  return {
+    logged:false,
+    admin: false,
+  };
 }
+interface HomeProps{logged:boolean,admin:boolean}
 
 export default function Home() {
+  const { logged, admin } = useLoaderData<typeof loader>();
+  
   return (<>
-  <Header admin={false} logged={false} />
+  <Header admin={admin} logged={logged} />
+  {!logged && <GuestHomeContent/>}
   <Footer></Footer>
   </>
   )
