@@ -1,5 +1,7 @@
 interface HeaderProps{logged:boolean,admin:boolean}
 export default function Header({logged,admin}:HeaderProps){
+    
+    admin = logged && admin;
     return(
         <>
     <nav className="navbar navbar-expand-lg navbar-dark sticky-top">
