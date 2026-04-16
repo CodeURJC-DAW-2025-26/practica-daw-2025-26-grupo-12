@@ -1,3 +1,5 @@
+import { Link } from "react-router";
+
 interface HeaderProps{logged:boolean,admin:boolean}
 export default function Header({logged,admin}:HeaderProps){
     
@@ -12,7 +14,7 @@ export default function Header({logged,admin}:HeaderProps){
         </button>
         <div className="collapse navbar-collapse" id="navbarNav">
             <ul className="navbar-nav me-auto">
-                <li className="nav-item"><a className="nav-link" href="/home">Home</a></li>
+                <li className="nav-item"><Link className="nav-link" to="/">Home</Link></li>
                 <li className="nav-item"><a className="nav-link" href="/matches/list">Best Matches</a></li>
                 {admin && <><li className="nav-item"><a className="nav-link" href="/admin/tournaments">Tournaments</a></li>
                 <li className="nav-item"><a className="nav-link" href="/admin/users">Users</a></li>
@@ -30,7 +32,7 @@ export default function Header({logged,admin}:HeaderProps){
                     <button type="submit" className="btn btn-primary btn-sm px-3">Log Out</button>
                 </form></>}
                 
-                {!logged && <> <a href="/login" className="btn btn-outline-muted btn-sm px-3">Log In</a>
+                {!logged && <> <Link to="/login" className="btn btn-outline-muted btn-sm px-3">Log In</Link>
                 <a href="/sign-up" className="btn btn-primary btn-sm px-3">Sign Up</a> </>}
             </div>
         </div>
