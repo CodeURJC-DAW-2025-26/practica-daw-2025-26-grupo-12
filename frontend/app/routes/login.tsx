@@ -1,5 +1,6 @@
 import { useState, type ChangeEvent } from "react";
 import { logUser } from "../services/auth-service";
+import { Link } from "react-router";
 
 export default function Login() {
     const [errorMessage, setErrorMessage] = useState("");
@@ -27,7 +28,7 @@ export default function Login() {
     }
     return (
         <>
-            <div className="centered-layout min-vh-100">
+            <div className="d-flex justify-content-center align-items-center min-vh-100">
                 <div className="card glass-card p-4" style={{maxWidth:'400px'}}>
                     <div className="card-body">
                         <div className="text-center mb-4">
@@ -83,8 +84,8 @@ export default function Login() {
 
                         <div className="text-center">
                             <p className="text-secondary small mb-0">
-                                Don't have an account? <a href="/sign-up" className="text-primary text-decoration-none fw-bold">Sign
-                                    up</a>
+                                Don't have an account? <Link to="/register" className="text-primary text-decoration-none fw-bold">Sign
+                                    up</Link>
                             </p>
                         </div>
                         <div className="text-center mt-3">

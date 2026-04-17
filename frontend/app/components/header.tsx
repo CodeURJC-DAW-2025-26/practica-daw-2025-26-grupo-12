@@ -33,7 +33,7 @@ export default function Header({logged,admin}:HeaderProps){
                 </form></>}
                 
                 {!logged && <> <Link to="/login" className="btn btn-outline-muted btn-sm px-3">Log In</Link>
-                <a href="/sign-up" className="btn btn-primary btn-sm px-3">Sign Up</a> </>}
+                <Link to="/register" className="btn btn-primary btn-sm px-3">Sign Up</Link> </>}
             </div>
         </div>
     </div>
