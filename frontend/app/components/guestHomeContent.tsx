@@ -1,4 +1,6 @@
 
+import { Link } from "react-router";
+
 export default function GuestHomeContent() {
     return (
         <>
@@ -12,7 +14,7 @@ export default function GuestHomeContent() {
                                 Program your strategy, deploy your bot, and watch it climb the global leaderboard.
                             </p>
                             <div className="d-flex justify-content-center gap-3">
-                                <a href="/sign-up" className="btn btn-primary btn-lg px-4">Enter the Area</a>
+                                <Link to="/sign-up" className="btn btn-primary btn-lg px-4">Enter the Area</Link>
                             </div>
                         </div>
                     </div>

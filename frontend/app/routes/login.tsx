@@ -1,4 +1,5 @@
-import { useState, type ChangeEvent } from "react";
+import { useState, type ChangeEvent, type FormEvent } from "react";
+import { Link } from "react-router";
 import { logUser } from "../services/auth-service";
 
 export default function Login() {
@@ -15,35 +16,36 @@ export default function Login() {
         setPassword(e.target.value);
     }
 
-    async function sendForm(e : React.MouseEvent<HTMLButtonElement>){
+    async function sendForm(e : FormEvent<HTMLFormElement>){
         e.preventDefault();
+        setErrorMessage("");
+        setSuccessMessage("");
         const result = await logUser({username,password})
         if (result){
-            alert("El usuario existe");
+            setSuccessMessage("Login successful. Redirecting...");
+            window.location.assign("/tournaments");
         }
         else{
-            alert("El usuario no existe");
+            setErrorMessage("Invalid username or password.");
         }
     }
     return (
         <>
             <div className="centered-layout min-vh-100">
                 <div className="card glass-card p-4" style={{maxWidth:'400px'}}>
-                    <div className="card-body">
+                        <div className="card-body">
                         <div className="text-center mb-4">
-                            <a href="/" className="text-decoration-none">
+                            <Link to="/" className="text-decoration-none">
                                 <div className="auth-header-icon">✂️</div>
                                 <h1 className="h4 fw-bold text-white mb-0">Scissors, Please</h1>
-                            </a>
+                            </Link>
                             <p className="text-secondary mt-2">Welcome back! Please enter your details.</p>
                         </div>
 
                         {errorMessage && <div className="alert alert-danger px-3 py-2 small mb-4" role="alert">{errorMessage}</div>}
                         {successMessage && <div className="alert alert-success px-3 py-2 small mb-4" role="alert">{successMessage}</div>}
 
-
-                        <form>
-                            <input type="hidden" name="_csrf" value="{{_csrf.token}}" />
+                        <form onSubmit={sendForm}>
                             <div className="mb-3">
                                 <label htmlFor="username" className="form-label text-uppercase small">Username</label>
                                 <input type="text"  value ={username} onChange={onChangeUsername} className="form-control form-control-lg" id="username" name="username"
@@ -64,7 +66,7 @@ export default function Login() {
                             </div>
 
                             <div className="d-grid mb-3">
-                                <button onClick={sendForm} className="btn btn-gradient-primary btn-lg fw-bold py-2">Log In</button>
+                                <button type="submit" className="btn btn-gradient-primary btn-lg fw-bold py-2">Log In</button>
                             </div>
                         </form>
 
@@ -83,12 +85,12 @@ export default function Login() {
 
                         <div className="text-center">
                             <p className="text-secondary small mb-0">
-                                Don't have an account? <a href="/sign-up" className="text-primary text-decoration-none fw-bold">Sign
-                                    up</a>
+                                Don't have an account? <Link to="/sign-up" className="text-primary text-decoration-none fw-bold">Sign
+                                    up</Link>
                             </p>
                         </div>
                         <div className="text-center mt-3">
-                            <a href="/" className="small text-secondary text-decoration-none">Back to Home</a>
+                            <Link to="/" className="small text-secondary text-decoration-none">Back to Home</Link>
                         </div>
                     </div>
                 </div>

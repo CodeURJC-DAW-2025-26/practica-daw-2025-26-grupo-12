@@ -147,6 +147,7 @@ body {
     }
 }
 
+.centered-layout,
 body.centered-layout {
     background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #0f172a);
     background-size: 400% 400%;
@@ -158,11 +159,13 @@ body.centered-layout {
     padding: 1rem;
 }
 
+.centered-layout .card,
 body.centered-layout .card {
     width: 100%;
     max-width: 380px;
 }
 
+.centered-layout .card.centered-layout-card--wide,
 body.centered-layout .card.centered-layout-card--wide {
     max-width: 720px;
 }
@@ -246,6 +249,21 @@ body.centered-layout .card.centered-layout-card--wide {
 
 .divider:not(:empty)::after {
     margin-left: .5em;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+}
+
+.empty-state-panel {
+    border: 1px dashed rgba(148, 163, 184, 0.35);
+    border-radius: 1rem;
+    background: rgba(15, 23, 42, 0.35);
+}
+
+.tournament-description-copy {
+    line-height: 1.8;
 }
 
 .searching-stage {
