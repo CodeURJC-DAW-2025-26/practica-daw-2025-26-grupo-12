@@ -24,9 +24,11 @@ export default function TournamentCreateRoute() {
                     Log In
                   </Link>
                 )}
-                <a href="/admin/tournaments" className="btn btn-primary btn-sm">
-                  Go to Admin Panel
-                </a>
+                {session.admin && (
+                  <Link to="/admin/tournaments" className="btn btn-primary btn-sm">
+                    Go to Admin Panel
+                  </Link>
+                )}
               </div>
             </div>
           </div>

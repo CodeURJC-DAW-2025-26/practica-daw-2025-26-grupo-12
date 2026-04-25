@@ -1,3 +1,10 @@
+import {
+  clearStoredSessionState,
+  fetchSessionState,
+  storeSessionState,
+  type SessionState,
+} from "~/services/session-service";
+
 interface LoginData {
   username: string;
   password: string;
@@ -39,7 +46,7 @@ async function readAuthMessage(response: Response, fallbackMessage: string): Pro
   return fallbackMessage;
 }
 
-export async function logUser(loginCredentials: LoginData): Promise<boolean> {
+export async function logUser(loginCredentials: LoginData): Promise<SessionState | null> {
   const response = await fetch("/api/v1/auth/login", {
     method: "POST",
     headers: {
@@ -52,7 +59,13 @@ export async function logUser(loginCredentials: LoginData): Promise<boolean> {
     credentials: "include",
   });
 
-  return response.ok;
+  if (!response.ok) {
+    clearStoredSessionState();
+    return null;
+  }
+
+  const session = await fetchSessionState();
+  return session.logged ? session : null;
 }
 
 export async function registerUser(registerData: RegisterData): Promise<AuthResult> {
@@ -69,20 +82,32 @@ export async function registerUser(registerData: RegisterData): Promise<AuthResu
     credentials: "include",
   });
 
-  return {
+  const result = {
     ok: response.ok,
     message: await readAuthMessage(
       response,
       response.ok ? "Account created successfully." : "Unable to create your account right now.",
     ),
   };
+
+  if (result.ok) {
+    storeSessionState({ logged: true, admin: false });
+  }
+
+  return result;
 }
 
 export async function logoutUser(): Promise<boolean> {
-  const response = await fetch("/api/v1/auth/logout", {
-    method: "POST",
-    credentials: "include",
-  });
+  try {
+    const response = await fetch("/api/v1/auth/logout", {
+      method: "POST",
+      credentials: "include",
+    });
 
-  return response.ok;
+    return response.ok;
+  } catch {
+    return false;
+  } finally {
+    clearStoredSessionState();
+  }
 }

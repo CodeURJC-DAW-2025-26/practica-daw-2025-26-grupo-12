@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import { fetchSessionState, type SessionState } from "~/services/session-service";
+import {
+  fetchSessionState,
+  getStoredSessionState,
+  type SessionState,
+} from "~/services/session-service";
 
 interface ResolvedSessionState extends SessionState {
   resolved: boolean;
@@ -11,8 +15,16 @@ const INITIAL_SESSION_STATE: ResolvedSessionState = {
   resolved: false,
 };
 
+function getInitialSessionState(): ResolvedSessionState {
+  const storedSession = getStoredSessionState();
+  return {
+    ...(storedSession ?? INITIAL_SESSION_STATE),
+    resolved: false,
+  };
+}
+
 export function useSessionState(): ResolvedSessionState {
-  const [sessionState, setSessionState] = useState(INITIAL_SESSION_STATE);
+  const [sessionState, setSessionState] = useState(getInitialSessionState);
 
   useEffect(() => {
     let active = true;

@@ -2,16 +2,18 @@ import Header from "~/components/header";
 import Footer from "~/components/footer";
 import GuestHomeContent from "~/components/guestHomeContent";
 import { useEffect } from "react";
+import { useNavigate } from "react-router";
 import { useSessionState } from "~/hooks/use-session-state";
 
 export default function Home() {
   const session = useSessionState();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (session.resolved && session.logged) {
-      window.location.assign("/tournaments");
+      navigate(session.admin ? "/admin/tournaments" : "/tournaments", { replace: true });
     }
-  }, [session.logged, session.resolved]);
+  }, [navigate, session.admin, session.logged, session.resolved]);
 
   return (
     <>

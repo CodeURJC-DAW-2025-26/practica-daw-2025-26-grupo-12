@@ -151,15 +151,15 @@ export default function TournamentDetailRoute() {
                   <div className="d-flex flex-wrap justify-content-center justify-content-md-start gap-3 mt-3">
                     {session.admin ? (
                       <>
-                        <a
-                          href={`/admin/tournaments/edit/${tournament.id}`}
+                        <Link
+                          to={`/admin/tournaments/edit/${tournament.id}`}
                           className="btn btn-primary px-4"
                         >
                           Edit Settings
-                        </a>
-                        <a href="/admin/tournaments" className="btn btn-outline-muted px-4">
+                        </Link>
+                        <Link to="/admin/tournaments" className="btn btn-outline-muted px-4">
                           Admin Dashboard
-                        </a>
+                        </Link>
                       </>
                     ) : (
                       <>

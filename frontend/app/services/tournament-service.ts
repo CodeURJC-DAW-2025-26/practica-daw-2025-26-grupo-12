@@ -39,6 +39,17 @@ export interface TournamentJoinResult {
   message: string;
 }
 
+export interface TournamentMutationData {
+  name: string;
+  description: string;
+  slots: number;
+  registrationStarts: string;
+  startDate: string;
+  price: string;
+  status?: string;
+  imageFile?: File | null;
+}
+
 interface ApiErrorPayload {
   message?: string;
   error?: string;
@@ -170,6 +181,26 @@ export function formatTournamentDate(value?: string | null): string {
 export function extractRegistrationOpenDate(description?: string | null): string | null {
   const match = (description ?? "").match(/Registration opens:\s*(\d{4}-\d{2}-\d{2})/i);
   return match?.[1] ?? null;
+}
+
+export function extractTournamentPrize(description?: string | null): string {
+  const match = (description ?? "").match(/Prize:\s*([^]+?)(?:\s+-\s+|$)/i);
+  return match?.[1]?.trim() ?? "";
+}
+
+export function stripTournamentMetadata(description?: string | null): string {
+  return (description ?? "")
+    .split(" - ")
+    .filter((segment) => {
+      const normalized = segment.trim().toLowerCase();
+      return (
+        !normalized.startsWith("max players:") &&
+        !normalized.startsWith("registration opens:") &&
+        !normalized.startsWith("prize:")
+      );
+    })
+    .join(" - ")
+    .trim();
 }
 
 export function extractTournamentFormat(description?: string | null): string {
@@ -381,5 +412,74 @@ export async function joinTournament(
   return parseApiResponse<TournamentJoinResult>(
     response,
     "Unable to join this tournament right now.",
+  );
+}
+
+function buildTournamentFormData(data: TournamentMutationData): FormData {
+  const formData = new FormData();
+  const payload = {
+    name: data.name,
+    description: data.description,
+    status: data.status,
+    slots: data.slots,
+    registrationStarts: data.registrationStarts,
+    startDate: data.startDate,
+    price: data.price,
+  };
+
+  formData.append(
+    "request",
+    new Blob([JSON.stringify(payload)], {
+      type: "application/json",
+    }),
+  );
+
+  if (data.imageFile) {
+    formData.append("imageFile", data.imageFile);
+  }
+
+  return formData;
+}
+
+export async function createTournament(
+  data: TournamentMutationData,
+): Promise<TournamentDetail> {
+  const response = await fetch(TOURNAMENTS_API_PATH, {
+    method: "POST",
+    credentials: "include",
+    body: buildTournamentFormData(data),
+  });
+
+  return parseApiResponse<TournamentDetail>(
+    response,
+    "Unable to create this tournament right now.",
+  );
+}
+
+export async function updateTournament(
+  id: number | string,
+  data: TournamentMutationData,
+): Promise<TournamentDetail> {
+  const response = await fetch(`${TOURNAMENTS_API_PATH}/${id}`, {
+    method: "PUT",
+    credentials: "include",
+    body: buildTournamentFormData(data),
+  });
+
+  return parseApiResponse<TournamentDetail>(
+    response,
+    "Unable to update this tournament right now.",
+  );
+}
+
+export async function deleteTournament(id: number | string): Promise<TournamentDetail> {
+  const response = await fetch(`${TOURNAMENTS_API_PATH}/${id}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+
+  return parseApiResponse<TournamentDetail>(
+    response,
+    "Unable to delete this tournament right now.",
   );
 }

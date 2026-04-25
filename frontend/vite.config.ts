@@ -16,11 +16,11 @@ export default defineConfig({
         target: "http://localhost:8080",
         changeOrigin: true,
       },
-      "/admin": {
+      "/admin/users": {
         target: "http://localhost:8080",
         changeOrigin: true,
       },
-      "/user": {
+      "/admin/bots": {
         target: "http://localhost:8080",
         changeOrigin: true,
       },

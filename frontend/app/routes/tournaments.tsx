@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { Link, useSearchParams } from "react-router";
+import { Link, Navigate, useSearchParams } from "react-router";
 import Footer from "~/components/footer";
 import Header from "~/components/header";
 import TournamentStatusBadge from "~/components/tournamentStatusBadge";
@@ -178,6 +178,28 @@ export default function Tournaments() {
 
   const fromItem = tournaments.length === 0 ? 0 : 1;
   const toItem = tournaments.length;
+  const adminTournamentUrl = urlQuery
+    ? `/admin/tournaments?q=${encodeURIComponent(urlQuery)}`
+    : "/admin/tournaments";
+
+  if (!session.resolved) {
+    return (
+      <>
+        <Header logged={session.logged} admin={session.admin} />
+        <main className="container py-5 text-center">
+          <div className="card p-5">
+            <div className="spinner-border text-primary mb-3 mx-auto" role="status" />
+            <p className="text-secondary mb-0">Checking your session...</p>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  if (session.admin) {
+    return <Navigate to={adminTournamentUrl} replace />;
+  }
 
   return (
     <>

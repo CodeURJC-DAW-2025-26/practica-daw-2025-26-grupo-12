@@ -1,13 +1,15 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { logUser } from "../services/auth-service";
 
 export default function Login() {
+    const navigate = useNavigate();
     const [errorMessage, setErrorMessage] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [username, setUsername] = useState("");
-    const [password,setPassword] = useState("");
+    const [password, setPassword] = useState("");
 
     function onChangeUsername(e: ChangeEvent<HTMLInputElement>){
         setUsername(e.target.value);
@@ -20,13 +22,22 @@ export default function Login() {
         e.preventDefault();
         setErrorMessage("");
         setSuccessMessage("");
-        const result = await logUser({username,password})
-        if (result){
-            setSuccessMessage("Login successful. Redirecting...");
-            window.location.assign("/tournaments");
-        }
-        else{
+
+        setIsSubmitting(true);
+
+        try {
+            const session = await logUser({ username, password });
+            if (session){
+                setSuccessMessage("Login successful. Redirecting...");
+                navigate(session.admin ? "/admin/tournaments" : "/tournaments", { replace: true });
+                return;
+            }
+
             setErrorMessage("Invalid username or password.");
+        } catch {
+            setErrorMessage("Unable to log in right now.");
+        } finally {
+            setIsSubmitting(false);
         }
     }
     return (
@@ -66,7 +77,9 @@ export default function Login() {
                             </div>
 
                             <div className="d-grid mb-3">
-                                <button type="submit" className="btn btn-gradient-primary btn-lg fw-bold py-2">Log In</button>
+                                <button type="submit" className="btn btn-gradient-primary btn-lg fw-bold py-2" disabled={isSubmitting}>
+                                    {isSubmitting ? "Logging in..." : "Log In"}
+                                </button>
                             </div>
                         </form>
 
