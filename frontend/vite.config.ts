@@ -4,14 +4,14 @@ import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
-  plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8080/api',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
-      }
-    }
-  }
+    plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
+    server: {
+        proxy: {
+            "/api": {
+                target: "http://localhost:8080/api",
+                changeOrigin: true,
+                rewrite: (path) => path.replace(/^\/api/, ""),
+            },
+        },
+    },
 });
