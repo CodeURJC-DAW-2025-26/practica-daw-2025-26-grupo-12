@@ -32,14 +32,6 @@ export default defineConfig({
         target: "http://localhost:8080",
         changeOrigin: true,
       },
-      "/tournaments/detail": {
-        target: "http://localhost:8080",
-        changeOrigin: true,
-      },
-      "/tournaments/join": {
-        target: "http://localhost:8080",
-        changeOrigin: true,
-      },
       "/tournament-images": {
         target: "http://localhost:8080",
         changeOrigin: true,

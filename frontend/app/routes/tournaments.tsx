@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, useSearchParams } from "react-router";
 import Footer from "~/components/footer";
 import Header from "~/components/header";
@@ -7,59 +7,80 @@ import TournamentThumbnail from "~/components/tournamentThumbnail";
 import { useSessionState } from "~/hooks/use-session-state";
 import {
   TOURNAMENT_PAGE_SIZE,
+  fetchTournament,
   fetchTournamentPage,
-  type TournamentPageResponse,
+  getTournamentActionMeta,
+  type TournamentDetail,
+  type TournamentListItem,
 } from "~/services/tournament-service";
 
-function sanitizePage(rawPage: string | null): number {
-  const parsedPage = Number(rawPage ?? "0");
-  if (!Number.isFinite(parsedPage) || parsedPage < 0) {
-    return 0;
-  }
-
-  return Math.floor(parsedPage);
+interface EnrichedTournament extends TournamentListItem {
+  detail: TournamentDetail | null;
 }
 
 export default function Tournaments() {
   const session = useSessionState();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [searchValue, setSearchValue] = useState(searchParams.get("q") ?? "");
-  const [tournamentPage, setTournamentPage] = useState<TournamentPageResponse | null>(null);
+  const urlQuery = searchParams.get("q")?.trim() ?? "";
+  const [searchValue, setSearchValue] = useState(urlQuery);
+  const [tournaments, setTournaments] = useState<EnrichedTournament[]>([]);
+  const [nextPage, setNextPage] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-
-  const query = searchParams.get("q")?.trim() ?? "";
-  const page = sanitizePage(searchParams.get("page"));
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    setSearchValue(query);
-  }, [query]);
+    setSearchValue(urlQuery);
+  }, [urlQuery]);
 
   useEffect(() => {
     let active = true;
 
-    async function loadTournaments() {
+    async function enrichTournamentItems(items: TournamentListItem[]): Promise<EnrichedTournament[]> {
+      const details = await Promise.all(
+        items.map((item) => {
+          return fetchTournament(item.id).catch(() => null);
+        }),
+      );
+
+      return items.map((item, index) => ({
+        ...item,
+        detail: details[index],
+      }));
+    }
+
+    async function loadInitialPage() {
       setIsLoading(true);
       setErrorMessage("");
 
       try {
-        const nextTournamentPage = await fetchTournamentPage({
-          query,
-          page,
+        const tournamentPage = await fetchTournamentPage({
+          query: urlQuery,
+          page: 0,
           size: TOURNAMENT_PAGE_SIZE,
         });
+        const enrichedTournaments = await enrichTournamentItems(tournamentPage.content);
 
         if (!active) {
           return;
         }
 
-        setTournamentPage(nextTournamentPage);
+        setTournaments(enrichedTournaments);
+        setNextPage(tournamentPage.pageNumber + 1);
+        setTotalElements(tournamentPage.totalElements);
+        setHasMore(tournamentPage.pageNumber + 1 < tournamentPage.totalPages);
       } catch (error) {
         if (!active) {
           return;
         }
 
-        setTournamentPage(null);
+        setTournaments([]);
+        setNextPage(0);
+        setTotalElements(0);
+        setHasMore(false);
         setErrorMessage(
           error instanceof Error ? error.message : "Unable to load tournaments right now.",
         );
@@ -70,47 +91,93 @@ export default function Tournaments() {
       }
     }
 
-    void loadTournaments();
+    void loadInitialPage();
 
     return () => {
       active = false;
     };
-  }, [page, query]);
+  }, [urlQuery]);
 
-  function updatePage(nextPage: number) {
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, []);
+
+  function updateQuery(nextQuery: string) {
+    const trimmedQuery = nextQuery.trim();
     const nextParams = new URLSearchParams(searchParams);
-    if (nextPage <= 0) {
-      nextParams.delete("page");
+
+    if (trimmedQuery) {
+      nextParams.set("q", trimmedQuery);
     } else {
-      nextParams.set("page", String(nextPage));
+      nextParams.delete("q");
     }
 
-    setSearchParams(nextParams);
+    setSearchParams(nextParams, { replace: true });
+  }
+
+  function queueLiveSearch(nextValue: string) {
+    setSearchValue(nextValue);
+
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    debounceRef.current = setTimeout(() => {
+      updateQuery(nextValue);
+    }, 250);
   }
 
   function onSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const nextParams = new URLSearchParams(searchParams);
-    const trimmedValue = searchValue.trim();
-
-    if (trimmedValue) {
-      nextParams.set("q", trimmedValue);
-    } else {
-      nextParams.delete("q");
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
     }
 
-    nextParams.delete("page");
-    setSearchParams(nextParams);
+    updateQuery(searchValue);
   }
 
-  const tournaments = tournamentPage?.content ?? [];
-  const fromItem = tournaments.length === 0 ? 0 : page * TOURNAMENT_PAGE_SIZE + 1;
-  const toItem = tournaments.length === 0 ? 0 : fromItem + tournaments.length - 1;
-  const totalPages = tournamentPage?.totalPages ?? 0;
-  const totalElements = tournamentPage?.totalElements ?? 0;
-  const hasPreviousPage = page > 0;
-  const hasNextPage = totalPages > 0 && page < totalPages - 1;
+  async function loadMoreTournaments() {
+    if (isLoadingMore || !hasMore) {
+      return;
+    }
+
+    setIsLoadingMore(true);
+    setErrorMessage("");
+
+    try {
+      const tournamentPage = await fetchTournamentPage({
+        query: urlQuery,
+        page: nextPage,
+        size: TOURNAMENT_PAGE_SIZE,
+      });
+      const details = await Promise.all(
+        tournamentPage.content.map((item) => fetchTournament(item.id).catch(() => null)),
+      );
+      const enrichedTournaments = tournamentPage.content.map((item, index) => ({
+        ...item,
+        detail: details[index],
+      }));
+
+      setTournaments((currentTournaments) => [...currentTournaments, ...enrichedTournaments]);
+      setNextPage(tournamentPage.pageNumber + 1);
+      setTotalElements(tournamentPage.totalElements);
+      setHasMore(tournamentPage.pageNumber + 1 < tournamentPage.totalPages);
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error ? error.message : "Unable to load more tournaments right now.",
+      );
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }
+
+  const fromItem = tournaments.length === 0 ? 0 : 1;
+  const toItem = tournaments.length;
 
   return (
     <>
@@ -122,6 +189,11 @@ export default function Tournaments() {
             <p className="text-secondary mb-1 small text-uppercase">Season 2026</p>
             <h1 className="h3 fw-bold mb-0">Tournaments</h1>
           </div>
+          {session.logged && !session.admin && (
+            <Link to="/tournaments/my-tournaments" className="btn btn-outline-muted btn-sm">
+              My Tournaments
+            </Link>
+          )}
         </div>
 
         <div className="card p-4 mb-4">
@@ -137,7 +209,7 @@ export default function Tournaments() {
                 placeholder="Search by tournament name..."
                 autoComplete="off"
                 value={searchValue}
-                onChange={(event) => setSearchValue(event.target.value)}
+                onChange={(event) => queueLiveSearch(event.target.value)}
               />
             </div>
             <div className="col-lg-3 d-grid d-lg-flex justify-content-lg-end gap-2">
@@ -175,9 +247,9 @@ export default function Tournaments() {
           {!isLoading && tournaments.length > 0 && (
             <>
               <div className="table-responsive">
-                <table className="table mb-0 align-middle text-nowrap">
+                <table className="table tournament-table mb-0 align-middle text-nowrap">
                   <thead>
-                    <tr className="text-secondary small text-uppercase">
+                    <tr className="small text-uppercase">
                       <th scope="col" className="ps-3" style={{ width: "60px" }}>
                         Image
                       </th>
@@ -191,34 +263,45 @@ export default function Tournaments() {
                   </thead>
                   <tbody>
                     {tournaments.map((tournament) => {
+                      const actionMeta = getTournamentActionMeta(tournament.status);
+
                       return (
                         <tr key={tournament.id}>
                           <td className="ps-3">
                             <TournamentThumbnail
                               tournamentId={tournament.id}
                               name={tournament.name}
+                              imageUrl={tournament.detail?.imageUrl}
                               size={48}
                             />
                           </td>
-                          <td>
-                            <div className="fw-medium">{tournament.name}</div>
-                            <div className="text-secondary small">
-                              {tournament.registered} registered participants
+                          <td className="tournament-title-cell">
+                            <div className="tournament-list-name">{tournament.name}</div>
+                            <div className="tournament-list-summary">
+                              {tournament.detail?.description || "No description available."}
                             </div>
                           </td>
-                          <td className="text-secondary">
-                            {tournament.registered}/{tournament.slots}
+                          <td>
+                            <span className="tournament-slot-badge">
+                              {tournament.registered}/{tournament.slots}
+                            </span>
                           </td>
                           <td>
                             <TournamentStatusBadge status={tournament.status} />
                           </td>
                           <td className="text-end pe-3">
-                            <a
-                              href={`/tournaments/detail/${tournament.id}`}
-                              className="btn btn-outline-muted btn-sm"
-                            >
-                              View
-                            </a>
+                            {actionMeta.actionDisabled ? (
+                              <button type="button" className="btn btn-outline-muted btn-sm" disabled>
+                                {actionMeta.actionLabel}
+                              </button>
+                            ) : (
+                              <Link
+                                to={`/tournaments/detail/${tournament.id}`}
+                                className="btn btn-outline-muted btn-sm"
+                              >
+                                {actionMeta.actionLabel}
+                              </Link>
+                            )}
                           </td>
                         </tr>
                       );
@@ -227,31 +310,17 @@ export default function Tournaments() {
                 </table>
               </div>
 
-              {totalPages > 1 && (
-                <div className="d-flex justify-content-between align-items-center gap-2 mt-4 flex-wrap">
-                  <span className="text-secondary small">
-                    Page {page + 1} of {totalPages}
-                  </span>
-                  <div className="d-flex gap-2">
-                    <button
-                      type="button"
-                      className="btn btn-outline-muted btn-sm"
-                      onClick={() => updatePage(page - 1)}
-                      disabled={!hasPreviousPage}
-                    >
-                      Previous
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-outline-muted btn-sm"
-                      onClick={() => updatePage(page + 1)}
-                      disabled={!hasNextPage}
-                    >
-                      Next
-                    </button>
-                  </div>
-                </div>
-              )}
+              <div className="d-flex justify-content-center mt-3">
+                <button
+                  type="button"
+                  className="btn btn-outline-muted btn-sm"
+                  onClick={loadMoreTournaments}
+                  hidden={!hasMore}
+                  disabled={isLoadingMore}
+                >
+                  {isLoadingMore ? "Loading..." : "Show more"}
+                </button>
+              </div>
             </>
           )}
 
