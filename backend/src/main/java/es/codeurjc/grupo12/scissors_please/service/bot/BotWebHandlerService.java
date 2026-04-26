@@ -37,7 +37,7 @@ public class BotWebHandlerService {
       boolean isPublic,
       Authentication authentication) {
     User currentUser = userService.getCurrentUser(authentication);
-    Bot bot = botService.createBot(currentUser, name, description,code, tags, image, isPublic);
+    Bot bot = botService.createBot(currentUser, name, description, code, tags, image, isPublic);
     return WebRedirectView.to("/bots/" + bot.getId() + "/edit");
   }
 

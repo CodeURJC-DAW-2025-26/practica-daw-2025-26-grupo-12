@@ -33,7 +33,7 @@ public class BotController {
       @RequestParam(defaultValue = "false") boolean isPublic,
       Authentication authentication) {
     return botWebHandlerService
-        .createBotHandler(name, description, code,tags, image, isPublic, authentication)
+        .createBotHandler(name, description, code, tags, image, isPublic, authentication)
         .viewName();
   }
 
