@@ -6,6 +6,8 @@ import AppNavbar from "~/components/header";
 import Footer from "~/components/footer";
 import { useAuthStore, type AuthUser } from "~/stores/auth-store";
 import { getMe } from "~/services/auth-service";
+import { getMyBots } from "~/services/bot-service";
+import type { BotDetail } from "~/types";
 
 export function meta(_args: Route.MetaArgs) {
     return [
@@ -16,11 +18,17 @@ export function meta(_args: Route.MetaArgs) {
 
 export async function clientLoader() {
     const user = await getMe();
-    return { user };
+
+    const botsPage = user ? await getMyBots(user.id) : null;
+
+    return {
+        user,
+        botsPage,
+    };
 }
 
 export default function Home() {
-    const { user: loadedUser } = useLoaderData<typeof clientLoader>();
+    const { user: loadedUser, botsPage } = useLoaderData<typeof clientLoader>();
     const { setUser, setInitialized, isAdmin, isLoggedIn } = useAuthStore();
 
     useEffect(() => {
@@ -36,7 +44,7 @@ export default function Home() {
             <AppNavbar />
             {!loggedIn && <GuestHome />}
             {loggedIn && admin && <AdminHome />}
-            {loggedIn && !admin && <UserHome user={loadedUser} />}
+            {loggedIn && !admin && <UserHome user={loadedUser} botsPage={botsPage} />}
             <Footer />
         </div>
     );
@@ -180,9 +188,12 @@ function AdminHome() {
     );
 }
 
-function UserHome({ user }: { user: AuthUser | null }) {
+function UserHome({ user, botsPage,}: {user: AuthUser | null; botsPage: any;}) {
     if (!user) return null;
     const initial = user.username.charAt(0).toUpperCase();
+
+    const bots: BotDetail[] = botsPage?.content ?? [];
+    const hasBots = bots.length > 0;    
     return (
         <>
             <header className="hero-section mb-5">
@@ -245,17 +256,49 @@ function UserHome({ user }: { user: AuthUser | null }) {
                             <Col md={6}>
                                 <Card className="p-4 h-100">
                                     <h2 className="h5 fw-bold mb-3">My Bots</h2>
-                                    <p className="text-secondary mb-3">
-                                        Manage your bots and track their performance.
-                                    </p>
-                                    <Button
-                                        as={Link as any}
-                                        to="/bots/user-bots"
-                                        variant="outline-secondary"
-                                        size="sm"
-                                    >
-                                        Manage Bots
-                                    </Button>
+
+                                    {hasBots ? (
+                                        <>
+                                            <div className="list-group list-group-flush">
+                                                {bots.slice(0, 5).map((bot) => (
+                                                    <div
+                                                        key={bot.id}
+                                                        className="list-group-item d-flex justify-content-between align-items-center"
+                                                    >
+                                                        {bot.name}
+                                                        <span className="badge bg-secondary rounded-pill">
+                                                            {bot.elo} ELO
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            <div className="mt-3">
+                                                <Button
+                                                    as={Link as any}
+                                                    to="/bots/user-bots"
+                                                    variant="outline-secondary"
+                                                    size="sm"
+                                                >
+                                                    Manage Bots
+                                                </Button>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <p className="text-secondary mb-3">
+                                                You don't have any bots yet.
+                                            </p>
+                                            <Button
+                                                as={Link as any}
+                                                to="/bots/create"
+                                                variant="primary"
+                                                size="sm"
+                                            >
+                                                Create Bot
+                                            </Button>
+                                        </>
+                                    )}
                                 </Card>
                             </Col>
                             <Col md={6}>

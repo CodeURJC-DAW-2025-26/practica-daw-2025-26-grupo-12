@@ -15,3 +15,13 @@ export async function getBotById(id: number): Promise<BotDetail> {
     if (!res.ok) throw new Error(`Bot ${id} not found`);
     return res.json();
 }
+
+export async function getMyBots(userId: number): Promise<Page<BotDetail>> {
+    const res = await fetch(`/api/v1/bots/user/${userId}`, {
+        credentials: "include",
+    });
+
+    if (!res.ok) throw new Error("Failed to fetch user bots");
+
+    return res.json();
+}
