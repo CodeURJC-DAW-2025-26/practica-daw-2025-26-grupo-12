@@ -28,3 +28,14 @@ export async function getMyTournaments(): Promise<Page<TournamentSummary>> {
 
     return res.json();
 }
+
+export async function joinTournament(tournamentId: number, botId: number): Promise<void> {
+    const res = await fetch(`${BASE}/${tournamentId}/join?botId=${botId}`, {
+        method: "POST",
+        credentials: "include",
+    });
+    if (!res.ok) {
+        const error = await res.json().catch(() => ({}));
+        throw new Error(error.message || "Failed to join tournament");
+    }
+}

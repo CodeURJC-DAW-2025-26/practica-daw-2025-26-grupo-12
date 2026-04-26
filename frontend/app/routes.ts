@@ -14,6 +14,8 @@ export default [
     route("/bots", "routes/bots.tsx"),
     route("/bots/:id", "routes/bot-detail.tsx"),
 
+    route("/profile","routes/profile.tsx"),
+
     layout("layouts/admin-layout.tsx", [
         route("/admin/users", "routes/admin/users.tsx"),
         route("/admin/bots", "routes/admin/bots.tsx"),

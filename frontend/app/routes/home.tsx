@@ -9,7 +9,7 @@ import { getMe } from "~/services/auth-service";
 import { getMyBots } from "~/services/bot-service";
 import type { BotDetail, MatchSummary, TournamentDetail, TournamentSummary } from "~/types";
 import { getMyTournaments } from "~/services/tournament-service";
-import { getMyMatches } from "~/services/match-service";
+import { getRecentMatches } from "~/services/match-service";
 
 export function meta(_args: Route.MetaArgs) {
     return [
@@ -25,7 +25,7 @@ export async function clientLoader() {
 
     const tournamentsPage = user ? await getMyTournaments() : null
 
-    const matchesPage = user ? await getMyMatches() : null
+    const matchesPage = user ? await getRecentMatches() : null
 
     return {
         user,
