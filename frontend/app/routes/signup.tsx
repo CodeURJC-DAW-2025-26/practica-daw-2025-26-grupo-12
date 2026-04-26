@@ -1,21 +1,26 @@
 import { useState, type ChangeEvent } from "react";
 import { Link, useNavigate } from "react-router";
 import { Form, Button, Alert, Card } from "react-bootstrap";
-import type { Route } from "./+types/login";
-import { logUser } from "~/services/auth-service";
+import type { Route } from "./+types/signup";
+import { registerUser } from "~/services/auth-service";
 import { getMe } from "~/services/auth-service";
 import { useAuthStore } from "~/stores/auth-store";
 
 export function meta(_args: Route.MetaArgs) {
     return [
-        { title: "Log In – Scissors, Please" },
-        { name: "description", content: "Sign in to your Scissors, Please account." },
+        { title: "Sign Up – Scissors, Please" },
+        {
+            name: "description",
+            content: "Create your Scissors, Please account and start competing.",
+        },
     ];
 }
 
-export default function Login() {
+export default function Signup() {
+    const [email, setEmail] = useState("");
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
@@ -24,16 +29,24 @@ export default function Login() {
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         setError("");
+        if (password !== confirmPassword) {
+            setError("Passwords do not match.");
+            return;
+        }
+        if (password.length < 8) {
+            setError("Password must be at least 8 characters.");
+            return;
+        }
         setLoading(true);
         try {
-            const ok = await logUser({ username, password });
-            if (ok) {
+            const result = await registerUser({ username, email, password });
+            if (result.ok) {
                 const me = await getMe();
                 setUser(me);
                 setInitialized(true);
                 navigate("/");
             } else {
-                setError("Invalid username or password.");
+                setError(result.error ?? "Registration failed. Please try again.");
             }
         } catch {
             setError("An unexpected error occurred. Please try again.");
@@ -44,7 +57,10 @@ export default function Login() {
 
     return (
         <div className="centered-layout">
-            <Card className="glass-card p-4" style={{ maxWidth: 400, width: "100%" }}>
+            <Card
+                className="glass-card p-4 centered-layout-card--wide"
+                style={{ maxWidth: 480, width: "100%" }}
+            >
                 <Card.Body>
                     <div className="text-center mb-4">
                         <Link to="/" className="text-decoration-none d-block">
@@ -54,7 +70,7 @@ export default function Login() {
                             <h1 className="h4 fw-bold text-white mb-0">Scissors, Please</h1>
                         </Link>
                         <p className="text-secondary mt-2">
-                            Welcome back! Please enter your details.
+                            Create your account to start competing.
                         </p>
                     </div>
 
@@ -70,6 +86,23 @@ export default function Login() {
                     )}
 
                     <Form onSubmit={handleSubmit}>
+                        <Form.Group className="mb-3" controlId="email">
+                            <Form.Label className="text-uppercase small text-secondary">
+                                Email Address
+                            </Form.Label>
+                            <Form.Control
+                                className="form-control-lg"
+                                type="email"
+                                value={email}
+                                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                    setEmail(e.target.value)
+                                }
+                                placeholder="name@example.com"
+                                required
+                                autoComplete="email"
+                            />
+                        </Form.Group>
+
                         <Form.Group className="mb-3" controlId="username">
                             <Form.Label className="text-uppercase small text-secondary">
                                 Username
@@ -81,13 +114,13 @@ export default function Login() {
                                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
                                     setUsername(e.target.value)
                                 }
-                                placeholder="Enter your username"
+                                placeholder="Choose a unique username"
                                 required
                                 autoComplete="username"
                             />
                         </Form.Group>
 
-                        <Form.Group className="mb-4" controlId="password">
+                        <Form.Group className="mb-3" controlId="password">
                             <Form.Label className="text-uppercase small text-secondary">
                                 Password
                             </Form.Label>
@@ -98,9 +131,27 @@ export default function Login() {
                                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
                                     setPassword(e.target.value)
                                 }
-                                placeholder="••••••••"
+                                placeholder="Min. 8 characters"
+                                minLength={8}
                                 required
-                                autoComplete="current-password"
+                                autoComplete="new-password"
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-4" controlId="confirmPassword">
+                            <Form.Label className="text-uppercase small text-secondary">
+                                Confirm Password
+                            </Form.Label>
+                            <Form.Control
+                                className="form-control-lg"
+                                type="password"
+                                value={confirmPassword}
+                                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                    setConfirmPassword(e.target.value)
+                                }
+                                placeholder="Confirm your password"
+                                required
+                                autoComplete="new-password"
                             />
                         </Form.Group>
 
@@ -110,40 +161,16 @@ export default function Login() {
                                 className="btn-gradient-primary btn-lg fw-bold py-2"
                                 disabled={loading}
                             >
-                                {loading ? "Signing in…" : "Log In"}
+                                {loading ? "Creating account…" : "Create Account"}
                             </Button>
                         </div>
                     </Form>
 
-                    <div className="divider">or continue with</div>
-
-                    <div className="d-grid gap-2 mb-4">
-                        <a
-                            href="/oauth2/authorization/google"
-                            className="btn btn-outline-light btn-sm text-decoration-none py-2"
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="16"
-                                height="16"
-                                fill="currentColor"
-                                className="bi bi-google me-2"
-                                viewBox="0 0 16 16"
-                            >
-                                <path d="M15.545 6.558a9.42 9.42 0 0 1 .139 1.626c0 2.434-.87 4.492-2.384 5.885h.002C11.978 15.292 10.158 16 8 16A8 8 0 1 1 8 0a7.689 7.689 0 0 1 5.352 2.082l-2.284 2.284A4.347 4.347 0 0 0 8 3.166c-2.087 0-3.86 1.408-4.492 3.304a4.792 4.792 0 0 0 0 3.063h.003c.635 1.893 2.405 3.301 4.492 3.301 1.078 0 2.004-.276 2.722-.764h-.003a3.702 3.702 0 0 0 1.599-2.431H8v-3.08h7.545z" />
-                            </svg>
-                            Continue with Google
-                        </a>
-                    </div>
-
                     <div className="text-center">
                         <p className="text-secondary small mb-0">
-                            Don't have an account?{" "}
-                            <Link
-                                to="/signup"
-                                className="text-primary text-decoration-none fw-bold"
-                            >
-                                Sign up
+                            Already have an account?{" "}
+                            <Link to="/login" className="text-primary text-decoration-none fw-bold">
+                                Log in
                             </Link>
                         </p>
                     </div>
