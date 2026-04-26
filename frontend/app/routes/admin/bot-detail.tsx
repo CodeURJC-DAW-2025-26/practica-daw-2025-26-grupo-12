@@ -1,9 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import type { Route } from "./+types/bot-detail";
 import { adminBotService } from "../../services/admin-bot-service";
 import type { BotDetail } from "~/types";
 import { Button, Row, Col, Badge, Card, Modal } from "react-bootstrap";
+import { getEloChart, getResultsChart } from "~/services/chart-service";
+import {
+    PieChart, Pie, Cell,
+    LineChart, Line,
+    XAxis, YAxis, Tooltip, ResponsiveContainer
+} from "recharts";
 
 export async function clientLoader({ params }: Route.ClientLoaderArgs) {
     const { id } = params;
@@ -19,6 +25,41 @@ export default function AdminBotDetail({ loaderData }: Route.ComponentProps) {
     const { bot } = loaderData as { bot: BotDetail };
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const navigate = useNavigate();
+
+    const [resultsData, setResultsData] = useState<any>(null);
+    const [eloData, setEloData] = useState<any>(null);
+
+    useEffect(() => {
+        const loadCharts = async () => {
+            try {
+                const results = await getResultsChart({
+                    wins: bot.wins,
+                    losses: bot.losses,
+                    draws: bot.draws
+                });
+
+                setResultsData([
+                    { name: "Wins", value: results.wins },
+                    { name: "Losses", value: results.losses },
+                    { name: "Draws", value: results.draws }
+                ]);
+
+                const eloHistory = bot.eloHistory ?? [];
+                const elo = await getEloChart(eloHistory);
+
+                setEloData(
+                    elo.map((value: number, index: number) => ({
+                        game: index + 1,
+                        elo: value
+                    }))
+                );
+            } catch (e) {
+                console.error(e);
+            }
+        };
+
+        loadCharts();
+    }, [bot]);
 
     const onDelete = async () => {
         try {
@@ -116,6 +157,21 @@ export default function AdminBotDetail({ loaderData }: Route.ComponentProps) {
                             </Col>
                         </Row>
 
+                        {resultsData && (
+                            <div className="mt-4">
+                                <ResponsiveContainer width="100%" height={200}>
+                                    <PieChart>
+                                        <Pie data={resultsData} dataKey="value">
+                                            <Cell fill="#22c55e" />
+                                            <Cell fill="#ef4444" />
+                                            <Cell fill="#eab308" />
+                                        </Pie>
+                                        <Tooltip />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </div>
+                        )}
+
                         <div className="mt-5">
                             <h5 className="small fw-bold text-muted text-uppercase letter-spacing-lg mb-3">
                                 Tags
@@ -138,6 +194,20 @@ export default function AdminBotDetail({ loaderData }: Route.ComponentProps) {
                             {bot.description || "No description provided."}
                         </p>
                     </div>
+
+                    {eloData && (
+                        <div className="glass-card p-4 mb-4">
+                            <h4 className="fw-bold mb-4">ELO Progression</h4>
+                            <ResponsiveContainer width="100%" height={250}>
+                                <LineChart data={eloData}>
+                                    <XAxis dataKey="game" />
+                                    <YAxis />
+                                    <Tooltip />
+                                    <Line type="monotone" dataKey="elo" stroke="#3b82f6" />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </div>
+                    )}
 
                     <div className="glass-card p-4">
                         <h4 className="fw-bold mb-4">Source Code</h4>

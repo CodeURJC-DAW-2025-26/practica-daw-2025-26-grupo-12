@@ -1,7 +1,6 @@
 package es.codeurjc.grupo12.scissors_please.controller.api.v1.chart;
 
 import es.codeurjc.grupo12.scissors_please.repository.UserRepository.MonthlyUserCount;
-import es.codeurjc.grupo12.scissors_please.service.chart.ChartService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -10,151 +9,120 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.awt.Color;
-import java.util.Base64;
 import java.util.List;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController("apiChartController")
 @RequestMapping("/api/v1/charts")
-@Tag(name = "Charts", description = "Endpoints that generate charts encoded as Base64 strings")
+@Tag(name = "Charts", description = "Endpoints that return chart data in JSON format")
 public class ChartController {
 
-  private final ChartService chartService;
+  public record ResultsChartDto(int wins, int losses, int draws) {}
 
-  public ChartController(ChartService chartService) {
-    this.chartService = chartService;
-  }
-
-  private String encodeToBase64(byte[] bytes) {
-    return Base64.getEncoder().encodeToString(bytes);
-  }
+  public record ProgressDto(int current, int max) {}
 
   @GetMapping("/results")
   @Operation(
-      summary = "Generate a results pie chart",
-      description =
-          "Returns a pie chart encoded as Base64 using the provided wins, losses and draws.")
+      summary = "Get results data",
+      description = "Returns wins, losses and draws to build a pie chart in frontend.")
   @ApiResponses(
       value = {
         @ApiResponse(
             responseCode = "200",
-            description = "Chart generated successfully",
+            description = "Data returned successfully",
             content =
                 @Content(
-                    mediaType = "text/plain",
-                    schema = @Schema(type = "string", example = "iVBORw0KGgoAAAANSUhEUgAA..."))),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Invalid query parameters",
-            content = @Content)
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ResultsChartDto.class))),
+        @ApiResponse(responseCode = "400", description = "Invalid query parameters")
       })
-  public ResponseEntity<String> getResultsPieChart(
+  public ResponseEntity<ResultsChartDto> getResults(
       @Parameter(description = "Number of wins", example = "12") @RequestParam int wins,
       @Parameter(description = "Number of losses", example = "4") @RequestParam int losses,
       @Parameter(description = "Number of draws", example = "2") @RequestParam int draws) {
 
-    byte[] chartBytes = chartService.generateResultsPieChart(wins, losses, draws);
-    String base64Chart = encodeToBase64(chartBytes);
-    return ResponseEntity.ok(base64Chart);
+    return ResponseEntity.ok(new ResultsChartDto(wins, losses, draws));
   }
 
-  @GetMapping("/elo")
+  @PostMapping("/elo")
   @Operation(
-      summary = "Generate an ELO line chart",
-      description = "Returns a line chart encoded as Base64 from a list of ELO values.")
+      summary = "Get ELO history data",
+      description = "Returns a list of ELO values to build a line chart.")
   @ApiResponses(
       value = {
         @ApiResponse(
             responseCode = "200",
-            description = "Chart generated successfully",
+            description = "Data returned successfully",
             content =
                 @Content(
-                    mediaType = "text/plain",
-                    schema = @Schema(type = "string", example = "iVBORw0KGgoAAAANSUhEUgAA..."))),
-        @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content)
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    array = @ArraySchema(schema = @Schema(type = "integer")))),
+        @ApiResponse(responseCode = "400", description = "Invalid request body")
       })
-  public ResponseEntity<String> getEloLineChart(
+  public ResponseEntity<List<Integer>> getEloData(
       @RequestBody
           @io.swagger.v3.oas.annotations.parameters.RequestBody(
               required = true,
               content =
                   @Content(
-                      mediaType = "application/json",
+                      mediaType = MediaType.APPLICATION_JSON_VALUE,
                       array = @ArraySchema(schema = @Schema(type = "integer", example = "1500"))))
           List<Integer> eloHistory) {
-    byte[] chartBytes = chartService.generateEloLineChart(eloHistory);
-    String base64Chart = encodeToBase64(chartBytes);
-    return ResponseEntity.ok(base64Chart);
+
+    return ResponseEntity.ok(eloHistory);
   }
 
-  @GetMapping("/users")
+  @PostMapping("/users")
   @Operation(
-      summary = "Generate a user history chart",
-      description =
-          "Returns a bar chart encoded as Base64 from monthly user count data grouped by year and month.")
+      summary = "Get user history data",
+      description = "Returns monthly user counts to build a bar chart.")
   @ApiResponses(
       value = {
         @ApiResponse(
             responseCode = "200",
-            description = "Chart generated successfully",
+            description = "Data returned successfully",
             content =
                 @Content(
-                    mediaType = "text/plain",
-                    schema = @Schema(type = "string", example = "iVBORw0KGgoAAAANSUhEUgAA..."))),
-        @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content)
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    array =
+                        @ArraySchema(schema = @Schema(implementation = MonthlyUserCount.class)))),
+        @ApiResponse(responseCode = "400", description = "Invalid request body")
       })
-  public ResponseEntity<String> getUserHistoryChart(
+  public ResponseEntity<List<MonthlyUserCount>> getUserHistory(
       @RequestBody
           @io.swagger.v3.oas.annotations.parameters.RequestBody(
               required = true,
               content =
                   @Content(
-                      mediaType = "application/json",
+                      mediaType = MediaType.APPLICATION_JSON_VALUE,
                       array =
                           @ArraySchema(schema = @Schema(implementation = MonthlyUserCount.class))))
           List<MonthlyUserCount> monthlyData) {
-    byte[] chartBytes = chartService.generateUserHistory(monthlyData);
-    String base64Chart = encodeToBase64(chartBytes);
-    return ResponseEntity.ok(base64Chart);
+
+    return ResponseEntity.ok(monthlyData);
   }
 
   @GetMapping("/progress")
   @Operation(
-      summary = "Generate a progress bar",
-      description =
-          "Returns a progress bar encoded as Base64 using a current value, a maximum value and an optional RGB color.")
+      summary = "Get progress data",
+      description = "Returns current and max values to build a progress bar.")
   @ApiResponses(
       value = {
         @ApiResponse(
             responseCode = "200",
-            description = "Chart generated successfully",
+            description = "Data returned successfully",
             content =
                 @Content(
-                    mediaType = "text/plain",
-                    schema = @Schema(type = "string", example = "iVBORw0KGgoAAAANSUhEUgAA..."))),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Invalid query parameters",
-            content = @Content)
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ProgressDto.class))),
+        @ApiResponse(responseCode = "400", description = "Invalid query parameters")
       })
-  public ResponseEntity<String> getProgressBar(
+  public ResponseEntity<ProgressDto> getProgress(
       @Parameter(description = "Current progress value", example = "75") @RequestParam int current,
-      @Parameter(description = "Maximum progress value", example = "100") @RequestParam int max,
-      @Parameter(description = "Optional RGB color in the format R,G,B", example = "34,197,94")
-          @RequestParam(required = false, defaultValue = "34,197,94")
-          String color) {
+      @Parameter(description = "Maximum progress value", example = "100") @RequestParam int max) {
 
-    String[] rgb = color.split(",");
-    Color barColor =
-        new Color(
-            Integer.parseInt(rgb[0].trim()),
-            Integer.parseInt(rgb[1].trim()),
-            Integer.parseInt(rgb[2].trim()));
-
-    byte[] chartBytes = chartService.generateProgressBar(current, max, barColor);
-    String base64Chart = encodeToBase64(chartBytes);
-    return ResponseEntity.ok(base64Chart);
+    return ResponseEntity.ok(new ProgressDto(current, max));
   }
 }
