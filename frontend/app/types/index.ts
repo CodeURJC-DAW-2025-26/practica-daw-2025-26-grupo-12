@@ -16,8 +16,9 @@ export interface BotSummary {
     name: string;
     elo: number;
     imageUrl?: string | null;
-    ownerUsername: string;
+    ownerUsername?: string;
     ownerId: number;
+    public: boolean;
 }
 
 export interface BotDetail extends BotSummary {
@@ -28,7 +29,6 @@ export interface BotDetail extends BotSummary {
     losses: number;
     draws: number;
     createdAt: string;
-    public: boolean;
 }
 
 export interface TournamentSummary {
