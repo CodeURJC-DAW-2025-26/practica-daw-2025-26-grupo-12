@@ -27,12 +27,13 @@ public class BotController {
   public String createBot(
       @RequestParam String name,
       @RequestParam(required = false) String description,
+      @RequestParam(required = false) String code,
       @RequestParam(required = false) String tags,
       @RequestParam(required = false) MultipartFile image,
       @RequestParam(defaultValue = "false") boolean isPublic,
       Authentication authentication) {
     return botWebHandlerService
-        .createBotHandler(name, description, tags, image, isPublic, authentication)
+        .createBotHandler(name, description, code,tags, image, isPublic, authentication)
         .viewName();
   }
 

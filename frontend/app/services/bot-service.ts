@@ -28,6 +28,7 @@ export async function getMyBots(userId: number): Promise<Page<BotDetail>> {
 export async function createBot(data: {
     name: string;
     description: string;
+    code:string;
     tags: string[];
     isPublic: boolean;
     imageFile?: File;
@@ -35,6 +36,7 @@ export async function createBot(data: {
     const formData = new FormData();
     formData.append("name", data.name);
     formData.append("description", data.description);
+    formData.append("code", data.code);
     data.tags.forEach((tag) => formData.append("tags", tag));
     formData.append("public", String(data.isPublic));
     if (data.imageFile) {

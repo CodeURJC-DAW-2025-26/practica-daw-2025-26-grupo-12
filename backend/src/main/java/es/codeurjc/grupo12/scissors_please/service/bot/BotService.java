@@ -223,6 +223,7 @@ public class BotService {
       User actingUser,
       String name,
       String description,
+      String code,
       String tags,
       MultipartFile image,
       boolean isPublic) {
@@ -230,6 +231,7 @@ public class BotService {
 
     bot.setName(name);
     bot.setDescription(description);
+    bot.setCode(code);
     bot.setOwnerId(requireOwnerId(actingUser));
     bot.setPublic(isPublic);
     bot.setTags(parseTags(tags));

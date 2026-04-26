@@ -170,6 +170,7 @@ public class BotController {
             currentUser,
             request.getName(),
             request.getDescription(),
+            request.getCode(),
             request.getTags(),
             request.getImageFile(),
             request.isPublic());
