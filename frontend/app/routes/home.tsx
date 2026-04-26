@@ -7,7 +7,8 @@ import Footer from "~/components/footer";
 import { useAuthStore, type AuthUser } from "~/stores/auth-store";
 import { getMe } from "~/services/auth-service";
 import { getMyBots } from "~/services/bot-service";
-import type { BotDetail } from "~/types";
+import type { BotDetail, TournamentDetail } from "~/types";
+import { getMyTournaments } from "~/services/tournament-service";
 
 export function meta(_args: Route.MetaArgs) {
     return [
@@ -21,14 +22,17 @@ export async function clientLoader() {
 
     const botsPage = user ? await getMyBots(user.id) : null;
 
+    const tournamentsPage = user ? await getMyTournaments() : null
+
     return {
         user,
         botsPage,
+        tournamentsPage
     };
 }
 
 export default function Home() {
-    const { user: loadedUser, botsPage } = useLoaderData<typeof clientLoader>();
+    const { user: loadedUser, botsPage, tournamentsPage } = useLoaderData<typeof clientLoader>();
     const { setUser, setInitialized, isAdmin, isLoggedIn } = useAuthStore();
 
     useEffect(() => {
@@ -44,7 +48,7 @@ export default function Home() {
             <AppNavbar />
             {!loggedIn && <GuestHome />}
             {loggedIn && admin && <AdminHome />}
-            {loggedIn && !admin && <UserHome user={loadedUser} botsPage={botsPage} />}
+            {loggedIn && !admin && <UserHome user={loadedUser} botsPage={botsPage} tournamentsPage={tournamentsPage} />}
             <Footer />
         </div>
     );
@@ -188,12 +192,16 @@ function AdminHome() {
     );
 }
 
-function UserHome({ user, botsPage,}: {user: AuthUser | null; botsPage: any;}) {
+function UserHome({ user, botsPage, tournamentsPage }: { user: AuthUser | null; botsPage: any; tournamentsPage: any }) {
     if (!user) return null;
     const initial = user.username.charAt(0).toUpperCase();
 
     const bots: BotDetail[] = botsPage?.content ?? [];
-    const hasBots = bots.length > 0;    
+    const hasBots = bots.length > 0;
+
+    const tournaments: TournamentDetail[] = tournamentsPage?.content ?? [];
+    console.log(tournamentsPage);
+    const hasTournaments = tournaments.length > 0;
     return (
         <>
             <header className="hero-section mb-5">
@@ -320,17 +328,57 @@ function UserHome({ user, botsPage,}: {user: AuthUser | null; botsPage: any;}) {
                             <Col xs={12}>
                                 <Card className="p-4">
                                     <h2 className="h5 fw-bold mb-3">My Tournaments</h2>
-                                    <p className="text-secondary mb-3">
-                                        Tournaments you have joined.
-                                    </p>
-                                    <Button
-                                        as={Link as any}
-                                        to="/tournaments/my-tournaments"
-                                        variant="outline-secondary"
-                                        size="sm"
-                                    >
-                                        View My Tournaments
-                                    </Button>
+                                    {hasTournaments ? (
+                                        <>
+                                            <div className="list-group list-group-flush">
+                                                {tournaments.slice(0, 5).map((tournament) => (
+                                                    <div
+                                                        key={tournament.id}
+                                                        className="list-group-item d-flex justify-content-between align-items-center"
+                                                    >
+                                                        <div className="d-flex flex-column">
+                                                            <span className="fw-semibold">
+                                                                {tournament.name}
+                                                            </span>
+                                                            <small className="text-secondary">
+                                                                {tournament.startDate}
+                                                            </small>
+                                                        </div>
+
+                                                        <span className="badge bg-primary rounded-pill">
+                                                            {tournament.status}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            <div className="mt-3">
+                                                <Button
+                                                    as={Link as any}
+                                                    to="/tournaments/my-tournaments"
+                                                    variant="outline-secondary"
+                                                    size="sm"
+                                                >
+                                                    Manage Tournaments
+                                                </Button>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <p className="text-secondary mb-3">
+                                                You are not registered in any tournament yet.
+                                            </p>
+
+                                            <Button
+                                                as={Link as any}
+                                                to="/tournaments"
+                                                variant="primary"
+                                                size="sm"
+                                            >
+                                                Browse Tournaments
+                                            </Button>
+                                        </>
+                                    )}
                                 </Card>
                             </Col>
                         </Row>

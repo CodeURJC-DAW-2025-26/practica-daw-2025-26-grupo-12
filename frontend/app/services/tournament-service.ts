@@ -19,3 +19,12 @@ export async function getTournamentById(id: number): Promise<TournamentDetail> {
     if (!res.ok) throw new Error(`Tournament ${id} not found`);
     return res.json();
 }
+
+export async function getMyTournaments(): Promise<Page<TournamentDetail>> {
+    const res = await fetch(`/api/v1/tournaments/my-tournaments`, {
+        credentials: "include",
+    });
+    if (!res.ok) throw new Error("Failed to fetch user tournaments");
+
+    return res.json();
+}
