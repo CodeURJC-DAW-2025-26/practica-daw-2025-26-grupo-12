@@ -20,8 +20,8 @@ export async function getTournamentById(id: number): Promise<TournamentDetail> {
     return res.json();
 }
 
-export async function getMyTournaments(): Promise<Page<TournamentDetail>> {
-    const res = await fetch(`/api/v1/tournaments/my-tournaments`, {
+export async function getMyTournaments(): Promise<Page<TournamentSummary>> {
+    const res = await fetch(`${BASE}/my-tournaments`, {
         credentials: "include",
     });
     if (!res.ok) throw new Error("Failed to fetch user tournaments");

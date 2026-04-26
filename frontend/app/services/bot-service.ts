@@ -17,7 +17,7 @@ export async function getBotById(id: number): Promise<BotDetail> {
 }
 
 export async function getMyBots(userId: number): Promise<Page<BotDetail>> {
-    const res = await fetch(`/api/v1/bots/user/${userId}`, {
+    const res = await fetch(`${BASE}/user/${userId}`, {
         credentials: "include",
     });
 

@@ -14,3 +14,14 @@ export async function getMatchStats(id: number): Promise<MatchStats> {
     if (!res.ok) throw new Error(`Match stats ${id} not found`);
     return res.json();
 }
+
+export async function getMyMatches(): Promise<Page<MatchSummary>> {
+    const res = await fetch(`${BASE}/recent`, {
+        credentials: "include",
+    });
+
+    if (!res.ok) throw new Error("Failed to fetch user bots");
+
+    return res.json();
+}
+

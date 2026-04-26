@@ -7,8 +7,9 @@ import Footer from "~/components/footer";
 import { useAuthStore, type AuthUser } from "~/stores/auth-store";
 import { getMe } from "~/services/auth-service";
 import { getMyBots } from "~/services/bot-service";
-import type { BotDetail, TournamentDetail } from "~/types";
+import type { BotDetail, MatchSummary, TournamentDetail, TournamentSummary } from "~/types";
 import { getMyTournaments } from "~/services/tournament-service";
+import { getMyMatches } from "~/services/match-service";
 
 export function meta(_args: Route.MetaArgs) {
     return [
@@ -24,15 +25,18 @@ export async function clientLoader() {
 
     const tournamentsPage = user ? await getMyTournaments() : null
 
+    const matchesPage = user ? await getMyMatches() : null
+
     return {
         user,
         botsPage,
-        tournamentsPage
+        tournamentsPage,
+        matchesPage
     };
 }
 
 export default function Home() {
-    const { user: loadedUser, botsPage, tournamentsPage } = useLoaderData<typeof clientLoader>();
+    const { user: loadedUser, botsPage, tournamentsPage, matchesPage } = useLoaderData<typeof clientLoader>();
     const { setUser, setInitialized, isAdmin, isLoggedIn } = useAuthStore();
 
     useEffect(() => {
@@ -48,7 +52,7 @@ export default function Home() {
             <AppNavbar />
             {!loggedIn && <GuestHome />}
             {loggedIn && admin && <AdminHome />}
-            {loggedIn && !admin && <UserHome user={loadedUser} botsPage={botsPage} tournamentsPage={tournamentsPage} />}
+            {loggedIn && !admin && <UserHome user={loadedUser} botsPage={botsPage} tournamentsPage={tournamentsPage} matchesPage={matchesPage} />}
             <Footer />
         </div>
     );
@@ -192,16 +196,19 @@ function AdminHome() {
     );
 }
 
-function UserHome({ user, botsPage, tournamentsPage }: { user: AuthUser | null; botsPage: any; tournamentsPage: any }) {
+function UserHome({ user, botsPage, tournamentsPage, matchesPage }: { user: AuthUser | null; botsPage: any; tournamentsPage: any; matchesPage: any }) {
     if (!user) return null;
     const initial = user.username.charAt(0).toUpperCase();
 
     const bots: BotDetail[] = botsPage?.content ?? [];
     const hasBots = bots.length > 0;
 
-    const tournaments: TournamentDetail[] = tournamentsPage?.content ?? [];
-    console.log(tournamentsPage);
+    const tournaments: TournamentSummary[] = tournamentsPage?.content ?? [];
     const hasTournaments = tournaments.length > 0;
+
+    const matches: MatchSummary[] = matchesPage?.content ?? [];
+    console.log(matchesPage);
+    const hasMatches = matches.length > 0;
     return (
         <>
             <header className="hero-section mb-5">
@@ -312,17 +319,82 @@ function UserHome({ user, botsPage, tournamentsPage }: { user: AuthUser | null; 
                             <Col md={6}>
                                 <Card className="p-4 h-100">
                                     <h2 className="h5 fw-bold mb-3">Recent Matches</h2>
-                                    <p className="text-secondary mb-3">
-                                        View your latest match results.
-                                    </p>
-                                    <Button
-                                        as={Link as any}
-                                        to="/matches/recent"
-                                        variant="outline-secondary"
-                                        size="sm"
-                                    >
-                                        View Recent Matches
-                                    </Button>
+                                    {hasMatches ? (
+                                        <>
+                                            <div className="list-group list-group-flush">
+                                                {matches.slice(0, 5).map((match) => {
+                                                    const isBot1Winner =
+                                                        match.winnerBotId === match.bot1Id;
+                                                    const isBot2Winner =
+                                                        match.winnerBotId === match.bot2Id;
+
+                                                    const resultLabel = !match.winnerBotId
+                                                        ? "DRAW"
+                                                        : isBot1Winner
+                                                            ? `${match.bot1Name} won`
+                                                            : `${match.bot2Name} won`;
+
+                                                    const badgeClass = !match.winnerBotId
+                                                        ? "bg-secondary"
+                                                        : "bg-primary";
+
+                                                    return (
+                                                        <div
+                                                            key={match.id}
+                                                            className="list-group-item d-flex justify-content-between align-items-center"
+                                                        >
+                                                            <div className="d-flex flex-column">
+                                                                <span className="fw-semibold">
+                                                                    Match #{match.id}
+                                                                </span>
+
+                                                                <small className="text-secondary">
+                                                                    {match.bot1Name} vs {match.bot2Name}
+                                                                </small>
+
+                                                                <small className="text-secondary">
+                                                                    {match.bot1OwnerName} vs{" "}
+                                                                    {match.bot2OwnerName}
+                                                                </small>
+                                                            </div>
+
+                                                            <span
+                                                                className={`badge rounded-pill ${badgeClass}`}
+                                                            >
+                                                                {resultLabel}
+                                                            </span>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+
+                                            <div className="mt-3">
+                                                <Button
+                                                    as={Link as any}
+                                                    to="/matches/recent"
+                                                    variant="outline-secondary"
+                                                    size="sm"
+                                                >
+                                                    View All Matches
+                                                </Button>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <p className="text-secondary mb-3">
+                                                You don't have any matches yet.
+                                            </p>
+
+                                            <Button
+                                                as={Link as any}
+                                                to="/matches/search"
+                                                variant="primary"
+                                                size="sm"
+                                            >
+                                                Find a Match
+                                            </Button>
+                                        </>
+                                    )}
                                 </Card>
                             </Col>
                             <Col xs={12}>
