@@ -29,6 +29,7 @@ export interface BotDetail extends BotSummary {
     losses: number;
     draws: number;
     createdAt: string;
+    eloHistory?: number[];
 }
 
 export interface TournamentSummary {

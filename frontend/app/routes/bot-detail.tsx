@@ -1,10 +1,12 @@
-import { Link, useLoaderData } from "react-router";
-import { Container, Row, Col, Card, Button, Badge } from "react-bootstrap";
+import { useState } from "react";
+import { Link, useLoaderData, useNavigate } from "react-router";
+import { Container, Row, Col, Card, Button, Badge, Modal } from "react-bootstrap";
 import type { Route } from "./+types/bot-detail";
-import { getBotById } from "~/services/bot-service";
+import { getBotById, deleteBot } from "~/services/bot-service";
 import AppNavbar from "~/components/header";
 import Footer from "~/components/footer";
 import { useAuthStore } from "~/stores/auth-store";
+import Chart from "~/components/chart";
 
 export function meta({ data }: Route.MetaArgs) {
     const name = (data as any)?.bot?.name ?? "Bot";
@@ -41,18 +43,34 @@ export function ErrorBoundary({ error }: { error: unknown }) {
 export default function BotDetail() {
     const { bot } = useLoaderData<typeof clientLoader>();
     const { user } = useAuthStore();
+    const navigate = useNavigate();
+    const [showDelete, setShowDelete] = useState(false);
+    const [loading, setLoading] = useState(false);
+
     const isOwner = user?.id === bot.ownerId;
     const canManage = isOwner || useAuthStore.getState().isAdmin();
     const initial = bot.name.charAt(0).toUpperCase();
     const totalMatches = bot.wins + bot.losses + bot.draws;
     const winRate = totalMatches > 0 ? ((bot.wins / totalMatches) * 100).toFixed(1) : "0.0";
 
+    const handleDelete = async () => {
+        setLoading(true);
+        try {
+            await deleteBot(bot.id);
+            navigate("/bots/user-bots");
+        } catch (err) {
+            alert("Failed to delete bot");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="d-flex flex-column min-vh-100">
             <AppNavbar />
             <Container className="py-5">
-                <Row className="mb-5 align-items-end">
-                    <Col md="auto">
+                <Row className="mb-5 align-items-end justify-content-between">
+                    <Col md="auto" className="d-flex align-items-end gap-3 flex-wrap">
                         {bot.imageUrl ? (
                             <img
                                 src={`/api/v1/images/bots/${bot.id}`}
@@ -68,36 +86,44 @@ export default function BotDetail() {
                                 {initial}
                             </div>
                         )}
-                    </Col>
-                    <Col>
-                        <h1 className="h2 fw-bold mb-1">{bot.name}</h1>
-                        <p className="text-secondary mb-1">
-                            Owner:{" "}
-                            <span className="text-white fw-semibold">{bot.ownerUsername}</span>
-                        </p>
-                        <p className="text-secondary mb-2">Created: {bot.createdAt}</p>
-                        {bot.description && (
-                            <p className="text-secondary mb-0">{bot.description}</p>
-                        )}
-                        {bot.tags && bot.tags.length > 0 && (
-                            <div className="mt-2 d-flex flex-wrap gap-1">
-                                {bot.tags.map((tag) => (
-                                    <Badge key={tag} bg="secondary" className="rounded-pill">
-                                        {tag}
-                                    </Badge>
-                                ))}
-                            </div>
-                        )}
+                        <div>
+                            <h1 className="h2 fw-bold mb-1">{bot.name}</h1>
+                            <p className="text-secondary mb-1">
+                                Owner:{" "}
+                                <span className="text-white fw-semibold">{bot.ownerUsername}</span>
+                            </p>
+                            <p className="text-secondary mb-2">Created: {bot.createdAt}</p>
+                            {bot.description && (
+                                <p className="text-secondary mb-0">{bot.description}</p>
+                            )}
+                            {bot.tags && bot.tags.length > 0 && (
+                                <div className="mt-2 d-flex flex-wrap gap-1">
+                                    {bot.tags.map((tag) => (
+                                        <Badge key={tag} bg="secondary" className="rounded-pill">
+                                            {tag}
+                                        </Badge>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </Col>
                     <Col md="auto" className="mt-3 mt-md-0 d-flex flex-wrap gap-2">
                         {canManage && (
-                            <Button
-                                as={Link as any}
-                                to={`/bots/${bot.id}/edit`}
-                                variant="outline-secondary"
-                            >
-                                Edit Bot
-                            </Button>
+                            <>
+                                <Button
+                                    as={Link as any}
+                                    to={`/bots/${bot.id}/edit`}
+                                    variant="outline-secondary"
+                                >
+                                    Edit Bot
+                                </Button>
+                                <Button
+                                    variant="outline-danger"
+                                    onClick={() => setShowDelete(true)}
+                                >
+                                    Delete
+                                </Button>
+                            </>
                         )}
                         {isOwner && (
                             <Button as={Link as any} to="/matches/search" variant="primary">
@@ -107,10 +133,10 @@ export default function BotDetail() {
                     </Col>
                 </Row>
 
-                {bot.code && isOwner && (
-                    <Row className="justify-content-center">
-                        <Col lg={10}>
-                            <Card className="glass-card mb-4 border-0">
+                <Row className="g-4 mb-5">
+                    <Col lg={8}>
+                        {bot.code && isOwner && (
+                            <Card className="glass-card mb-4 border-0 p-4">
                                 <h3 className="h6 fw-bold mb-3">Bot Logic (Python)</h3>
                                 <div
                                     className="bg-black border border-secondary rounded p-3 overflow-auto"
@@ -124,42 +150,39 @@ export default function BotDetail() {
                                     </pre>
                                 </div>
                             </Card>
-                        </Col>
-                    </Row>
-                )}
+                        )}
 
-                <Row className="g-4 mb-5">
-                    <Col md={3}>
-                        <Card className="p-3 h-100">
-                            <h6 className="text-secondary text-uppercase small fw-bold mb-2">
-                                ELO Rating
-                            </h6>
-                            <span className="h2 fw-bold mb-0 text-white">{bot.elo}</span>
+                        <Card className="glass-card border-0 p-4">
+                            <h3 className="h6 fw-bold mb-4">ELO Progress</h3>
+                            {bot.eloHistory && bot.eloHistory.length > 1 ? (
+                                <Chart type="elo" body={bot.eloHistory} />
+                            ) : (
+                                <div className="text-center py-5 text-secondary">
+                                    Not enough data to generate ELO chart.
+                                </div>
+                            )}
                         </Card>
                     </Col>
-                    <Col md={3}>
-                        <Card className="p-3 h-100">
-                            <h6 className="text-secondary text-uppercase small fw-bold mb-2">
-                                Win Rate
-                            </h6>
-                            <span className="h2 fw-bold mb-0 text-success">{winRate}%</span>
-                            <p className="text-secondary small mb-0">{totalMatches} matches</p>
-                        </Card>
-                    </Col>
-                    <Col md={3}>
-                        <Card className="p-3 h-100">
-                            <h6 className="text-secondary text-uppercase small fw-bold mb-2">
-                                Wins
-                            </h6>
-                            <span className="h2 fw-bold mb-0 text-success">{bot.wins}</span>
-                        </Card>
-                    </Col>
-                    <Col md={3}>
-                        <Card className="p-3 h-100">
-                            <h6 className="text-secondary text-uppercase small fw-bold mb-2">
-                                W / L / D
-                            </h6>
-                            <div className="d-flex flex-wrap gap-2 mt-1">
+
+                    <Col lg={4}>
+                        <Card className="p-4 glass-card border-0 mb-4 h-100">
+                            <h3 className="h6 fw-bold mb-4">Battle Stats</h3>
+                            <div className="text-center mb-4">
+                                <Chart
+                                    type="results"
+                                    params={{ wins: bot.wins, losses: bot.losses, draws: bot.draws }}
+                                />
+                            </div>
+                            <div className="d-flex justify-content-between mb-3">
+                                <span className="text-secondary small">Current ELO</span>
+                                <span className="fw-bold text-white">{bot.elo}</span>
+                            </div>
+                            <div className="d-flex justify-content-between mb-3">
+                                <span className="text-secondary small">Win Rate</span>
+                                <span className="fw-bold text-success">{winRate}%</span>
+                            </div>
+                            <hr className="border-secondary opacity-25" />
+                            <div className="d-flex justify-content-between pt-2">
                                 <Badge bg="success">W: {bot.wins}</Badge>
                                 <Badge bg="danger">L: {bot.losses}</Badge>
                                 <Badge bg="secondary">D: {bot.draws}</Badge>
@@ -167,6 +190,24 @@ export default function BotDetail() {
                         </Card>
                     </Col>
                 </Row>
+
+                <Modal show={showDelete} onHide={() => setShowDelete(false)} centered>
+                    <Modal.Header closeButton className="bg-dark border-secondary text-white">
+                        <Modal.Title>Delete Bot</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body className="bg-dark text-white">
+                        Are you sure you want to delete <strong>{bot.name}</strong>? This action
+                        cannot be undone.
+                    </Modal.Body>
+                    <Modal.Footer className="bg-dark border-secondary">
+                        <Button variant="secondary" onClick={() => setShowDelete(false)}>
+                            Cancel
+                        </Button>
+                        <Button variant="danger" onClick={handleDelete} disabled={loading}>
+                            {loading ? "Deleting..." : "Delete Bot"}
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
             </Container>
             <Footer />
         </div>
