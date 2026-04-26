@@ -19,6 +19,7 @@ export default [
 
     route("/bots", "routes/bots.tsx"),
     route("/bots/:id", "routes/bot-detail.tsx"),
+    route("/bots/:id/edit", "routes/bot-edit.tsx"),
     route("/bots/create", "routes/bot-form.tsx"),
     route("/bots/user-bots", "routes/user-bots.tsx"),
 
