@@ -1,10 +1,17 @@
 import { useState, useEffect } from "react";
 import { Spinner } from "react-bootstrap";
 import {
-    LineChart, Line,
-    PieChart, Pie, Cell,
-    BarChart, Bar,
-    XAxis, YAxis, Tooltip, ResponsiveContainer
+    LineChart,
+    Line,
+    PieChart,
+    Pie,
+    Cell,
+    BarChart,
+    Bar,
+    XAxis,
+    YAxis,
+    Tooltip,
+    ResponsiveContainer,
 } from "recharts";
 
 interface ChartProps {
@@ -38,7 +45,7 @@ export default function Chart({ type, params, body }: ChartProps) {
                     method: body ? "POST" : "GET",
                     credentials: "include",
                     headers: body ? { "Content-Type": "application/json" } : undefined,
-                    body: body ? JSON.stringify(body) : undefined
+                    body: body ? JSON.stringify(body) : undefined,
                 });
 
                 if (!res.ok) throw new Error();
@@ -55,7 +62,12 @@ export default function Chart({ type, params, body }: ChartProps) {
         fetchData();
     }, [type, JSON.stringify(params), JSON.stringify(body)]);
 
-    if (loading) return <div className="text-center py-4"><Spinner size="sm" /></div>;
+    if (loading)
+        return (
+            <div className="text-center py-4">
+                <Spinner size="sm" />
+            </div>
+        );
     if (error) return <div className="text-center py-4 text-secondary">Error loading chart</div>;
 
     if (type === "results") {
@@ -82,7 +94,7 @@ export default function Chart({ type, params, body }: ChartProps) {
     if (type === "elo") {
         const lineData = data.map((value: number, index: number) => ({
             game: index + 1,
-            elo: value
+            elo: value,
         }));
 
         return (
@@ -100,7 +112,7 @@ export default function Chart({ type, params, body }: ChartProps) {
     if (type === "users") {
         const barData = data.map((d: any) => ({
             label: `${d.year}-${d.month}`,
-            users: d.count
+            users: d.count,
         }));
 
         return (
@@ -120,10 +132,7 @@ export default function Chart({ type, params, body }: ChartProps) {
 
         return (
             <div className="w-100 bg-dark rounded" style={{ height: 20 }}>
-                <div
-                    className="bg-success h-100 rounded"
-                    style={{ width: `${percent}%` }}
-                />
+                <div className="bg-success h-100 rounded" style={{ width: `${percent}%` }} />
             </div>
         );
     }

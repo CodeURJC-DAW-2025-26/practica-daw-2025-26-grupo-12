@@ -28,7 +28,7 @@ export async function getMyBots(userId: number): Promise<Page<BotDetail>> {
 export async function createBot(data: {
     name: string;
     description: string;
-    code:string;
+    code: string;
     tags: string[];
     isPublic: boolean;
     imageFile?: File;

@@ -1,27 +1,27 @@
-import { useState, useMemo, useEffect } from "react";
-import { useSearchParams, Link } from "react-router";
+import { useState, useEffect } from "react";
+import { useSearchParams, Link, useLoaderData } from "react-router";
+import { Container, Row, Col, Card, Table, Form, Button, Badge, Modal } from "react-bootstrap";
 import type { Route } from "./+types/users";
 import { adminUserService, type UserPageResponse } from "../../services/admin-user-service";
-import { Table, Button, Form, Modal, Pagination, Badge, Row, Col } from "react-bootstrap";
 
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
     const url = new URL(request.url);
-    const page = parseInt(url.searchParams.get("page") || "0");
     const query = url.searchParams.get("query") || "";
-
     try {
-        const data = await adminUserService.getUsers(page, 10, query);
-        return { data };
+        const data = await adminUserService.getUsers(0, 10, query);
+        return { data, query };
     } catch (error) {
         throw new Error("Failed to load users");
     }
 }
 
-export default function AdminUsers({ loaderData }: Route.ComponentProps) {
-    const initialData = (loaderData as { data: UserPageResponse }).data;
+export default function AdminUsers() {
+    const { data: initialData, query: initialQuery } = useLoaderData<typeof clientLoader>();
     const [users, setUsers] = useState(initialData.content);
+    const [page, setPage] = useState(0);
+    const [hasMore, setHasMore] = useState(initialData.number < initialData.totalPages - 1);
     const [searchParams, setSearchParams] = useSearchParams();
-    const [query, setQuery] = useState(searchParams.get("query") || "");
+    const [query, setQuery] = useState(initialQuery);
 
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showBlockModal, setShowBlockModal] = useState(false);
@@ -33,22 +33,26 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
 
     useEffect(() => {
         setUsers(initialData.content);
-    }, [initialData.content]);
+        setPage(0);
+        setHasMore(initialData.number < initialData.totalPages - 1);
+        setQuery(initialQuery);
+    }, [initialData, initialQuery]);
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        setSearchParams((prev) => {
-            prev.set("query", query);
-            prev.set("page", "0");
-            return prev;
-        });
+        setSearchParams({ query });
     };
 
-    const handlePageChange = (page: number) => {
-        setSearchParams((prev) => {
-            prev.set("page", page.toString());
-            return prev;
-        });
+    const handleLoadMore = async () => {
+        const nextPage = page + 1;
+        try {
+            const data = await adminUserService.getUsers(nextPage, 10, query);
+            setUsers((prev) => [...prev, ...data.content]);
+            setPage(nextPage);
+            setHasMore(data.number < data.totalPages - 1);
+        } catch (error) {
+            alert("Error loading more users");
+        }
     };
 
     const onBlockToggle = async () => {
@@ -77,198 +81,201 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
     };
 
     return (
-        <div className="admin-users-page animate__animated animate__fadeIn">
-            <div className="d-flex justify-content-between align-items-center mb-5 mt-2">
+        <Container className="py-5">
+            <div className="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
                 <div>
-                    <h2 className="fw-bold m-0">User Moderation</h2>
-                    <p className="text-muted m-0">Manage and monitor application users</p>
+                    <p className="text-secondary mb-1 small text-uppercase">Administration</p>
+                    <h1 className="h3 fw-bold mb-0">User Management</h1>
                 </div>
             </div>
 
-            <div className="glass-card p-4 mb-4">
+            <Card className="p-4 mb-4">
                 <Form onSubmit={handleSearch}>
-                    <Row className="g-3">
-                        <Col md={8}>
+                    <Row className="g-3 align-items-center">
+                        <Col lg={7}>
+                            <Form.Label className="text-uppercase small mb-1">
+                                Search users
+                            </Form.Label>
                             <Form.Control
-                                type="text"
-                                placeholder="Search by username or email..."
-                                className="form-control-lg"
+                                type="search"
+                                placeholder="Search by username or email"
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
                             />
                         </Col>
-                        <Col md={4} className="d-grid">
+                        <Col lg={2}>
+                            <Form.Label className="text-uppercase small mb-1">Status</Form.Label>
+                            <Form.Select>
+                                <option value="all">All</option>
+                                <option value="active">Active</option>
+                                <option value="blocked">Blocked</option>
+                            </Form.Select>
+                        </Col>
+                        <Col lg={3} className="d-grid d-lg-flex justify-content-lg-end gap-2">
                             <Button
-                                variant="primary"
                                 type="submit"
-                                className="btn-gradient-primary btn-lg"
+                                variant="primary"
+                                size="sm"
+                                className="px-3 mt-lg-4"
                             >
-                                Search Users
+                                Search
+                            </Button>
+                            <Button
+                                variant="outline-muted"
+                                size="sm"
+                                className="px-3 mt-lg-4"
+                                onClick={() => {
+                                    setQuery("");
+                                    setSearchParams({});
+                                }}
+                            >
+                                Clear
                             </Button>
                         </Col>
                     </Row>
                 </Form>
-            </div>
+            </Card>
 
-            <div className="glass-card overflow-hidden">
-                <Table hover responsive className="m-0 align-middle">
-                    <thead className="bg-dark text-uppercase small letter-spacing-lg">
-                        <tr>
-                            <th className="border-0 ps-4 py-3">User</th>
-                            <th className="border-0 py-3">Status</th>
-                            <th className="border-0 py-3">Joined</th>
-                            <th className="border-0 pe-4 py-3 text-end">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody className="border-top-0">
-                        {users.map((user) => (
-                            <tr key={user.id} className="border-bottom border-secondary">
-                                <td className="ps-4 py-3">
-                                    <div className="d-flex align-items-center gap-3">
+            <Card className="p-4 mb-4">
+                <div className="d-flex justify-content-between align-items-center gap-2 flex-wrap mb-3">
+                    <h2 className="h5 fw-bold mb-0">Matching Users</h2>
+                    <Badge bg="secondary">
+                        Showing {users.length} of {initialData.totalElements}
+                    </Badge>
+                </div>
+                <div className="table-responsive">
+                    <Table className="mb-0 align-middle text-nowrap">
+                        <thead>
+                            <tr className="text-secondary small text-uppercase border-secondary">
+                                <th scope="col" className="ps-3">
+                                    Photo
+                                </th>
+                                <th scope="col">Username</th>
+                                <th scope="col">Email</th>
+                                <th scope="col">Provider</th>
+                                <th scope="col">Status</th>
+                                <th scope="col" className="text-end pe-3">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {users.map((user) => (
+                                <tr key={user.id} className="border-secondary">
+                                    <td className="ps-3">
                                         <div
-                                            className="avatar-placeholder rounded-circle bg-primary d-flex align-items-center justify-content-center text-white"
+                                            className="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold"
                                             style={{ width: 40, height: 40 }}
                                         >
                                             {user.username.charAt(0).toUpperCase()}
                                         </div>
-                                        <div>
-                                            <Link
-                                                to={`/profile/${user.id}`}
-                                                className="fw-bold text-white text-decoration-none hover-link"
-                                            >
-                                                {user.username}
-                                            </Link>
-                                            <div className="small text-muted">{user.email}</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <Badge
-                                        className={
-                                            user.blocked
-                                                ? "badge-soft-danger"
-                                                : "badge-soft-success"
-                                        }
-                                        pill
-                                    >
-                                        {user.blocked ? "Blocked" : "Active"}
-                                    </Badge>
-                                </td>
-                                <td className="text-muted small">
-                                    {new Date(user.createdAt).toLocaleDateString(undefined, {
-                                        year: "numeric",
-                                        month: "short",
-                                        day: "numeric",
-                                    })}
-                                </td>
-                                <td className="pe-4 py-3 text-end">
-                                    <Button
-                                        variant={user.blocked ? "success" : "warning"}
-                                        size="sm"
-                                        className="me-2 rounded-pill px-3"
-                                        onClick={() => {
-                                            setTargetUser({
-                                                id: user.id,
-                                                username: user.username,
-                                                blocked: user.blocked,
-                                            });
-                                            setShowBlockModal(true);
-                                        }}
-                                    >
-                                        {user.blocked ? "Unblock" : "Block"}
-                                    </Button>
-                                    <Button
-                                        variant="outline-danger"
-                                        size="sm"
-                                        className="rounded-pill px-3"
-                                        onClick={() => {
-                                            setTargetUser({
-                                                id: user.id,
-                                                username: user.username,
-                                                blocked: user.blocked,
-                                            });
-                                            setShowDeleteModal(true);
-                                        }}
-                                    >
-                                        Delete
-                                    </Button>
-                                </td>
-                            </tr>
-                        ))}
-                        {users.length === 0 && (
-                            <tr>
-                                <td colSpan={4} className="text-center py-5 text-muted">
-                                    <div className="mb-2 fs-2">🔍</div>
-                                    No users found matching your search.
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </Table>
-            </div>
+                                    </td>
+                                    <td className="fw-semibold text-white">{user.username}</td>
+                                    <td className="text-secondary">{user.email}</td>
+                                    <td className="text-secondary">SYSTEM</td>
+                                    <td>
+                                        {user.blocked ? (
+                                            <Badge bg="danger">Blocked</Badge>
+                                        ) : (
+                                            <Badge bg="success">Active</Badge>
+                                        )}
+                                    </td>
+                                    <td className="text-end pe-3">
+                                        <Button
+                                            as={Link as any}
+                                            to={`/profile/${user.id}`}
+                                            variant="outline-muted"
+                                            size="sm"
+                                            className="me-2"
+                                        >
+                                            View
+                                        </Button>
+                                        <Button
+                                            variant={user.blocked ? "success" : "warning"}
+                                            size="sm"
+                                            className="me-2"
+                                            onClick={() => {
+                                                setTargetUser({
+                                                    id: user.id,
+                                                    username: user.username,
+                                                    blocked: user.blocked,
+                                                });
+                                                setShowBlockModal(true);
+                                            }}
+                                        >
+                                            {user.blocked ? "Unblock" : "Block"}
+                                        </Button>
+                                        <Button
+                                            variant="outline-danger"
+                                            size="sm"
+                                            onClick={() => {
+                                                setTargetUser({
+                                                    id: user.id,
+                                                    username: user.username,
+                                                    blocked: user.blocked,
+                                                });
+                                                setShowDeleteModal(true);
+                                            }}
+                                        >
+                                            Delete
+                                        </Button>
+                                    </td>
+                                </tr>
+                            ))}
+                            {users.length === 0 && (
+                                <tr>
+                                    <td colSpan={6} className="text-center text-secondary py-4">
+                                        No users found.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </Table>
+                </div>
+                {hasMore && (
+                    <div className="d-flex justify-content-center mt-3">
+                        <Button variant="outline-muted" size="sm" onClick={handleLoadMore}>
+                            Show more
+                        </Button>
+                    </div>
+                )}
+            </Card>
 
-            {initialData.totalPages > 1 && (
-                <Pagination>
-                    <Pagination.First
-                        onClick={() => handlePageChange(0)}
-                        disabled={initialData.number === 0}
-                    />
-                    <Pagination.Prev
-                        onClick={() => handlePageChange(initialData.number - 1)}
-                        disabled={initialData.number === 0}
-                    />
-                    {[...Array(initialData.totalPages)].map((_, i) => (
-                        <Pagination.Item
-                            key={i}
-                            active={i === initialData.number}
-                            onClick={() => handlePageChange(i)}
-                        >
-                            {i + 1}
-                        </Pagination.Item>
-                    ))}
-                    <Pagination.Next
-                        onClick={() => handlePageChange(initialData.number + 1)}
-                        disabled={initialData.number === initialData.totalPages - 1}
-                    />
-                    <Pagination.Last
-                        onClick={() => handlePageChange(initialData.totalPages - 1)}
-                        disabled={initialData.number === initialData.totalPages - 1}
-                    />
-                </Pagination>
-            )}
-
-            <Modal show={showBlockModal} onHide={() => setShowBlockModal(false)}>
-                <Modal.Header closeButton>
-                    <Modal.Title>{targetUser?.blocked ? "Unblock" : "Block"} User</Modal.Title>
+            <Modal show={showBlockModal} onHide={() => setShowBlockModal(false)} centered>
+                <Modal.Header closeButton className="border-secondary">
+                    <Modal.Title className="h5">Confirm action</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    Are you sure you want to {targetUser?.blocked ? "unblock" : "block"}{" "}
-                    <strong>{targetUser?.username}</strong>?
+                    <p className="mb-0 text-secondary">
+                        Are you sure you want to {targetUser?.blocked ? "unblock" : "block"}{" "}
+                        {targetUser?.username}?
+                    </p>
                 </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowBlockModal(false)}>
+                <Modal.Footer className="border-secondary">
+                    <Button variant="outline-muted" onClick={() => setShowBlockModal(false)}>
                         Cancel
                     </Button>
                     <Button
-                        variant={targetUser?.blocked ? "success" : "warning"}
+                        variant={targetUser?.blocked ? "success" : "danger"}
                         onClick={onBlockToggle}
                     >
-                        Confirm
+                        {targetUser?.blocked ? "Unblock" : "Block"}
                     </Button>
                 </Modal.Footer>
             </Modal>
 
-            <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Delete User</Modal.Title>
+            <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)} centered>
+                <Modal.Header closeButton className="border-secondary">
+                    <Modal.Title className="h5">Delete User</Modal.Title>
                 </Modal.Header>
-                <Modal.Body className="text-danger">
-                    <strong>Warning!</strong> You are about to delete user{" "}
-                    <strong>{targetUser?.username}</strong>. This action is usually irreversible in
-                    this system (logical delete).
+                <Modal.Body>
+                    <p className="mb-0 text-danger">
+                        You are about to delete user <strong>{targetUser?.username}</strong>. This
+                        action is irreversible.
+                    </p>
                 </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+                <Modal.Footer className="border-secondary">
+                    <Button variant="outline-muted" onClick={() => setShowDeleteModal(false)}>
                         Cancel
                     </Button>
                     <Button variant="danger" onClick={onDelete}>
@@ -276,6 +283,6 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
                     </Button>
                 </Modal.Footer>
             </Modal>
-        </div>
+        </Container>
     );
 }

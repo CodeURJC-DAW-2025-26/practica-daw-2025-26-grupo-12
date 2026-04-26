@@ -1,13 +1,13 @@
 import { useEffect } from "react";
 import { Link, useLoaderData } from "react-router";
-import { Container, Row, Col, Card, Button } from "react-bootstrap";
+import { Container, Row, Col, Card, Button, Badge } from "react-bootstrap";
 import type { Route } from "./+types/home";
 import AppNavbar from "~/components/header";
 import Footer from "~/components/footer";
 import { useAuthStore, type AuthUser } from "~/stores/auth-store";
 import { getMe } from "~/services/auth-service";
 import { getMyBots } from "~/services/bot-service";
-import type { BotDetail, MatchSummary, TournamentDetail, TournamentSummary } from "~/types";
+import type { BotDetail, MatchSummary, TournamentSummary } from "~/types";
 import { getMyTournaments } from "~/services/tournament-service";
 import { getRecentMatches } from "~/services/match-service";
 
@@ -20,23 +20,25 @@ export function meta(_args: Route.MetaArgs) {
 
 export async function clientLoader() {
     const user = await getMe();
-
     const botsPage = user ? await getMyBots(user.id) : null;
-
-    const tournamentsPage = user ? await getMyTournaments() : null
-
-    const matchesPage = user ? await getRecentMatches() : null
+    const tournamentsPage = user ? await getMyTournaments() : null;
+    const matchesPage = user ? await getRecentMatches() : null;
 
     return {
         user,
         botsPage,
         tournamentsPage,
-        matchesPage
+        matchesPage,
     };
 }
 
 export default function Home() {
-    const { user: loadedUser, botsPage, tournamentsPage, matchesPage } = useLoaderData<typeof clientLoader>();
+    const {
+        user: loadedUser,
+        botsPage,
+        tournamentsPage,
+        matchesPage,
+    } = useLoaderData<typeof clientLoader>();
     const { setUser, setInitialized, isAdmin, isLoggedIn } = useAuthStore();
 
     useEffect(() => {
@@ -52,7 +54,14 @@ export default function Home() {
             <AppNavbar />
             {!loggedIn && <GuestHome />}
             {loggedIn && admin && <AdminHome />}
-            {loggedIn && !admin && <UserHome user={loadedUser} botsPage={botsPage} tournamentsPage={tournamentsPage} matchesPage={matchesPage} />}
+            {loggedIn && !admin && (
+                <UserHome
+                    user={loadedUser}
+                    botsPage={botsPage}
+                    tournamentsPage={tournamentsPage}
+                    matchesPage={matchesPage}
+                />
+            )}
             <Footer />
         </div>
     );
@@ -149,54 +158,62 @@ function GuestHome() {
 
 function AdminHome() {
     return (
-        <>
-            <header className="hero-section text-center mb-5">
-                <Container>
-                    <Row className="justify-content-center">
-                        <Col lg={8}>
-                            <h1 className="display-4 fw-bold mb-3">Admin Dashboard</h1>
-                            <p className="lead text-secondary mb-4">
-                                Welcome back, Administrator. Manage users, bots, and tournaments
-                                from here.
-                            </p>
-                            <div className="d-flex justify-content-center gap-3">
-                                <Button
-                                    as={Link as any}
-                                    to="/admin/users"
-                                    variant="primary"
-                                    size="lg"
-                                    className="px-4"
-                                >
-                                    Users
-                                </Button>
-                                <Button
-                                    as={Link as any}
-                                    to="/admin/bots"
-                                    variant="primary"
-                                    size="lg"
-                                    className="px-4"
-                                >
-                                    Bots
-                                </Button>
-                                <Button
-                                    as={Link as any}
-                                    to="/admin/tournaments"
-                                    variant="primary"
-                                    size="lg"
-                                    className="px-4"
-                                >
-                                    Tournaments
-                                </Button>
-                            </div>
-                        </Col>
-                    </Row>
-                </Container>
-            </header>
-        </>
+        <header className="hero-section text-center mb-5">
+            <Container>
+                <Row className="justify-content-center">
+                    <Col lg={8}>
+                        <h1 className="display-4 fw-bold mb-3">Admin Dashboard</h1>
+                        <p className="lead text-secondary mb-4">
+                            Welcome back, Administrator. Manage users, bots, and tournaments from
+                            here.
+                        </p>
+                        <div className="d-flex justify-content-center gap-3">
+                            <Button
+                                as={Link as any}
+                                to="/admin/users"
+                                variant="primary"
+                                size="lg"
+                                className="px-4"
+                            >
+                                Users
+                            </Button>
+                            <Button
+                                as={Link as any}
+                                to="/admin/bots"
+                                variant="primary"
+                                size="lg"
+                                className="px-4"
+                            >
+                                Bots
+                            </Button>
+                            <Button
+                                as={Link as any}
+                                to="/admin/tournaments"
+                                variant="primary"
+                                size="lg"
+                                className="px-4"
+                            >
+                                Tournaments
+                            </Button>
+                        </div>
+                    </Col>
+                </Row>
+            </Container>
+        </header>
     );
 }
 
-function UserHome({ user, botsPage, tournamentsPage, matchesPage }: { user: AuthUser | null; botsPage: any; tournamentsPage: any; matchesPage: any }) {
+function UserHome({
+    user,
+    botsPage,
+    tournamentsPage,
+    matchesPage,
+}: {
+    user: AuthUser | null;
+    botsPage: any;
+    tournamentsPage: any;
+    matchesPage: any;
+}) {
     if (!user) return null;
     const initial = user.username.charAt(0).toUpperCase();
 
@@ -207,8 +224,8 @@ function UserHome({ user, botsPage, tournamentsPage, matchesPage }: { user: Auth
     const hasTournaments = tournaments.length > 0;
 
     const matches: MatchSummary[] = matchesPage?.content ?? [];
-    console.log(matchesPage);
     const hasMatches = matches.length > 0;
+
     return (
         <>
             <header className="hero-section mb-5">
@@ -222,9 +239,6 @@ function UserHome({ user, botsPage, tournamentsPage, matchesPage }: { user: Auth
                                         className="rounded-circle border border-primary"
                                         style={{ width: 64, height: 64, objectFit: "cover" }}
                                         alt={user.username}
-                                        onError={(e) => {
-                                            (e.target as HTMLImageElement).style.display = "none";
-                                        }}
                                     />
                                 ) : (
                                     <div
@@ -237,7 +251,9 @@ function UserHome({ user, botsPage, tournamentsPage, matchesPage }: { user: Auth
                             </div>
                             <div>
                                 <h1 className="h3 fw-bold mb-1">{user.username}</h1>
-                                <p className="text-secondary mb-0">Logged in</p>
+                                <p className="text-secondary mb-0">
+                                    Logged in • {bots.length} {bots.length === 1 ? "bot" : "bots"}
+                                </p>
                             </div>
                         </div>
                         <div className="d-flex flex-wrap gap-3 align-items-center">
@@ -253,9 +269,9 @@ function UserHome({ user, botsPage, tournamentsPage, matchesPage }: { user: Auth
                             <Button
                                 as={Link as any}
                                 to="/matches/search"
-                                variant="outline-secondary"
+                                className="btn-outline-muted px-4"
+                                variant="outline"
                                 size="lg"
-                                className="px-4"
                             >
                                 Find Match
                             </Button>
@@ -265,39 +281,40 @@ function UserHome({ user, botsPage, tournamentsPage, matchesPage }: { user: Auth
             </header>
 
             <Container className="mb-5">
-                <Row className="g-4 justify-content-center">
+                <Row className="g-4">
                     <Col lg={8}>
                         <Row className="g-4">
                             <Col md={6}>
                                 <Card className="p-4 h-100">
                                     <h2 className="h5 fw-bold mb-3">My Bots</h2>
-
                                     {hasBots ? (
                                         <>
-                                            <div className="list-group list-group-flush">
+                                            <div className="list-group list-group-flush mb-3">
                                                 {bots.slice(0, 5).map((bot) => (
                                                     <div
                                                         key={bot.id}
-                                                        className="list-group-item d-flex justify-content-between align-items-center"
+                                                        className="list-group-item bg-transparent border-secondary px-0 d-flex justify-content-between align-items-center"
                                                     >
-                                                        {bot.name}
-                                                        <span className="badge bg-secondary rounded-pill">
+                                                        <Link
+                                                            to={`/bots/${bot.id}`}
+                                                            className="text-white text-decoration-none hover-link"
+                                                        >
+                                                            {bot.name}
+                                                        </Link>
+                                                        <Badge bg="secondary" pill>
                                                             {bot.elo} ELO
-                                                        </span>
+                                                        </Badge>
                                                     </div>
                                                 ))}
                                             </div>
-
-                                            <div className="mt-3">
-                                                <Button
-                                                    as={Link as any}
-                                                    to="/bots/user-bots"
-                                                    variant="outline-secondary"
-                                                    size="sm"
-                                                >
-                                                    Manage Bots
-                                                </Button>
-                                            </div>
+                                            <Button
+                                                as={Link as any}
+                                                to="/bots/user-bots"
+                                                variant="outline-secondary"
+                                                size="sm"
+                                            >
+                                                Manage Bots
+                                            </Button>
                                         </>
                                     ) : (
                                         <>
@@ -321,77 +338,54 @@ function UserHome({ user, botsPage, tournamentsPage, matchesPage }: { user: Auth
                                     <h2 className="h5 fw-bold mb-3">Recent Matches</h2>
                                     {hasMatches ? (
                                         <>
-                                            <div className="list-group list-group-flush">
-                                                {matches.slice(0, 5).map((match) => {
-                                                    const isBot1Winner =
-                                                        match.winnerBotId === match.bot1Id;
-                                                    const isBot2Winner =
-                                                        match.winnerBotId === match.bot2Id;
-
-                                                    const resultLabel = !match.winnerBotId
-                                                        ? "DRAW"
-                                                        : isBot1Winner
-                                                            ? `${match.bot1Name} won`
-                                                            : `${match.bot2Name} won`;
-
-                                                    const badgeClass = !match.winnerBotId
-                                                        ? "bg-secondary"
-                                                        : "bg-primary";
-
-                                                    return (
-                                                        <div
-                                                            key={match.id}
-                                                            className="list-group-item d-flex justify-content-between align-items-center"
-                                                        >
-                                                            <div className="d-flex flex-column">
-                                                                <span className="fw-semibold">
-                                                                    Match #{match.id}
-                                                                </span>
-
-                                                                <small className="text-secondary">
-                                                                    {match.bot1Name} vs {match.bot2Name}
-                                                                </small>
-
-                                                                <small className="text-secondary">
-                                                                    {match.bot1OwnerName} vs{" "}
-                                                                    {match.bot2OwnerName}
-                                                                </small>
+                                            <div className="list-group list-group-flush mb-3">
+                                                {matches.slice(0, 5).map((match) => (
+                                                    <div
+                                                        key={match.id}
+                                                        className="list-group-item bg-transparent border-secondary px-0 d-flex justify-content-between align-items-center"
+                                                    >
+                                                        <div className="small">
+                                                            <div className="text-white fw-semibold">
+                                                                Match #{match.id}
                                                             </div>
-
-                                                            <span
-                                                                className={`badge rounded-pill ${badgeClass}`}
-                                                            >
-                                                                {resultLabel}
-                                                            </span>
+                                                            <div className="text-muted">
+                                                                {match.bot1Name} vs {match.bot2Name}
+                                                            </div>
                                                         </div>
-                                                    );
-                                                })}
+                                                        <Badge
+                                                            bg={
+                                                                match.winnerBotId
+                                                                    ? "primary"
+                                                                    : "secondary"
+                                                            }
+                                                            pill
+                                                        >
+                                                            {match.winnerBotId ? "FINISH" : "DRAW"}
+                                                        </Badge>
+                                                    </div>
+                                                ))}
                                             </div>
-
-                                            <div className="mt-3">
-                                                <Button
-                                                    as={Link as any}
-                                                    to="/matches/recent"
-                                                    variant="outline-secondary"
-                                                    size="sm"
-                                                >
-                                                    View All Matches
-                                                </Button>
-                                            </div>
+                                            <Button
+                                                as={Link as any}
+                                                to="/matches/recent"
+                                                variant="outline-secondary"
+                                                size="sm"
+                                            >
+                                                View Matches
+                                            </Button>
                                         </>
                                     ) : (
                                         <>
                                             <p className="text-secondary mb-3">
-                                                You don't have any matches yet.
+                                                You have no recent matches yet.
                                             </p>
-
                                             <Button
                                                 as={Link as any}
                                                 to="/matches/search"
-                                                variant="primary"
+                                                variant="outline-secondary"
                                                 size="sm"
                                             >
-                                                Find a Match
+                                                Find Match
                                             </Button>
                                         </>
                                     )}
@@ -402,45 +396,49 @@ function UserHome({ user, botsPage, tournamentsPage, matchesPage }: { user: Auth
                                     <h2 className="h5 fw-bold mb-3">My Tournaments</h2>
                                     {hasTournaments ? (
                                         <>
-                                            <div className="list-group list-group-flush">
-                                                {tournaments.slice(0, 5).map((tournament) => (
+                                            <div className="list-group list-group-flush mb-3">
+                                                {tournaments.slice(0, 5).map((t) => (
                                                     <div
-                                                        key={tournament.id}
-                                                        className="list-group-item d-flex justify-content-between align-items-center"
+                                                        key={t.id}
+                                                        className="list-group-item bg-transparent border-secondary px-0 d-flex justify-content-between align-items-center"
                                                     >
-                                                        <div className="d-flex flex-column">
-                                                            <span className="fw-semibold">
-                                                                {tournament.name}
-                                                            </span>
-                                                            <small className="text-secondary">
-                                                                {tournament.startDate}
-                                                            </small>
+                                                        <div>
+                                                            <div className="text-white fw-semibold">
+                                                                {t.name}
+                                                            </div>
+                                                            <div className="text-muted small">
+                                                                {t.startDate}
+                                                            </div>
                                                         </div>
-
-                                                        <span className="badge bg-primary rounded-pill">
-                                                            {tournament.status}
-                                                        </span>
+                                                        <Badge
+                                                            bg={
+                                                                t.status === "OPEN"
+                                                                    ? "success"
+                                                                    : t.status === "RUNNING"
+                                                                      ? "warning"
+                                                                      : "secondary"
+                                                            }
+                                                            pill
+                                                        >
+                                                            {t.status}
+                                                        </Badge>
                                                     </div>
                                                 ))}
                                             </div>
-
-                                            <div className="mt-3">
-                                                <Button
-                                                    as={Link as any}
-                                                    to="/tournaments/my-tournaments"
-                                                    variant="outline-secondary"
-                                                    size="sm"
-                                                >
-                                                    Manage Tournaments
-                                                </Button>
-                                            </div>
+                                            <Button
+                                                as={Link as any}
+                                                to="/tournaments/my-tournaments"
+                                                variant="outline-secondary"
+                                                size="sm"
+                                            >
+                                                Manage Tournaments
+                                            </Button>
                                         </>
                                     ) : (
                                         <>
                                             <p className="text-secondary mb-3">
                                                 You are not registered in any tournament yet.
                                             </p>
-
                                             <Button
                                                 as={Link as any}
                                                 to="/tournaments"
@@ -454,6 +452,42 @@ function UserHome({ user, botsPage, tournamentsPage, matchesPage }: { user: Auth
                                 </Card>
                             </Col>
                         </Row>
+                    </Col>
+                    <Col lg={4}>
+                        <Card className="p-4 mb-4 shadow-sm border-0 bg-dark text-white">
+                            <h2 className="h5 fw-bold mb-3">My Performance</h2>
+                            <div className="d-flex justify-content-between text-secondary small mb-2">
+                                <span>Win Rate</span>
+                                <span>0.0%</span>
+                            </div>
+                            <div className="mb-3">
+                                <img
+                                    src="/api/v1/charts/progress?current=0&max=100&color=34,197,94"
+                                    className="img-fluid rounded"
+                                    alt="Win Rate Progress"
+                                />
+                            </div>
+                            <div className="d-flex justify-content-between text-secondary small mb-2">
+                                <span>Current ELO (Peak)</span>
+                                <span>0</span>
+                            </div>
+                            <div>
+                                <img
+                                    src="/api/v1/charts/progress?current=0&max=3000&color=139,92,246"
+                                    className="img-fluid rounded"
+                                    alt="ELO Progress"
+                                />
+                            </div>
+                        </Card>
+                        <Card className="p-4 border-0 bg-dark text-white shadow-sm">
+                            <h2 className="h5 fw-bold mb-3">My Rankings</h2>
+                            <p className="text-secondary mb-2 small">
+                                Current placement in the global ladder.
+                            </p>
+                            <p className="mb-0 text-secondary small">
+                                Create and play with at least one bot to get your ranking.
+                            </p>
+                        </Card>
                     </Col>
                 </Row>
             </Container>

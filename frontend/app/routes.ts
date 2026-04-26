@@ -12,7 +12,6 @@ export default [
     route("/matches", "routes/matches.tsx"),
     route("/matches/:id/stats", "routes/match-stats.tsx"),
 
-
     route("/matches/recent", "routes/user-matches.tsx"),
     route("/matches/search", "routes/matchmaking-search.tsx"),
     route("/matches/battle/:id", "routes/battle.tsx"),
@@ -22,7 +21,7 @@ export default [
     route("/bots/create", "routes/bot-form.tsx"),
     route("/bots/user-bots", "routes/user-bots.tsx"),
 
-    route("/profile","routes/profile.tsx"),
+    route("/profile", "routes/profile.tsx"),
 
     layout("layouts/admin-layout.tsx", [
         route("/admin/users", "routes/admin/users.tsx"),

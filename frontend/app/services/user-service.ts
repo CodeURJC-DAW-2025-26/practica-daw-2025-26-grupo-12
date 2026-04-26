@@ -48,7 +48,7 @@ export async function updateUserProfile(
     try {
         const json = await response.json();
         error = json.message ?? error;
-    } catch { }
+    } catch {}
     return { ok: false, error };
 }
 

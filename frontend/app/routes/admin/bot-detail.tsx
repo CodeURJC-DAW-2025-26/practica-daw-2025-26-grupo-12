@@ -6,9 +6,15 @@ import type { BotDetail } from "~/types";
 import { Button, Row, Col, Badge, Card, Modal } from "react-bootstrap";
 import { getEloChart, getResultsChart } from "~/services/chart-service";
 import {
-    PieChart, Pie, Cell,
-    LineChart, Line,
-    XAxis, YAxis, Tooltip, ResponsiveContainer
+    PieChart,
+    Pie,
+    Cell,
+    LineChart,
+    Line,
+    XAxis,
+    YAxis,
+    Tooltip,
+    ResponsiveContainer,
 } from "recharts";
 
 export async function clientLoader({ params }: Route.ClientLoaderArgs) {
@@ -35,13 +41,13 @@ export default function AdminBotDetail({ loaderData }: Route.ComponentProps) {
                 const results = await getResultsChart({
                     wins: bot.wins,
                     losses: bot.losses,
-                    draws: bot.draws
+                    draws: bot.draws,
                 });
 
                 setResultsData([
                     { name: "Wins", value: results.wins },
                     { name: "Losses", value: results.losses },
-                    { name: "Draws", value: results.draws }
+                    { name: "Draws", value: results.draws },
                 ]);
 
                 const eloHistory = bot.eloHistory ?? [];
@@ -50,7 +56,7 @@ export default function AdminBotDetail({ loaderData }: Route.ComponentProps) {
                 setEloData(
                     elo.map((value: number, index: number) => ({
                         game: index + 1,
-                        elo: value
+                        elo: value,
                     }))
                 );
             } catch (e) {
