@@ -10,6 +10,7 @@ import { getMyBots } from "~/services/bot-service";
 import type { BotDetail, MatchSummary, TournamentSummary } from "~/types";
 import { getMyTournaments } from "~/services/tournament-service";
 import { getRecentMatches } from "~/services/match-service";
+import Chart from "~/components/chart";
 
 export function meta(_args: Route.MetaArgs) {
     return [
@@ -461,22 +462,14 @@ function UserHome({
                                 <span>0.0%</span>
                             </div>
                             <div className="mb-3">
-                                <img
-                                    src="/api/v1/charts/progress?current=0&max=100&color=34,197,94"
-                                    className="img-fluid rounded"
-                                    alt="Win Rate Progress"
-                                />
+                                <Chart type="progress" params={{ current: 0, max: 100 }} />
                             </div>
                             <div className="d-flex justify-content-between text-secondary small mb-2">
                                 <span>Current ELO (Peak)</span>
                                 <span>0</span>
                             </div>
                             <div>
-                                <img
-                                    src="/api/v1/charts/progress?current=0&max=3000&color=139,92,246"
-                                    className="img-fluid rounded"
-                                    alt="ELO Progress"
-                                />
+                                <Chart type="progress" params={{ current: 0, max: 3000 }} />
                             </div>
                         </Card>
                         <Card className="p-4 border-0 bg-dark text-white shadow-sm">

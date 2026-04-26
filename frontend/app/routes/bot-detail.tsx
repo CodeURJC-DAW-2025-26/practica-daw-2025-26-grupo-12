@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useLoaderData, useNavigate } from "react-router";
 import { Container, Row, Col, Card, Button, Badge, Modal } from "react-bootstrap";
 import type { Route } from "./+types/bot-detail";
@@ -6,6 +6,7 @@ import { getBotById, deleteBot } from "~/services/bot-service";
 import AppNavbar from "~/components/header";
 import Footer from "~/components/footer";
 import { useAuthStore } from "~/stores/auth-store";
+import Chart from "~/components/chart";
 
 export function meta({ data }: Route.MetaArgs) {
     const name = (data as any)?.bot?.name ?? "Bot";
@@ -51,45 +52,6 @@ export default function BotDetail() {
     const initial = bot.name.charAt(0).toUpperCase();
     const totalMatches = bot.wins + bot.losses + bot.draws;
     const winRate = totalMatches > 0 ? ((bot.wins / totalMatches) * 100).toFixed(1) : "0.0";
-
-    const [pieChart, setPieChart] = useState<string>("");
-    const [eloChart, setEloChart] = useState<string>("");
-
-    useEffect(() => {
-        const fetchPieChart = async () => {
-            try {
-                const res = await fetch(
-                    `/api/v1/charts/results?wins=${bot.wins}&losses=${bot.losses}&draws=${bot.draws}`
-                );
-                if (res.ok) {
-                    const text = await res.text();
-                    setPieChart(text);
-                }
-            } catch (e) {
-                console.error("Failed to fetch pie chart", e);
-            }
-        };
-
-        const fetchEloChart = async () => {
-            try {
-                const eloHistory = [1000, 1020, 1050, bot.elo];
-                const res = await fetch(`/api/v1/charts/elo`, {
-                    method: "GET",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(eloHistory),
-                });
-                if (res.ok) {
-                    const text = await res.text();
-                    setEloChart(text);
-                }
-            } catch (e) {
-                console.error("Failed to fetch elo chart", e);
-            }
-        };
-
-        fetchPieChart();
-        fetchEloChart();
-    }, [bot]);
 
     const handleDelete = async () => {
         setLoading(true);
@@ -240,15 +202,15 @@ export default function BotDetail() {
                                 <Badge bg="secondary">Total: {totalMatches}</Badge>
                             </div>
                             <div className="bg-secondary-bg border border-secondary rounded p-4 text-center">
-                                {pieChart && (
-                                    <img
-                                        src={`data:image/png;base64,${pieChart}`}
-                                        className="img-fluid mb-3"
-                                        style={{ maxHeight: 180 }}
-                                        alt="Results Breakdown"
-                                    />
-                                )}
-                                <div className="d-flex flex-wrap justify-content-center gap-2">
+                                <Chart
+                                    type="results"
+                                    params={{
+                                        wins: bot.wins,
+                                        losses: bot.losses,
+                                        draws: bot.draws,
+                                    }}
+                                />
+                                <div className="d-flex flex-wrap justify-content-center gap-2 mt-3">
                                     <Badge bg="success">Wins: {bot.wins}</Badge>
                                     <Badge bg="danger">Losses: {bot.losses}</Badge>
                                     <Badge bg="secondary">Draws: {bot.draws}</Badge>
@@ -266,42 +228,11 @@ export default function BotDetail() {
                                 <Badge bg="secondary">Live History</Badge>
                             </div>
                             <div className="bg-secondary-bg border border-secondary rounded p-4 text-center">
-                                {eloChart && (
-                                    <img
-                                        src={`data:image/png;base64,${eloChart}`}
-                                        className="img-fluid mb-3"
-                                        style={{ maxHeight: 250 }}
-                                        alt="ELO Progression"
-                                    />
-                                )}
-                                <div className="d-flex flex-wrap justify-content-center gap-2">
+                                <Chart type="elo" body={[1000, 1020, 1050, bot.elo]} />
+                                <div className="d-flex flex-wrap justify-content-center gap-2 mt-3">
                                     <Badge bg="secondary">Start: 1000</Badge>
                                     <Badge bg="primary">Current: {bot.elo}</Badge>
                                     <Badge bg="success">Trend: +</Badge>
-                                </div>
-                                <div className="d-flex flex-wrap justify-content-center gap-3 mt-3 text-secondary small">
-                                    <span className="d-inline-flex align-items-center gap-2">
-                                        <span
-                                            className="rounded-circle"
-                                            style={{
-                                                width: 10,
-                                                height: 10,
-                                                backgroundColor: "#8b5cf6",
-                                            }}
-                                        ></span>{" "}
-                                        ELO Line
-                                    </span>
-                                    <span className="d-inline-flex align-items-center gap-2">
-                                        <span
-                                            className="rounded-circle"
-                                            style={{
-                                                width: 10,
-                                                height: 10,
-                                                backgroundColor: "#22c55e",
-                                            }}
-                                        ></span>{" "}
-                                        Current
-                                    </span>
                                 </div>
                             </div>
                         </Card>

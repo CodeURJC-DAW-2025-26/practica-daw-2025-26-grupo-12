@@ -46,7 +46,7 @@ public class ChartController {
     return ResponseEntity.ok(new ResultsChartDto(wins, losses, draws));
   }
 
-  @PostMapping("/elo")
+  @GetMapping("/elo")
   @Operation(
       summary = "Get ELO history data",
       description = "Returns a list of ELO values to build a line chart.")
@@ -59,22 +59,14 @@ public class ChartController {
                 @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     array = @ArraySchema(schema = @Schema(type = "integer")))),
-        @ApiResponse(responseCode = "400", description = "Invalid request body")
+        @ApiResponse(responseCode = "400", description = "Invalid request parameters")
       })
-  public ResponseEntity<List<Integer>> getEloData(
-      @RequestBody
-          @io.swagger.v3.oas.annotations.parameters.RequestBody(
-              required = true,
-              content =
-                  @Content(
-                      mediaType = MediaType.APPLICATION_JSON_VALUE,
-                      array = @ArraySchema(schema = @Schema(type = "integer", example = "1500"))))
-          List<Integer> eloHistory) {
+  public ResponseEntity<List<Integer>> getEloData(@RequestParam List<Integer> eloHistory) {
 
     return ResponseEntity.ok(eloHistory);
   }
 
-  @PostMapping("/users")
+  @GetMapping("/users")
   @Operation(
       summary = "Get user history data",
       description = "Returns monthly user counts to build a bar chart.")
@@ -88,20 +80,12 @@ public class ChartController {
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     array =
                         @ArraySchema(schema = @Schema(implementation = MonthlyUserCount.class)))),
-        @ApiResponse(responseCode = "400", description = "Invalid request body")
+        @ApiResponse(responseCode = "400", description = "Invalid query parameters")
       })
   public ResponseEntity<List<MonthlyUserCount>> getUserHistory(
-      @RequestBody
-          @io.swagger.v3.oas.annotations.parameters.RequestBody(
-              required = true,
-              content =
-                  @Content(
-                      mediaType = MediaType.APPLICATION_JSON_VALUE,
-                      array =
-                          @ArraySchema(schema = @Schema(implementation = MonthlyUserCount.class))))
-          List<MonthlyUserCount> monthlyData) {
+      @RequestParam(required = false) List<String> monthlyDataPlaceholder) {
 
-    return ResponseEntity.ok(monthlyData);
+    return ResponseEntity.ok(java.util.Collections.emptyList());
   }
 
   @GetMapping("/progress")

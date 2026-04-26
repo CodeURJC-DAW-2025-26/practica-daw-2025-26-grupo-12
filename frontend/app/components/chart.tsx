@@ -32,20 +32,24 @@ export default function Chart({ type, params, body }: ChartProps) {
 
             try {
                 let url = `/api/v1/charts/${type}`;
+                const searchParams = new URLSearchParams();
 
                 if (params) {
-                    const searchParams = new URLSearchParams();
                     Object.entries(params).forEach(([k, v]) => {
                         searchParams.set(k, String(v));
                     });
-                    url += `?${searchParams.toString()}`;
                 }
 
+                if (body && Array.isArray(body)) {
+                    searchParams.set(type === "elo" ? "eloHistory" : "data", body.join(","));
+                }
+
+                const query = searchParams.toString();
+                if (query) url += `?${query}`;
+
                 const res = await fetch(url, {
-                    method: body ? "POST" : "GET",
+                    method: "GET",
                     credentials: "include",
-                    headers: body ? { "Content-Type": "application/json" } : undefined,
-                    body: body ? JSON.stringify(body) : undefined,
                 });
 
                 if (!res.ok) throw new Error();
