@@ -39,3 +39,10 @@ export async function joinTournament(tournamentId: number, botId: number): Promi
         throw new Error(error.message || "Failed to join tournament");
     }
 }
+
+export async function getUserTournaments( userId: number,page = 0,size = 10): Promise<Page<TournamentSummary>> {
+    const params = new URLSearchParams({ page: String(page), size: String(size) });
+    const res = await fetch(`${BASE}/user/${userId}?${params}`, { credentials: "include" });
+    if (!res.ok) throw new Error(`Failed to fetch tournaments for user ${userId}`);
+    return res.json();
+}

@@ -7,9 +7,13 @@ export default [
 
     route("/tournaments", "routes/tournaments.tsx"),
     route("/tournaments/:id", "routes/tournament-detail.tsx"),
+    route("/tournaments/my-tournaments", "routes/user-tournaments.tsx"),
 
     route("/matches", "routes/matches.tsx"),
     route("/matches/:id/stats", "routes/match-stats.tsx"),
+
+    route("/bots/user-bots", "routes/user-bots.tsx"),
+    route("/matches/recent", "routes/user-matches.tsx"),
 
     route("/bots", "routes/bots.tsx"),
     route("/bots/:id", "routes/bot-detail.tsx"),
