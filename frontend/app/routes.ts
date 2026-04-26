@@ -17,7 +17,11 @@ export default [
     layout("layouts/admin-layout.tsx", [
         route("/admin/users", "routes/admin/users.tsx"),
         route("/admin/bots", "routes/admin/bots.tsx"),
+        route("/admin/bots/:id", "routes/admin/bot-detail.tsx"),
         route("/admin/tournaments", "routes/admin/tournaments.tsx"),
+        route("/admin/tournaments/new", "routes/admin/tournament-new.tsx"),
+        route("/admin/tournaments/:id", "routes/admin/tournament-edit.tsx"),
+        route("/admin/notifications", "routes/admin/notifications.tsx"),
     ]),
 
     route("*", "routes/error-page.tsx"),

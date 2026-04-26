@@ -57,6 +57,14 @@ export default function AdminLayout() {
                             >
                                 <span>🏆</span> Tournaments
                             </Nav.Link>
+                            <Nav.Link
+                                as={NavLink}
+                                to="/admin/notifications"
+                                className="text-white mb-2 p-3 rounded hover-link d-flex align-items-center gap-2"
+                                style={{ transition: "all 0.2s" }}
+                            >
+                                <span>📢</span> Notifications
+                            </Nav.Link>
                         </Nav>
                         <div className="mt-auto p-4 border-top border-secondary">
                             <Nav.Link
