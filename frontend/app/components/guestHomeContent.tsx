@@ -7,21 +7,16 @@ export default function GuestHomeContent() {
                 <Container>
                     <Row className="justify-content-center">
                         <Col lg={8}>
-                            <h1 className="display-4 fw-bold mb-3">
-                                Code. Compete. Conquer.
-                            </h1>
+                            <h1 className="display-4 fw-bold mb-3">Code. Compete. Conquer.</h1>
 
                             <p className="lead text-secondary mb-4">
-                                Welcome to the ultimate <strong>Rock, Paper, Scissors</strong>{" "}
-                                bot arena. Program your strategy, deploy your bot, and watch
-                                it climb the global leaderboard.
+                                Welcome to the ultimate <strong>Rock, Paper, Scissors</strong> bot
+                                arena. Program your strategy, deploy your bot, and watch it climb
+                                the global leaderboard.
                             </p>
 
                             <div className="d-flex justify-content-center gap-3">
-                                <a
-                                    href="/sign-up"
-                                    className="btn btn-primary btn-lg px-4"
-                                >
+                                <a href="/sign-up" className="btn btn-primary btn-lg px-4">
                                     Enter the Area
                                 </a>
                             </div>

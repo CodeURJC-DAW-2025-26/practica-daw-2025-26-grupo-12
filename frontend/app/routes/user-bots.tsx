@@ -144,6 +144,14 @@ export default function UserBots() {
     );
 }
 
-function Badge({ children, bg, className }: { children: React.ReactNode; bg: string; className?: string }) {
+function Badge({
+    children,
+    bg,
+    className,
+}: {
+    children: React.ReactNode;
+    bg: string;
+    className?: string;
+}) {
     return <span className={`badge bg-${bg} ${className}`}>{children}</span>;
 }

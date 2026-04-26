@@ -75,14 +75,14 @@ export default function TournamentDetail() {
                         </div>
 
                         <div className="text-center text-md-start flex-grow-1">
-                            <p className="text-primary mb-1 small text-uppercase fw-bold">
+                            <p className="text-primary mb-1 small text-uppercase fw-bold tracking-wider">
                                 {admin
                                     ? "Admin Control Panel"
                                     : isOpen
                                       ? "Registration Phase"
                                       : "Tournament Details"}
                             </p>
-                            <h1 className="display-5 fw-bold mb-2">{tournament.name}</h1>
+                            <h1 className="display-5 fw-extrabold mb-2">{tournament.name}</h1>
                             <div className="d-flex flex-wrap justify-content-center justify-content-md-start gap-3 mt-3">
                                 {admin ? (
                                     <>
@@ -92,7 +92,8 @@ export default function TournamentDetail() {
                                             variant="primary"
                                             className="px-4"
                                         >
-                                            Edit Settings
+                                            <i className="bi bi-pencil-square me-2"></i>Edit
+                                            Settings
                                         </Button>
                                         <Button
                                             as={Link as any}
@@ -150,19 +151,13 @@ export default function TournamentDetail() {
                                         Status
                                     </label>
                                     {isOpen ? (
-                                        <Badge
-                                            bg="success"
-                                            className="px-3 py-2 border border-success w-100 text-center"
-                                        >
+                                        <span className="badge bg-success-subtle text-success px-3 py-2 border border-success w-100 text-center">
                                             Open for Registration
-                                        </Badge>
+                                        </span>
                                     ) : (
-                                        <Badge
-                                            bg="danger"
-                                            className="px-3 py-2 border border-danger w-100 text-center"
-                                        >
+                                        <span className="badge bg-danger-subtle text-danger px-3 py-2 border border-danger w-100 text-center">
                                             Registration Closed
-                                        </Badge>
+                                        </span>
                                     )}
                                 </div>
 
@@ -184,7 +179,7 @@ export default function TournamentDetail() {
                                 <div className="mt-4 pt-4 border-top border-secondary">
                                     <div className="d-flex align-items-center gap-3">
                                         <div className="bg-primary bg-opacity-10 p-2 rounded">
-                                            <span className="text-primary fs-4">📅</span>
+                                            <i className="bi bi-calendar-event text-primary fs-4"></i>
                                         </div>
                                         <div>
                                             <label className="text-secondary small text-uppercase d-block">
@@ -205,7 +200,7 @@ export default function TournamentDetail() {
                                         "No external API calls.",
                                     ].map((rule) => (
                                         <div key={rule} className="d-flex gap-2 mb-2">
-                                            <span className="text-primary">✓</span>
+                                            <i className="bi bi-check2-circle text-primary"></i>
                                             <span>{rule}</span>
                                         </div>
                                     ))}

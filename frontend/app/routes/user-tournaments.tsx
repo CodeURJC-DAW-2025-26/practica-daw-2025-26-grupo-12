@@ -82,8 +82,8 @@ export default function UserTournaments() {
                                                         t.status === "OPEN"
                                                             ? "success"
                                                             : t.status === "STARTED"
-                                                                ? "primary"
-                                                                : "secondary"
+                                                              ? "primary"
+                                                              : "secondary"
                                                     }
                                                     className="rounded-pill"
                                                 >

@@ -57,18 +57,15 @@ export default function Signup() {
 
     return (
         <div className="centered-layout">
-            <Card
-                className="glass-card p-4 centered-layout-card--wide"
-                style={{ maxWidth: 480, width: "100%" }}
-            >
-                <Card.Body>
-                    <div className="text-center mb-4">
-                        <Link to="/" className="text-decoration-none d-block">
+            <Card className="glass-card p-4">
+                <Card.Body className="w-70">
+                    <div className="text-center mb-4 w-70">
+                        <a href="/" className="text-decoration-none">
                             <div className="auth-header-icon" style={{ fontSize: "3rem" }}>
                                 ✂️
                             </div>
                             <h1 className="h4 fw-bold text-white mb-0">Scissors, Please</h1>
-                        </Link>
+                        </a>
                         <p className="text-secondary mt-2">
                             Create your account to start competing.
                         </p>
@@ -169,18 +166,15 @@ export default function Signup() {
                     <div className="text-center">
                         <p className="text-secondary small mb-0">
                             Already have an account?{" "}
-                            <Link to="/login" className="text-primary text-decoration-none fw-bold">
+                            <a href="/login" className="text-primary text-decoration-none fw-bold">
                                 Log in
-                            </Link>
+                            </a>
                         </p>
                     </div>
                     <div className="text-center mt-3">
-                        <Link
-                            to="/"
-                            className="small text-secondary text-decoration-none opacity-75"
-                        >
+                        <a href="/" className="small text-secondary text-decoration-none">
                             Back to Home
-                        </Link>
+                        </a>
                     </div>
                 </Card.Body>
             </Card>

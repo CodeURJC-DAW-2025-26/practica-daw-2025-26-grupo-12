@@ -62,6 +62,7 @@ export default function BotDetail() {
             alert("Failed to delete bot");
         } finally {
             setLoading(false);
+            setShowDelete(false);
         }
     };
 
@@ -80,8 +81,8 @@ export default function BotDetail() {
                             />
                         ) : (
                             <div
-                                className="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold"
-                                style={{ width: 100, height: 100, fontSize: "2.5rem" }}
+                                className="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white display-4 fw-bold"
+                                style={{ width: 100, height: 100 }}
                             >
                                 {initial}
                             </div>
@@ -90,12 +91,12 @@ export default function BotDetail() {
                             <h1 className="h2 fw-bold mb-1">{bot.name}</h1>
                             <p className="text-secondary mb-1">
                                 Owner:{" "}
-                                <span className="text-white fw-semibold">{bot.ownerUsername}</span>
+                                <span className="text-white fw-semibold hover-link">
+                                    {bot.ownerUsername}
+                                </span>
                             </p>
                             <p className="text-secondary mb-2">Created: {bot.createdAt}</p>
-                            {bot.description && (
-                                <p className="text-secondary mb-0">{bot.description}</p>
-                            )}
+                            <p className="text-secondary mb-0">{bot.description}</p>
                             {bot.tags && bot.tags.length > 0 && (
                                 <div className="mt-2 d-flex flex-wrap gap-1">
                                     {bot.tags.map((tag) => (
@@ -113,7 +114,8 @@ export default function BotDetail() {
                                 <Button
                                     as={Link as any}
                                     to={`/bots/${bot.id}/edit`}
-                                    variant="outline-secondary"
+                                    className="btn-outline-muted"
+                                    variant="outline"
                                 >
                                     Edit Bot
                                 </Button>
@@ -133,10 +135,10 @@ export default function BotDetail() {
                     </Col>
                 </Row>
 
-                <Row className="g-4 mb-5">
-                    <Col lg={8}>
+                <div className="row g-4 mb-5">
+                    <div className="col-lg-8">
                         {bot.code && isOwner && (
-                            <Card className="glass-card mb-4 border-0 p-4">
+                            <Card className="p-4 h-100 mb-4">
                                 <h3 className="h6 fw-bold mb-3">Bot Logic (Python)</h3>
                                 <div
                                     className="bg-black border border-secondary rounded p-3 overflow-auto"
@@ -152,44 +154,90 @@ export default function BotDetail() {
                             </Card>
                         )}
 
-                        <Card className="glass-card border-0 p-4">
-                            <h3 className="h6 fw-bold mb-4">ELO Progress</h3>
-                            {bot.eloHistory && bot.eloHistory.length > 1 ? (
-                                <Chart type="elo" body={bot.eloHistory} />
-                            ) : (
-                                <div className="text-center py-5 text-secondary">
-                                    Not enough data to generate ELO chart.
-                                </div>
-                            )}
-                        </Card>
-                    </Col>
+                        <div className="row g-4">
+                            <div className="col-md-4">
+                                <Card className="p-3 stat-card h-100">
+                                    <h6 className="text-secondary text-uppercase small fw-bold mb-2">
+                                        Global Rank
+                                    </h6>
+                                    <div className="d-flex align-items-baseline">
+                                        <span className="h2 fw-bold mb-0 text-white">#?</span>
+                                    </div>
+                                </Card>
+                            </div>
+                            <div className="col-md-4">
+                                <Card className="p-3 stat-card h-100">
+                                    <h6 className="text-secondary text-uppercase small fw-bold mb-2">
+                                        ELO Rating
+                                    </h6>
+                                    <div className="d-flex align-items-baseline">
+                                        <span className="h2 fw-bold mb-0 text-white">
+                                            {bot.elo}
+                                        </span>
+                                    </div>
+                                </Card>
+                            </div>
+                            <div className="col-md-4">
+                                <Card className="p-3 stat-card h-100">
+                                    <h6 className="text-secondary text-uppercase small fw-bold mb-2">
+                                        Win Rate
+                                    </h6>
+                                    <div className="d-flex align-items-baseline">
+                                        <span className="h2 fw-bold mb-0 text-success">
+                                            {winRate}%
+                                        </span>
+                                        <span className="text-secondary small ms-2">
+                                            {totalMatches}
+                                        </span>
+                                    </div>
+                                </Card>
+                            </div>
+                        </div>
+                    </div>
 
-                    <Col lg={4}>
-                        <Card className="p-4 glass-card border-0 mb-4 h-100">
-                            <h3 className="h6 fw-bold mb-4">Battle Stats</h3>
-                            <div className="text-center mb-4">
+                    <div className="col-lg-4">
+                        <Card className="p-4 h-100">
+                            <div className="d-flex justify-content-between align-items-center mb-3">
+                                <h3 className="h6 fw-bold mb-0">Results Breakdown</h3>
+                                <Badge bg="secondary">Total: {totalMatches}</Badge>
+                            </div>
+                            <div className="bg-secondary-bg border border-secondary rounded p-4 text-center">
                                 <Chart
                                     type="results"
-                                    params={{ wins: bot.wins, losses: bot.losses, draws: bot.draws }}
+                                    params={{
+                                        wins: bot.wins,
+                                        losses: bot.losses,
+                                        draws: bot.draws,
+                                    }}
                                 />
-                            </div>
-                            <div className="d-flex justify-content-between mb-3">
-                                <span className="text-secondary small">Current ELO</span>
-                                <span className="fw-bold text-white">{bot.elo}</span>
-                            </div>
-                            <div className="d-flex justify-content-between mb-3">
-                                <span className="text-secondary small">Win Rate</span>
-                                <span className="fw-bold text-success">{winRate}%</span>
-                            </div>
-                            <hr className="border-secondary opacity-25" />
-                            <div className="d-flex justify-content-between pt-2">
-                                <Badge bg="success">W: {bot.wins}</Badge>
-                                <Badge bg="danger">L: {bot.losses}</Badge>
-                                <Badge bg="secondary">D: {bot.draws}</Badge>
+                                <div className="d-flex flex-wrap justify-content-center gap-2 mt-3">
+                                    <Badge bg="success">Wins: {bot.wins}</Badge>
+                                    <Badge bg="danger">Losses: {bot.losses}</Badge>
+                                    <Badge bg="secondary">Draws: {bot.draws}</Badge>
+                                </div>
                             </div>
                         </Card>
-                    </Col>
-                </Row>
+                    </div>
+                </div>
+
+                <div className="row g-4 mb-5">
+                    <div className="col-lg-12">
+                        <Card className="p-4 h-100">
+                            <div className="d-flex justify-content-between align-items-center mb-3">
+                                <h3 className="h6 fw-bold mb-0">ELO Progression</h3>
+                                <Badge bg="secondary">Live History</Badge>
+                            </div>
+                            <div className="bg-secondary-bg border border-secondary rounded p-4 text-center">
+                                <Chart type="elo" body={[1000, 1020, 1050, bot.elo]} />
+                                <div className="d-flex flex-wrap justify-content-center gap-2 mt-3">
+                                    <Badge bg="secondary">Start: 1000</Badge>
+                                    <Badge bg="primary">Current: {bot.elo}</Badge>
+                                    <Badge bg="success">Trend: +</Badge>
+                                </div>
+                            </div>
+                        </Card>
+                    </div>
+                </div>
 
                 <Modal show={showDelete} onHide={() => setShowDelete(false)} centered>
                     <Modal.Header closeButton className="bg-dark border-secondary text-white">

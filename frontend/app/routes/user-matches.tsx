@@ -52,9 +52,13 @@ export default function UserMatches() {
                                         <tr key={match.id}>
                                             <td className="ps-4">
                                                 <div className="d-flex align-items-center gap-2">
-                                                    <span className="fw-bold">{match.bot1Name}</span>
+                                                    <span className="fw-bold">
+                                                        {match.bot1Name}
+                                                    </span>
                                                     <span className="text-secondary small">vs</span>
-                                                    <span className="fw-bold">{match.bot2Name}</span>
+                                                    <span className="fw-bold">
+                                                        {match.bot2Name}
+                                                    </span>
                                                 </div>
                                             </td>
                                             <td>

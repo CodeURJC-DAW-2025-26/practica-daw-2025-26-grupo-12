@@ -1,49 +1,53 @@
 import { useState, useEffect } from "react";
-import { useSearchParams, Link } from "react-router";
+import { useSearchParams, Link, useLoaderData } from "react-router";
+import { Container, Row, Col, Card, Table, Form, Button, Badge, Modal } from "react-bootstrap";
 import type { Route } from "./+types/bots";
 import { adminBotService, type BotPageResponse } from "../../services/admin-bot-service";
-import { Table, Button, Form, Modal, Pagination, Badge, Row, Col } from "react-bootstrap";
 
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
     const url = new URL(request.url);
-    const page = parseInt(url.searchParams.get("page") || "0");
     const query = url.searchParams.get("query") || "";
-
     try {
-        const data = await adminBotService.getBots(page, 10, query);
-        return { data };
+        const data = await adminBotService.getBots(0, 10, query);
+        return { data, query };
     } catch (error) {
         throw new Error("Failed to load bots");
     }
 }
 
-export default function AdminBots({ loaderData }: Route.ComponentProps) {
-    const initialData = (loaderData as { data: BotPageResponse }).data;
+export default function AdminBots() {
+    const { data: initialData, query: initialQuery } = useLoaderData<typeof clientLoader>();
     const [bots, setBots] = useState(initialData.content);
+    const [page, setPage] = useState(0);
+    const [hasMore, setHasMore] = useState(initialData.number < initialData.totalPages - 1);
     const [searchParams, setSearchParams] = useSearchParams();
-    const [query, setQuery] = useState(searchParams.get("query") || "");
+    const [query, setQuery] = useState(initialQuery);
 
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [targetBot, setTargetBot] = useState<{ id: number; name: string } | null>(null);
 
     useEffect(() => {
         setBots(initialData.content);
-    }, [initialData.content]);
+        setPage(0);
+        setHasMore(initialData.number < initialData.totalPages - 1);
+        setQuery(initialQuery);
+    }, [initialData, initialQuery]);
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        setSearchParams((prev) => {
-            prev.set("query", query);
-            prev.set("page", "0");
-            return prev;
-        });
+        setSearchParams({ query });
     };
 
-    const handlePageChange = (page: number) => {
-        setSearchParams((prev) => {
-            prev.set("page", page.toString());
-            return prev;
-        });
+    const handleLoadMore = async () => {
+        const nextPage = page + 1;
+        try {
+            const data = await adminBotService.getBots(nextPage, 10, query);
+            setBots((prev) => [...prev, ...data.content]);
+            setPage(nextPage);
+            setHasMore(data.number < data.totalPages - 1);
+        } catch (error) {
+            alert("Error loading more bots");
+        }
     };
 
     const onDelete = async () => {
@@ -58,60 +62,96 @@ export default function AdminBots({ loaderData }: Route.ComponentProps) {
     };
 
     return (
-        <div className="admin-bots-page animate__animated animate__fadeIn">
-            <div className="d-flex justify-content-between align-items-center mb-5 mt-2">
+        <Container className="py-5">
+            <div className="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
                 <div>
-                    <h2 className="fw-bold m-0">Bot Inventory</h2>
-                    <p className="text-muted m-0">Manage and monitor all system bots</p>
+                    <p className="text-secondary mb-1 small text-uppercase">Administration</p>
+                    <h1 className="h3 fw-bold mb-0">Bot Management</h1>
                 </div>
             </div>
 
-            <div className="glass-card p-4 mb-4">
+            <Card className="p-4 mb-4">
                 <Form onSubmit={handleSearch}>
-                    <Row className="g-3">
-                        <Col md={8}>
+                    <Row className="g-3 align-items-center">
+                        <Col lg={7}>
+                            <Form.Label className="text-uppercase small mb-1">
+                                Search bots
+                            </Form.Label>
                             <Form.Control
-                                type="text"
+                                type="search"
                                 placeholder="Search by bot name..."
-                                className="form-control-lg"
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
+                                autoComplete="off"
                             />
                         </Col>
-                        <Col md={4} className="d-grid">
+                        <Col lg={2}>
+                            <Form.Label className="text-uppercase small mb-1">
+                                Visibility
+                            </Form.Label>
+                            <Form.Select>
+                                <option value="all">All</option>
+                                <option value="public">Public</option>
+                                <option value="private">Private</option>
+                            </Form.Select>
+                        </Col>
+                        <Col lg={3} className="d-grid d-lg-flex justify-content-lg-end gap-2">
                             <Button
-                                variant="primary"
                                 type="submit"
-                                className="btn-gradient-primary btn-lg"
+                                variant="primary"
+                                size="sm"
+                                className="px-3 mt-lg-4"
                             >
-                                Search Bots
+                                Search
+                            </Button>
+                            <Button
+                                variant="outline-muted"
+                                size="sm"
+                                className="px-3 mt-lg-4"
+                                onClick={() => {
+                                    setQuery("");
+                                    setSearchParams({});
+                                }}
+                            >
+                                Clear
                             </Button>
                         </Col>
                     </Row>
                 </Form>
-            </div>
+            </Card>
 
-            <div className="glass-card overflow-hidden">
-                <Table hover responsive className="m-0 align-middle">
-                    <thead className="bg-dark text-uppercase small letter-spacing-lg">
-                        <tr>
-                            <th className="border-0 ps-4 py-3">Bot</th>
-                            <th className="border-0 py-3">Owner</th>
-                            <th className="border-0 py-3">Visibility</th>
-                            <th className="border-0 py-3">Elo</th>
-                            <th className="border-0 pe-4 py-3 text-end">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody className="border-top-0">
-                        {bots.map((bot) => (
-                            <tr key={bot.id} className="border-bottom border-secondary">
-                                <td className="ps-4 py-3">
-                                    <div className="d-flex align-items-center gap-3">
+            <Card className="p-4">
+                <div className="d-flex justify-content-between align-items-center gap-2 flex-wrap mb-3">
+                    <h2 className="h5 fw-bold mb-0">Matching Bots</h2>
+                    <Badge bg="secondary">
+                        Showing {bots.length} of {initialData.totalElements}
+                    </Badge>
+                </div>
+                <div className="table-responsive">
+                    <Table className="mb-0 align-middle text-nowrap">
+                        <thead>
+                            <tr className="text-secondary small text-uppercase">
+                                <th scope="col" className="ps-3">
+                                    Icon
+                                </th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Owner</th>
+                                <th scope="col">ELO</th>
+                                <th scope="col">Visibility</th>
+                                <th scope="col" className="text-end pe-3">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {bots.map((bot) => (
+                                <tr key={bot.id} className="border-secondary">
+                                    <td className="ps-3">
                                         {bot.imageUrl ? (
                                             <img
-                                                src={bot.imageUrl}
+                                                src={`/api/v1/images/bots/${bot.id}`}
                                                 alt={bot.name}
-                                                className="rounded-circle border border-primary border-2"
+                                                className="rounded-circle"
                                                 style={{
                                                     width: 40,
                                                     height: 40,
@@ -120,122 +160,99 @@ export default function AdminBots({ loaderData }: Route.ComponentProps) {
                                             />
                                         ) : (
                                             <div
-                                                className="avatar-placeholder rounded-circle bg-primary d-flex align-items-center justify-content-center text-white"
+                                                className="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold"
                                                 style={{ width: 40, height: 40 }}
                                             >
                                                 {bot.name.charAt(0).toUpperCase()}
                                             </div>
                                         )}
-                                        <div>
-                                            <Link
-                                                to={`/admin/bots/${bot.id}`}
-                                                className="fw-bold text-white text-decoration-none hover-link"
+                                    </td>
+                                    <td className="fw-semibold text-white">{bot.name}</td>
+                                    <td className="text-secondary">{bot.ownerUsername}</td>
+                                    <td>{bot.elo}</td>
+                                    <td>
+                                        {bot.public ? (
+                                            <Badge bg="secondary">Public</Badge>
+                                        ) : (
+                                            <Badge
+                                                bg="dark"
+                                                className="border border-secondary text-secondary"
                                             >
-                                                {bot.name}
-                                            </Link>
-                                            <div className="small text-muted">ID: {bot.id}</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <Link
-                                        to={`/profile/${bot.ownerId}`}
-                                        className="text-info text-decoration-none small"
-                                    >
-                                        @{bot.ownerUsername}
-                                    </Link>
-                                </td>
-                                <td>
-                                    <Badge
-                                        className={
-                                            bot.public ? "badge-soft-success" : "badge-soft-warning"
-                                        }
-                                        pill
-                                    >
-                                        {bot.public ? "Public" : "Private"}
-                                    </Badge>
-                                </td>
-                                <td className="fw-bold">{bot.elo}</td>
-                                <td className="pe-4 py-3 text-end">
-                                    <Link
-                                        to={`/admin/bots/${bot.id}`}
-                                        className="btn btn-outline-info btn-sm me-2 rounded-pill px-3"
-                                    >
-                                        Inspect
-                                    </Link>
-                                    <Button
-                                        variant="outline-danger"
-                                        size="sm"
-                                        className="rounded-pill px-3"
-                                        onClick={() => {
-                                            setTargetBot({ id: bot.id, name: bot.name });
-                                            setShowDeleteModal(true);
-                                        }}
-                                    >
-                                        Delete
-                                    </Button>
-                                </td>
-                            </tr>
-                        ))}
-                        {bots.length === 0 && (
-                            <tr>
-                                <td colSpan={5} className="text-center py-5 text-muted">
-                                    <div className="mb-2 fs-2">🤖</div>
-                                    No bots found.
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </Table>
-            </div>
+                                                Private
+                                            </Badge>
+                                        )}
+                                    </td>
+                                    <td className="text-end pe-3">
+                                        <Button
+                                            as={Link as any}
+                                            to={`/bots/${bot.id}`}
+                                            variant="outline-muted"
+                                            size="sm"
+                                            className="me-2"
+                                        >
+                                            View
+                                        </Button>
+                                        <Button
+                                            variant="outline-danger"
+                                            size="sm"
+                                            onClick={() => {
+                                                setTargetBot({ id: bot.id, name: bot.name });
+                                                setShowDeleteModal(true);
+                                            }}
+                                        >
+                                            Delete
+                                        </Button>
+                                    </td>
+                                </tr>
+                            ))}
+                            {bots.length === 0 && (
+                                <tr>
+                                    <td colSpan={6} className="text-center text-secondary py-4">
+                                        No bots found.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </Table>
+                </div>
+                {hasMore && (
+                    <div className="d-flex justify-content-center mt-3">
+                        <Button variant="outline-muted" size="sm" onClick={handleLoadMore}>
+                            Show more
+                        </Button>
+                    </div>
+                )}
+            </Card>
 
-            {initialData.totalPages > 1 && (
-                <Pagination className="mt-4">
-                    <Pagination.First
-                        onClick={() => handlePageChange(0)}
-                        disabled={initialData.number === 0}
-                    />
-                    <Pagination.Prev
-                        onClick={() => handlePageChange(initialData.number - 1)}
-                        disabled={initialData.number === 0}
-                    />
-                    {[...Array(initialData.totalPages)].map((_, i) => (
-                        <Pagination.Item
-                            key={i}
-                            active={i === initialData.number}
-                            onClick={() => handlePageChange(i)}
-                        >
-                            {i + 1}
-                        </Pagination.Item>
-                    ))}
-                    <Pagination.Next
-                        onClick={() => handlePageChange(initialData.number + 1)}
-                        disabled={initialData.number === initialData.totalPages - 1}
-                    />
-                    <Pagination.Last
-                        onClick={() => handlePageChange(initialData.totalPages - 1)}
-                        disabled={initialData.number === initialData.totalPages - 1}
-                    />
-                </Pagination>
-            )}
-
-            <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Delete Bot</Modal.Title>
+            <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)} centered>
+                <Modal.Header closeButton className="border-secondary">
+                    <Modal.Title className="h5">Delete Bot</Modal.Title>
                 </Modal.Header>
-                <Modal.Body className="text-danger">
-                    <strong>Warning!</strong> You are about to globally delete bot{" "}
-                    <strong>{targetBot?.name}</strong>. This is irreversible.
+                <Modal.Body className="p-0">
+                    <div className="text-center p-5">
+                        <h4 className="fw-bold mb-2 text-white">
+                            Delete{" "}
+                            <span className="text-primary fst-italic">{targetBot?.name}</span>?
+                        </h4>
+                        <p className="text-secondary px-3">
+                            This will permanently remove this bot from the system. This action
+                            cannot be undone.
+                        </p>
+                    </div>
                 </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+                <Modal.Footer className="border-secondary">
+                    <Button
+                        variant="outline-muted"
+                        className="py-2"
+                        onClick={() => setShowDeleteModal(false)}
+                    >
                         Cancel
                     </Button>
-                    <Button variant="danger" onClick={onDelete}>
-                        Confirm Deletion
+                    <Button variant="danger" className="py-2" onClick={onDelete}>
+                        Delete Forever
                     </Button>
                 </Modal.Footer>
             </Modal>
-        </div>
+        </Container>
     );
 }

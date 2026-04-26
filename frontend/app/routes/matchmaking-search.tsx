@@ -4,7 +4,11 @@ import { Container, Row, Col, Card, Button, Form, Alert, Spinner } from "react-b
 import type { Route } from "./+types/matchmaking-search";
 import { getMe } from "~/services/auth-service";
 import { getMyBots } from "~/services/bot-service";
-import { startMatchmaking, getMatchmakingStatus, cancelMatchmaking } from "~/services/match-service";
+import {
+    startMatchmaking,
+    getMatchmakingStatus,
+    cancelMatchmaking,
+} from "~/services/match-service";
 import type { BotDetail } from "~/types";
 import AppNavbar from "~/components/header";
 import Footer from "~/components/footer";
@@ -45,7 +49,7 @@ export default function MatchmakingSearch() {
                 } else if (status.status === "FOUND" && status.matchId && isMounted) {
                     navigate(`/matches/battle/${status.matchId}`);
                 }
-            } catch (err) { }
+            } catch (err) {}
         };
         checkStatus();
         return () => {
@@ -180,7 +184,9 @@ export default function MatchmakingSearch() {
                                     </div>
                                 </div>
 
-                                <h2 className="h4 fw-bold mb-3 text-white">Searching for an opponent...</h2>
+                                <h2 className="h4 fw-bold mb-3 text-white">
+                                    Searching for an opponent...
+                                </h2>
                                 <p className="text-secondary mb-5">
                                     Our arena masters are looking for a worthy challenger for{" "}
                                     <span className="text-primary fw-bold">
@@ -203,7 +209,6 @@ export default function MatchmakingSearch() {
                 </Col>
             </Container>
             <Footer />
-
         </div>
     );
 }

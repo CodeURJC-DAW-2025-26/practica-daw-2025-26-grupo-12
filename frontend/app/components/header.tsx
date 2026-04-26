@@ -1,16 +1,18 @@
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { Navbar, Nav, Container, Button } from "react-bootstrap";
 import { useAuthStore } from "~/stores/auth-store";
 import { logoutUser } from "~/services/auth-service";
 
 export default function AppNavbar() {
     const { user, isAdmin, isLoggedIn, logout } = useAuthStore();
+    const navigate = useNavigate();
     const admin = isAdmin();
     const loggedIn = isLoggedIn();
 
     async function handleLogout() {
         await logoutUser();
         logout();
+        navigate("/", { replace: true });
     }
 
     return (
@@ -28,9 +30,11 @@ export default function AppNavbar() {
                         <Nav.Link as={Link} to="/matches">
                             Best Matches
                         </Nav.Link>
-                        {!loggedIn && <Nav.Link as={Link} to="/bots">
-                            Bots
-                        </Nav.Link>}
+                        {!loggedIn && (
+                            <Nav.Link as={Link} to="/bots">
+                                Bots
+                            </Nav.Link>
+                        )}
                         {admin ? (
                             <>
                                 <Nav.Link as={Link} to="/admin/tournaments">

@@ -58,14 +58,18 @@ export default function Battle() {
                                         )}
                                     </div>
                                     <h2 className="h4 fw-bold mb-1">{battle.bot1Name}</h2>
-                                    <p className="text-secondary small mb-0">by {battle.bot1OwnerName}</p>
+                                    <p className="text-secondary small mb-0">
+                                        by {battle.bot1OwnerName}
+                                    </p>
                                 </Card>
                             </Col>
 
                             {/* VS Center */}
                             <Col xs={2} className="text-center position-relative">
                                 <div className={`vs-logo ${animationState}`}>
-                                    <span className="display-1 fw-black text-primary font-italic">VS</span>
+                                    <span className="display-1 fw-black text-primary font-italic">
+                                        VS
+                                    </span>
                                 </div>
                             </Col>
 
@@ -85,7 +89,9 @@ export default function Battle() {
                                         )}
                                     </div>
                                     <h2 className="h4 fw-bold mb-1">{battle.bot2Name}</h2>
-                                    <p className="text-secondary small mb-0">by {battle.bot2OwnerName}</p>
+                                    <p className="text-secondary small mb-0">
+                                        by {battle.bot2OwnerName}
+                                    </p>
                                 </Card>
                             </Col>
                         </Row>

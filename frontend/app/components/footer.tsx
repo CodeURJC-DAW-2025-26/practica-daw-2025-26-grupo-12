@@ -6,18 +6,13 @@ export default function Footer() {
             <Container>
                 <Row className="align-items-center">
                     <Col md={6} className="text-center text-md-start">
-                        <p className="mb-0 text-secondary small">
-                            &copy; 2026 Scissors, Please.
-                        </p>
+                        <p className="mb-0 text-secondary small">&copy; 2026 Scissors, Please.</p>
                     </Col>
 
                     <Col md={6} className="text-center text-md-end">
                         <ul className="list-inline mb-0 small">
                             <li className="list-inline-item">
-                                <a
-                                    href="#"
-                                    className="text-secondary text-decoration-none"
-                                >
+                                <a href="#" className="text-secondary text-decoration-none">
                                     GitHub
                                 </a>
                             </li>
@@ -27,10 +22,7 @@ export default function Footer() {
                             </li>
 
                             <li className="list-inline-item">
-                                <a
-                                    href="#"
-                                    className="text-secondary text-decoration-none"
-                                >
+                                <a href="#" className="text-secondary text-decoration-none">
                                     Privacy
                                 </a>
                             </li>

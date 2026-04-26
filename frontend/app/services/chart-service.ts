@@ -7,11 +7,7 @@ async function handleResponse(res: Response) {
     return res.json();
 }
 
-export async function getResultsChart(params: {
-    wins: number;
-    losses: number;
-    draws: number;
-}) {
+export async function getResultsChart(params: { wins: number; losses: number; draws: number }) {
     const search = new URLSearchParams({
         wins: String(params.wins),
         losses: String(params.losses),
@@ -39,11 +35,13 @@ export async function getEloChart(eloHistory: number[]) {
     return handleResponse(res);
 }
 
-export async function getUsersChart(monthlyData: {
-    year: number;
-    month: number;
-    count: number;
-}[]) {
+export async function getUsersChart(
+    monthlyData: {
+        year: number;
+        month: number;
+        count: number;
+    }[]
+) {
     const res = await fetch(`${BASE}/users`, {
         method: "POST",
         credentials: "include",
@@ -56,10 +54,7 @@ export async function getUsersChart(monthlyData: {
     return handleResponse(res);
 }
 
-export async function getProgressChart(params: {
-    current: number;
-    max: number;
-}) {
+export async function getProgressChart(params: { current: number; max: number }) {
     const search = new URLSearchParams({
         current: String(params.current),
         max: String(params.max),

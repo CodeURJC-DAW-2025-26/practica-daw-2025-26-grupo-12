@@ -99,7 +99,7 @@ export default function MatchStats() {
 
                 <Row className="g-4 mb-5">
                     <Col md={4}>
-                        <Card className="p-3 h-100">
+                        <Card className="p-3 stat-card h-100">
                             <h6 className="text-secondary text-uppercase small fw-bold mb-2">
                                 Final Score
                             </h6>
@@ -118,7 +118,7 @@ export default function MatchStats() {
                         </Card>
                     </Col>
                     <Col md={4}>
-                        <Card className="p-3 h-100">
+                        <Card className="p-3 stat-card h-100">
                             <h6 className="text-secondary text-uppercase small fw-bold mb-2">
                                 Winner
                             </h6>
@@ -126,7 +126,7 @@ export default function MatchStats() {
                         </Card>
                     </Col>
                     <Col md={4}>
-                        <Card className="p-3 h-100">
+                        <Card className="p-3 stat-card h-100">
                             <h6 className="text-secondary text-uppercase small fw-bold mb-2">
                                 Played At
                             </h6>
@@ -135,10 +135,10 @@ export default function MatchStats() {
                     </Col>
                 </Row>
 
-                <Card className="p-4 glass-card border-0">
+                <Card className="p-4">
                     <h2 className="h5 fw-bold mb-3">Round Timeline</h2>
                     <div className="table-responsive">
-                        <Table className="mb-0 align-middle">
+                        <Table className="mb-0 align-middle text-nowrap">
                             <thead>
                                 <tr className="text-secondary small text-uppercase">
                                     <th scope="col" className="ps-3">
@@ -170,22 +170,8 @@ export default function MatchStats() {
                                             <td className="ps-3 text-secondary">
                                                 #{r.roundNumber}
                                             </td>
-                                            <td>
-                                                <Badge
-                                                    bg={getMoveBadgeClass(r.bot1Move)}
-                                                    className="rounded-pill px-3"
-                                                >
-                                                    {r.bot1Move}
-                                                </Badge>
-                                            </td>
-                                            <td>
-                                                <Badge
-                                                    bg={getMoveBadgeClass(r.bot2Move)}
-                                                    className="rounded-pill px-3"
-                                                >
-                                                    {r.bot2Move}
-                                                </Badge>
-                                            </td>
+                                            <td>{r.bot1Move}</td>
+                                            <td>{r.bot2Move}</td>
                                             <td>
                                                 <Badge
                                                     bg={getResultBadgeClass(r.result)}

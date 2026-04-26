@@ -44,15 +44,15 @@ export default function Login() {
 
     return (
         <div className="centered-layout">
-            <Card className="glass-card p-4" style={{ maxWidth: 400, width: "100%" }}>
+            <Card className="glass-card p-4">
                 <Card.Body>
                     <div className="text-center mb-4">
-                        <Link to="/" className="text-decoration-none d-block">
+                        <a href="/" className="text-decoration-none">
                             <div className="auth-header-icon" style={{ fontSize: "3rem" }}>
                                 ✂️
                             </div>
                             <h1 className="h4 fw-bold text-white mb-0">Scissors, Please</h1>
-                        </Link>
+                        </a>
                         <p className="text-secondary mt-2">
                             Welcome back! Please enter your details.
                         </p>
@@ -104,6 +104,25 @@ export default function Login() {
                             />
                         </Form.Group>
 
+                        <div className="d-flex justify-content-between align-items-center mb-4">
+                            <div className="form-check">
+                                <input
+                                    className="form-check-input"
+                                    type="checkbox"
+                                    id="rememberMe"
+                                />
+                                <label
+                                    className="form-check-label text-secondary small"
+                                    htmlFor="rememberMe"
+                                >
+                                    Remember me
+                                </label>
+                            </div>
+                            <a href="#" className="small text-primary text-decoration-none">
+                                Forgot password?
+                            </a>
+                        </div>
+
                         <div className="d-grid mb-3">
                             <Button
                                 type="submit"
@@ -120,7 +139,7 @@ export default function Login() {
                     <div className="d-grid gap-2 mb-4">
                         <a
                             href="/oauth2/authorization/google"
-                            className="btn btn-outline-light btn-sm text-decoration-none py-2"
+                            className="btn btn-outline-muted btn-sm text-decoration-none"
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -139,21 +158,15 @@ export default function Login() {
                     <div className="text-center">
                         <p className="text-secondary small mb-0">
                             Don't have an account?{" "}
-                            <Link
-                                to="/signup"
-                                className="text-primary text-decoration-none fw-bold"
-                            >
+                            <a href="/signup" className="text-primary text-decoration-none fw-bold">
                                 Sign up
-                            </Link>
+                            </a>
                         </p>
                     </div>
                     <div className="text-center mt-3">
-                        <Link
-                            to="/"
-                            className="small text-secondary text-decoration-none opacity-75"
-                        >
+                        <a href="/" className="small text-secondary text-decoration-none">
                             Back to Home
-                        </Link>
+                        </a>
                     </div>
                 </Card.Body>
             </Card>
