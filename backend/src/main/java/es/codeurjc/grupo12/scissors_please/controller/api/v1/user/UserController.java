@@ -299,6 +299,84 @@ public class UserController {
     return ResponseEntity.ok(UserResponseDto.from(updatedUser));
   }
 
+  @PutMapping("/{id}/unblock")
+  @Operation(
+      summary = "Unblock a user",
+      description = "Unblocks the user identified by id using the authenticated admin user.")
+  @ApiResponses({
+    @ApiResponse(
+        responseCode = "200",
+        description = "User unblocked successfully",
+        content =
+            @Content(
+                mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = UserResponseDto.class))),
+    @ApiResponse(
+        responseCode = "403",
+        description = "Current user is not allowed to unblock users",
+        content =
+            @Content(
+                mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ExceptionResponseDto.class))),
+    @ApiResponse(
+        responseCode = "404",
+        description = "User not found",
+        content =
+            @Content(
+                mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ExceptionResponseDto.class)))
+  })
+  public ResponseEntity<UserResponseDto> unblockUser(
+      @Parameter(description = "Identifier of the user to unblock", example = "1") @PathVariable
+          Long id,
+      @Parameter(hidden = true) Authentication authentication) {
+    String username = authentication.getName();
+    Optional<User> adminUser = userService.findByUsername(username);
+    if (adminUser.isEmpty() || !userService.isAdmin(adminUser.get())) {
+      return ResponseEntity.status(403).build();
+    }
+    userService.unblockUser(id, adminUser.get());
+    User updatedUser = userService.getUserById(id);
+    return ResponseEntity.ok(UserResponseDto.from(updatedUser));
+  }
+
+  @org.springframework.web.bind.annotation.DeleteMapping("/{id}")
+  @Operation(
+      summary = "Delete a user",
+      description = "Deletes the user identified by id using the authenticated admin user.")
+  @ApiResponses({
+    @ApiResponse(
+        responseCode = "200",
+        description = "User deleted successfully",
+        content = @Content),
+    @ApiResponse(
+        responseCode = "403",
+        description = "Current user is not allowed to delete users",
+        content =
+            @Content(
+                mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ExceptionResponseDto.class))),
+    @ApiResponse(
+        responseCode = "404",
+        description = "User not found",
+        content =
+            @Content(
+                mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ExceptionResponseDto.class)))
+  })
+  public ResponseEntity<Void> deleteUser(
+      @Parameter(description = "Identifier of the user to delete", example = "1") @PathVariable
+          Long id,
+      @Parameter(hidden = true) Authentication authentication) {
+    String username = authentication.getName();
+    Optional<User> adminUser = userService.findByUsername(username);
+    if (adminUser.isEmpty() || !userService.isAdmin(adminUser.get())) {
+      return ResponseEntity.status(403).build();
+    }
+    userService.deleteUser(id, adminUser.get());
+    return ResponseEntity.ok().build();
+  }
+
   @GetMapping("/{id}")
   @Operation(summary = "Get a user by id", description = "Returns the user identified by id.")
   @ApiResponses({

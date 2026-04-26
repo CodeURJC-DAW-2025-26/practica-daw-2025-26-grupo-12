@@ -89,7 +89,7 @@ body {
     box-shadow: 0 0 0 0.25rem rgba(139, 92, 246, 0.25);
 }
 
-.table> :not(caption)>*>* {
+.table > :not(caption) > * > * {
     padding: 1rem 0.75rem;
 }
 
@@ -319,16 +319,18 @@ body {
 .arena-loader::after {
     right: 18px;
     background: linear-gradient(135deg, #0d6efd 0%, #6ea8fe 48%, #0a58ca 100%);
-    clip-path: polygon(50% 0%,
-            61% 35%,
-            98% 35%,
-            68% 57%,
-            79% 100%,
-            50% 72%,
-            21% 100%,
-            32% 57%,
-            2% 35%,
-            39% 35%);
+    clip-path: polygon(
+        50% 0%,
+        61% 35%,
+        98% 35%,
+        68% 57%,
+        79% 100%,
+        50% 72%,
+        21% 100%,
+        32% 57%,
+        2% 35%,
+        39% 35%
+    );
     animation: right-duel 1.6s ease-in-out infinite;
 }
 
@@ -576,7 +578,6 @@ body {
 }
 
 @keyframes left-duel {
-
     0%,
     100% {
         transform: translateY(-50%) translateX(0) scale(0.92);
@@ -588,7 +589,6 @@ body {
 }
 
 @keyframes right-duel {
-
     0%,
     100% {
         transform: translateY(-50%) translateX(0) scale(0.92) rotate(0deg);
