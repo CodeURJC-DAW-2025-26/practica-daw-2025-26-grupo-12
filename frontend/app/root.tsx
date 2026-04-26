@@ -58,7 +58,25 @@ function GlobalSpinner() {
     );
 }
 
+import { useAuthStore } from "./stores/auth-store";
+import { useEffect } from "react";
+
 export default function App() {
+    const bootstrap = useAuthStore((state) => state.bootstrap);
+    const initialized = useAuthStore((state) => state.initialized);
+
+    useEffect(() => {
+        bootstrap();
+    }, [bootstrap]);
+
+    if (!initialized) {
+        return (
+            <div className="centered-layout min-vh-100">
+                <Spinner animation="border" variant="primary" />
+            </div>
+        );
+    }
+
     return (
         <>
             <GlobalSpinner />
