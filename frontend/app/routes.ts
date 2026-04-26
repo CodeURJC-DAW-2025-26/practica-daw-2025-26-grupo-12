@@ -14,7 +14,8 @@ export default [
 
     route("/bots/user-bots", "routes/user-bots.tsx"),
     route("/matches/recent", "routes/user-matches.tsx"),
-
+    route("/matches/search", "routes/matchmaking-search.tsx"),
+    
     route("/bots", "routes/bots.tsx"),
     route("/bots/:id", "routes/bot-detail.tsx"),
 
