@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class BotCreateRequestDTO {
   private String name;
   private String description;
+  private String code;
   private String tags;
   private boolean isPublic;
   private MultipartFile imageFile;

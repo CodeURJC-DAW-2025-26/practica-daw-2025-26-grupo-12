@@ -7,12 +7,22 @@ export default [
 
     route("/tournaments", "routes/tournaments.tsx"),
     route("/tournaments/:id", "routes/tournament-detail.tsx"),
+    route("/tournaments/my-tournaments", "routes/user-tournaments.tsx"),
 
     route("/matches", "routes/matches.tsx"),
     route("/matches/:id/stats", "routes/match-stats.tsx"),
 
+
+    route("/matches/recent", "routes/user-matches.tsx"),
+    route("/matches/search", "routes/matchmaking-search.tsx"),
+    route("/matches/battle/:id", "routes/battle.tsx"),
+
     route("/bots", "routes/bots.tsx"),
     route("/bots/:id", "routes/bot-detail.tsx"),
+    route("/bots/create", "routes/bot-form.tsx"),
+    route("/bots/user-bots", "routes/user-bots.tsx"),
+
+    route("/profile","routes/profile.tsx"),
 
     layout("layouts/admin-layout.tsx", [
         route("/admin/users", "routes/admin/users.tsx"),

@@ -89,7 +89,7 @@ body {
     box-shadow: 0 0 0 0.25rem rgba(139, 92, 246, 0.25);
 }
 
-.table > :not(caption) > * > * {
+.table> :not(caption)>*>* {
     padding: 1rem 0.75rem;
 }
 
@@ -319,18 +319,16 @@ body {
 .arena-loader::after {
     right: 18px;
     background: linear-gradient(135deg, #0d6efd 0%, #6ea8fe 48%, #0a58ca 100%);
-    clip-path: polygon(
-        50% 0%,
-        61% 35%,
-        98% 35%,
-        68% 57%,
-        79% 100%,
-        50% 72%,
-        21% 100%,
-        32% 57%,
-        2% 35%,
-        39% 35%
-    );
+    clip-path: polygon(50% 0%,
+            61% 35%,
+            98% 35%,
+            68% 57%,
+            79% 100%,
+            50% 72%,
+            21% 100%,
+            32% 57%,
+            2% 35%,
+            39% 35%);
     animation: right-duel 1.6s ease-in-out infinite;
 }
 
@@ -578,6 +576,7 @@ body {
 }
 
 @keyframes left-duel {
+
     0%,
     100% {
         transform: translateY(-50%) translateX(0) scale(0.92);
@@ -589,6 +588,7 @@ body {
 }
 
 @keyframes right-duel {
+
     0%,
     100% {
         transform: translateY(-50%) translateX(0) scale(0.92) rotate(0deg);
@@ -635,4 +635,157 @@ body {
 .hover-link:hover {
     color: var(--bs-primary) !important;
     opacity: 0.8;
+}
+
+.radar-container {
+    position: relative;
+    width: 150px;
+    height: 150px;
+}
+
+.radar {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 2px solid rgba(var(--bs-primary-rgb), 0.2);
+    border-radius: 50%;
+}
+
+.radar-scanner {
+    position: absolute;
+    width: 50%;
+    height: 50%;
+    top: 0;
+    left: 50%;
+    background: linear-gradient(to top right, rgba(var(--bs-primary-rgb), 0.5), transparent);
+    border-radius: 0 100% 0 0;
+    transform-origin: bottom left;
+    animation: scan 2s linear infinite;
+}
+
+.radar-inner {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@keyframes scan {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.battle-avatar {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+}
+
+.battle-avatar-placeholder {
+    width: 150px;
+    height: 150px;
+}
+
+.avatar-wrapper {
+    position: relative;
+    width: 150px;
+    height: 150px;
+}
+
+.battle-side.left {
+    transition: all 0.5s ease;
+}
+
+.battle-side.right {
+    transition: all 0.5s ease;
+}
+
+.vs-logo {
+    transition: all 0.5s ease;
+    transform: scale(1.2);
+}
+
+.battle-side.left.clash {
+    transform: translateX(40%);
+    z-index: 10;
+}
+
+.battle-side.right.clash {
+    transform: translateX(-40%);
+    z-index: 10;
+}
+
+.vs-logo.clash {
+    transform: scale(3);
+    opacity: 0;
+    filter: blur(10px);
+}
+
+.battle-side.left.finish {
+    transform: translateX(0);
+}
+
+.battle-side.right.finish {
+    transform: translateX(0);
+}
+
+.vs-logo.finish {
+    transform: scale(1);
+    opacity: 0.2;
+}
+
+.result-btn-container {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.8s ease;
+}
+
+.result-btn-container.finish {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.sparks {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 0 50px 20px white;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0);
+}
+
+.sparks.clash {
+    animation: spark-flash 0.5s ease-out;
+}
+
+@keyframes spark-flash {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 1;
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scale(20);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: translate(-50%, -50%) scale(40);
+        opacity: 0;
+    }
+}
+
+.fw-black {
+    font-weight: 900;
 }

@@ -28,9 +28,9 @@ export default function AppNavbar() {
                         <Nav.Link as={Link} to="/matches">
                             Best Matches
                         </Nav.Link>
-                        <Nav.Link as={Link} to="/bots">
+                        {!loggedIn && <Nav.Link as={Link} to="/bots">
                             Bots
-                        </Nav.Link>
+                        </Nav.Link>}
                         {admin ? (
                             <>
                                 <Nav.Link as={Link} to="/admin/tournaments">
@@ -59,7 +59,7 @@ export default function AppNavbar() {
                                 variant="outline-secondary"
                                 size="sm"
                             >
-                                {user?.username ?? "Profile"}
+                                Profile
                             </Button>
                         )}
                         {loggedIn && (

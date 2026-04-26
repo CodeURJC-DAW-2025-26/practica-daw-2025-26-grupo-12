@@ -31,12 +31,13 @@ public class BotWebHandlerService {
   public WebFlowView createBotHandler(
       String name,
       String description,
+      String code,
       String tags,
       MultipartFile image,
       boolean isPublic,
       Authentication authentication) {
     User currentUser = userService.getCurrentUser(authentication);
-    Bot bot = botService.createBot(currentUser, name, description, tags, image, isPublic);
+    Bot bot = botService.createBot(currentUser, name, description, code, tags, image, isPublic);
     return WebRedirectView.to("/bots/" + bot.getId() + "/edit");
   }
 
