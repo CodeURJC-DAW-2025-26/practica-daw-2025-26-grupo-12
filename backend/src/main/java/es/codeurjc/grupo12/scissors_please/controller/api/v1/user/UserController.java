@@ -204,9 +204,14 @@ public class UserController {
       log.debug("updateProfile[{}] - abort unauthenticated", id);
       return ResponseEntity.status(401).build();
     }
+    User userToUpdate = userService.getUserById(id);
+    String authenticatedUsername = authentication.getName();
+
+    if (!userToUpdate.getUsername().equals(authenticatedUsername)) {
+      return ResponseEntity.status(403).build();
+    }
 
     log.debug("updateProfile[{}] - loading user", id);
-    User userToUpdate = userService.getUserById(id);
     log.debug(
         "updateProfile[{}] - loaded user username={}, email={}, hasImage={}",
         id,
