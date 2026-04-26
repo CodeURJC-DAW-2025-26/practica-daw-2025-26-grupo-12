@@ -8,6 +8,7 @@ public record UserResponseDto(
     String username,
     String email,
     String imageUrl,
+    java.util.List<String> roles,
     LocalDateTime createdAt,
     boolean blocked) {
   public static UserResponseDto from(User user) {
@@ -16,6 +17,7 @@ public record UserResponseDto(
         user.getUsername(),
         user.getEmail(),
         buildImageUrl(user),
+        new java.util.ArrayList<>(user.getRoles()),
         user.getCreatedAt(),
         user.isBlocked());
   }

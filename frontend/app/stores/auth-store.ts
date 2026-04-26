@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { userService } from "../services/user-service";
 
 export interface AuthUser {
     id: number;
@@ -20,6 +21,7 @@ interface AuthState {
     isAdmin: () => boolean;
     isLoggedIn: () => boolean;
     logout: () => void;
+    bootstrap: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -42,5 +44,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     logout: () => {
         set({ user: null });
+    },
+
+    bootstrap: async () => {
+        set({ loading: true });
+        try {
+            const user = await userService.getMe();
+            set({ user, initialized: true });
+        } catch (error) {
+            set({ user: null, initialized: true });
+        } finally {
+            set({ loading: false });
+        }
     },
 }));

@@ -91,6 +91,32 @@ public class UserController {
     return ResponseEntity.ok(UserPageResponseDto.fromPage(userPage));
   }
 
+  @GetMapping("/me")
+  @Operation(
+      summary = "Get current authenticated user",
+      description = "Returns the profile of the current authenticated user.")
+  @ApiResponses({
+    @ApiResponse(
+        responseCode = "200",
+        description = "Current user returned",
+        content =
+            @Content(
+                mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = UserResponseDto.class))),
+    @ApiResponse(responseCode = "401", description = "Authentication required", content = @Content)
+  })
+  public ResponseEntity<UserResponseDto> getMe(Authentication authentication) {
+    if (authentication == null || !authentication.isAuthenticated()) {
+      return ResponseEntity.status(401).build();
+    }
+    try {
+      User currentUser = userService.getCurrentUser(authentication);
+      return ResponseEntity.ok(UserResponseDto.from(currentUser));
+    } catch (Exception e) {
+      return ResponseEntity.status(401).build();
+    }
+  }
+
   @PutMapping("/{id}")
   @Operation(
       summary = "Update a user profile",
