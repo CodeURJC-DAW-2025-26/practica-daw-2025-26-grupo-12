@@ -39,9 +39,12 @@ export default function BotEdit({ loaderData }: Route.ComponentProps) {
             name,
             description,
             code,
-            tags: tags.split(",").map(t => t.trim()).filter(Boolean),
+            tags: tags
+                .split(",")
+                .map((t) => t.trim())
+                .filter(Boolean),
             isPublic,
-            imageFile: imageFile ?? undefined
+            imageFile: imageFile ?? undefined,
         });
 
         navigate(`/bots/${bot.id}`);
@@ -124,7 +127,10 @@ export default function BotEdit({ loaderData }: Route.ComponentProps) {
                                     <Button type="submit" variant="primary">
                                         Save Changes
                                     </Button>
-                                    <Link to="/bots/user-bots" className="btn btn-outline-secondary">
+                                    <Link
+                                        to="/bots/user-bots"
+                                        className="btn btn-outline-secondary"
+                                    >
                                         Discard
                                     </Link>
                                 </Col>
@@ -162,9 +168,7 @@ export default function BotEdit({ loaderData }: Route.ComponentProps) {
 
                     <Card className="p-4 bg-primary bg-opacity-10 border-primary">
                         <h5 className="fw-bold">Import Script</h5>
-                        <p className="text-secondary small">
-                            Upload a .py file to replace code.
-                        </p>
+                        <p className="text-secondary small">Upload a .py file to replace code.</p>
 
                         <Form.Control
                             type="file"

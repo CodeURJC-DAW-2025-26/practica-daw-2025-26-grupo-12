@@ -37,3 +37,6 @@ build/
 .env
 /.run/
 src/main/resources/keystore.p12
+
+### Frontend ###
+src/main/resources/static/new
