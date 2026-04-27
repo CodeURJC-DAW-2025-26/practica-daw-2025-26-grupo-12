@@ -651,21 +651,18 @@ He migrado gran parte de las rutas públicas (usuario autenticado no admin), tam
 |2| [Some user pages](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/e996d51)  | [user-tournaments.tsx](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/frontend/app/routes/user-tournaments.tsx)   |
 |3| [Profile and some service operations](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/390dec9)  | [profile.tsx](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/frontend/app/routes/profile.tsx)   |
 |4| [my-tournaments-render](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/c5730ce)  | [home.tsx](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/frontend/app/routes/home.tsx)   |
-|5| [matchmaking page](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/2018aff)  | [matchmaking-search.tsx](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/‎frontend/app/routes/matchmaking-search.tsx)   |
+|5| [matchmaking page](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/2018aff)  | [matchmaking-search.tsx](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/frontend/app/routes/matchmaking-search.tsx)   |
 
 ---
 
-#### **Alumno 3 - [Nombre Completo]**
+#### **Alumno 3 - Jorge Cumadevilla Aniz**
 
-[Descripción de las tareas y responsabilidades principales del alumno en el proyecto]
+He arreglado diversos *bugs* en la etapa final del proyecto. También he configurado lo relativo al despliegue de la aplicación con Docker para incluir el frontend en el proceso de *build*.
 
 | Nº    | Commits      | Files      |
 |:------------: |:------------:| :------------:|
-|1| [Descripción commit 1](URL_commit_1)  | [Archivo1](URL_archivo_1)   |
-|2| [Descripción commit 2](URL_commit_2)  | [Archivo2](URL_archivo_2)   |
-|3| [Descripción commit 3](URL_commit_3)  | [Archivo3](URL_archivo_3)   |
-|4| [Descripción commit 4](URL_commit_4)  | [Archivo4](URL_archivo_4)   |
-|5| [Descripción commit 5](URL_commit_5)  | [Archivo5](URL_archivo_5)   |
-
----
-
+|1| [Fix notifications not being received by the user](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/cf24f39)  | [global-notification.tsx](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/frontend/app/components/global-notification.tsx)   |
+|2| [Implement user profile](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/3493352)  | [profile-detail.tsx](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/frontend/app/routes/profile-detail.tsx)   |
+|3| [Matches pagination and better visualization](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/1aa611c)  | [matches.tsx](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/frontend/app/routes/matches.tsx)   |
+|4| [Tournament pagination and add create tournament button](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/21341ec)  | [tournaments.tsx](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/frontend/app/routes/admin/tournaments.tsx)   |
+|5| [Integrate react frontend on multi-stage docker files](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/75cd257)  | [Dockerfile](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/docker/Dockerfile)   |
