@@ -642,17 +642,16 @@ He migrado gran parte de las rutas públicas (usuario no autenticado) a React, a
 
 ---
 
-#### **Alumno 2 - [Nombre Completo]**
+#### **Alumno 2 - Alejandro García Prada**
 
-[Descripción de las tareas y responsabilidades principales del alumno en el proyecto]
-
+He migrado gran parte de las rutas públicas (usuario autenticado no admin), también me he encargado de añadir la lógica de negocio en múltiples services. He arreglado la práctica 2 basándome en el feedback de los profesores de la asignatura. También he estado resolviendo bugs y realizando multitud de fixes.
 | Nº    | Commits      | Files      |
 |:------------: |:------------:| :------------:|
-|1| [Descripción commit 1](URL_commit_1)  | [Archivo1](URL_archivo_1)   |
-|2| [Descripción commit 2](URL_commit_2)  | [Archivo2](URL_archivo_2)   |
-|3| [Descripción commit 3](URL_commit_3)  | [Archivo3](URL_archivo_3)   |
-|4| [Descripción commit 4](URL_commit_4)  | [Archivo4](URL_archivo_4)   |
-|5| [Descripción commit 5](URL_commit_5)  | [Archivo5](URL_archivo_5)   |
+|1| [chart fix](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/636581a)  | [chart-service.ts](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/frontend/app/services/chart-service.ts)   |
+|2| [Some user pages](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/e996d51)  | [user-tournaments.tsx](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/frontend/app/routes/user-tournaments.tsx)   |
+|3| [Profile and some service operations](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/390dec9)  | [profile.tsx](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/frontend/app/routes/profile.tsx)   |
+|4| [my-tournaments-render](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/c5730ce)  | [home.tsx](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/frontend/app/routes/home.tsx)   |
+|5| [matchmaking page](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/2018aff)  | [matchmaking-search.tsx](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/‎frontend/app/routes/matchmaking-search.tsx)   |
 
 ---
 
@@ -670,14 +669,3 @@ He migrado gran parte de las rutas públicas (usuario no autenticado) a React, a
 
 ---
 
-#### **Alumno 4 - [Nombre Completo]**
-
-[Descripción de las tareas y responsabilidades principales del alumno en el proyecto]
-
-| Nº    | Commits      | Files      |
-|:------------: |:------------:| :------------:|
-|1| [Descripción commit 1](URL_commit_1)  | [Archivo1](URL_archivo_1)   |
-|2| [Descripción commit 2](URL_commit_2)  | [Archivo2](URL_archivo_2)   |
-|3| [Descripción commit 3](URL_commit_3)  | [Archivo3](URL_archivo_3)   |
-|4| [Descripción commit 4](URL_commit_4)  | [Archivo4](URL_archivo_4)   |
-|5| [Descripción commit 5](URL_commit_5)  | [Archivo5](URL_archivo_5)   |
