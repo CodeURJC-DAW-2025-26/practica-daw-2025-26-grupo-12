@@ -8,7 +8,7 @@ import Footer from "~/components/footer";
 
 export function meta(_args: Route.MetaArgs) {
     return [
-        { title: "My Bots – Scissors, Please" },
+        { title: "My Bots - Scissors, Please" },
         { name: "description", content: "Manage your collection of bots." },
     ];
 }

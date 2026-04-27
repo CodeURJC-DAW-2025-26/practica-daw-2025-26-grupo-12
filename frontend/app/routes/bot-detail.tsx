@@ -11,7 +11,7 @@ import Chart from "~/components/chart";
 export function meta({ data }: Route.MetaArgs) {
     const name = (data as any)?.bot?.name ?? "Bot";
     return [
-        { title: `${name} – Scissors, Please` },
+        { title: `${name} - Scissors, Please` },
         { name: "description", content: `Details and statistics for bot ${name}.` },
     ];
 }

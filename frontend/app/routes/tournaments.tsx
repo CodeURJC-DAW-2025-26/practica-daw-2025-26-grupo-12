@@ -9,7 +9,7 @@ import Footer from "~/components/footer";
 
 export function meta(_args: Route.MetaArgs) {
     return [
-        { title: "Tournaments – Scissors, Please" },
+        { title: "Tournaments - Scissors, Please" },
         { name: "description", content: "Browse all available bot tournaments." },
     ];
 }

@@ -14,7 +14,7 @@ import Chart from "~/components/chart";
 
 export function meta(_args: Route.MetaArgs) {
     return [
-        { title: "Scissors, Please – Code. Compete. Conquer." },
+        { title: "Scissors, Please - Code. Compete. Conquer." },
         { name: "description", content: "The ultimate Rock, Paper, Scissors bot arena." },
     ];
 }

@@ -10,7 +10,7 @@ import Footer from "~/components/footer";
 
 export function meta(_args: Route.MetaArgs) {
     return [
-        { title: "My Profile – Scissors, Please" },
+        { title: "My Profile - Scissors, Please" },
         { name: "description", content: "View and edit your profile settings." },
     ];
 }

@@ -15,7 +15,7 @@ import Footer from "~/components/footer";
 
 export function meta(_args: Route.MetaArgs) {
     return [
-        { title: "Find Match – Scissors, Please" },
+        { title: "Find Match - Scissors, Please" },
         { name: "description", content: "Search for an opponent in the matchmaking arena." },
     ];
 }

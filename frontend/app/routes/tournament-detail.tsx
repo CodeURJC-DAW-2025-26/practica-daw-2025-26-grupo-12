@@ -9,7 +9,7 @@ import { useAuthStore } from "~/stores/auth-store";
 export function meta({ data }: Route.MetaArgs) {
     const name = (data as any)?.tournament?.name ?? "Tournament";
     return [
-        { title: `${name} – Scissors, Please` },
+        { title: `${name} - Scissors, Please` },
         { name: "description", content: `Details for the ${name} tournament.` },
     ];
 }

@@ -8,7 +8,7 @@ import { useAuthStore } from "~/stores/auth-store";
 
 export function meta(_args: Route.MetaArgs) {
     return [
-        { title: "Log In – Scissors, Please" },
+        { title: "Log In - Scissors, Please" },
         { name: "description", content: "Sign in to your Scissors, Please account." },
     ];
 }

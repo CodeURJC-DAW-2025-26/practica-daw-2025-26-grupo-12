@@ -8,8 +8,8 @@ import Footer from "~/components/footer";
 export function meta({ data }: Route.MetaArgs) {
     const stats = (data as any)?.stats;
     const title = stats
-        ? `Match #${stats.matchId} – Scissors, Please`
-        : "Match Stats – Scissors, Please";
+        ? `Match #${stats.matchId} - Scissors, Please`
+        : "Match Stats - Scissors, Please";
     return [
         { title },
         { name: "description", content: "Detailed match statistics and round timeline." },
