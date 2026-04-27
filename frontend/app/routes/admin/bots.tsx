@@ -1,6 +1,17 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, Link, useLoaderData } from "react-router";
-import { Container, Row, Col, Card, Table, Form, Button, Badge, Modal } from "react-bootstrap";
+import {
+    Container,
+    Row,
+    Col,
+    Card,
+    Table,
+    Form,
+    Button,
+    Badge,
+    Modal,
+    Spinner,
+} from "react-bootstrap";
 import type { Route } from "./+types/bots";
 import { adminBotService, type BotPageResponse } from "../../services/admin-bot-service";
 
@@ -19,7 +30,7 @@ export default function AdminBots() {
     const { data: initialData, query: initialQuery } = useLoaderData<typeof clientLoader>();
     const [bots, setBots] = useState(initialData.content);
     const [page, setPage] = useState(0);
-    const [hasMore, setHasMore] = useState(initialData.number < initialData.totalPages - 1);
+    const [hasMore, setHasMore] = useState(!initialData.last);
     const [searchParams, setSearchParams] = useSearchParams();
     const [query, setQuery] = useState(initialQuery);
 
@@ -29,7 +40,7 @@ export default function AdminBots() {
     useEffect(() => {
         setBots(initialData.content);
         setPage(0);
-        setHasMore(initialData.number < initialData.totalPages - 1);
+        setHasMore(!initialData.last);
         setQuery(initialQuery);
     }, [initialData, initialQuery]);
 
@@ -38,15 +49,20 @@ export default function AdminBots() {
         setSearchParams({ query });
     };
 
+    const [loadingMore, setLoadingMore] = useState(false);
+
     const handleLoadMore = async () => {
+        setLoadingMore(true);
         const nextPage = page + 1;
         try {
             const data = await adminBotService.getBots(nextPage, 10, query);
             setBots((prev) => [...prev, ...data.content]);
             setPage(nextPage);
-            setHasMore(data.number < data.totalPages - 1);
+            setHasMore(!data.last);
         } catch (error) {
             alert("Error loading more bots");
+        } finally {
+            setLoadingMore(false);
         }
     };
 
@@ -217,8 +233,20 @@ export default function AdminBots() {
                 </div>
                 {hasMore && (
                     <div className="d-flex justify-content-center mt-3">
-                        <Button variant="outline-muted" size="sm" onClick={handleLoadMore}>
-                            Show more
+                        <Button
+                            variant="outline-secondary"
+                            size="sm"
+                            onClick={handleLoadMore}
+                            disabled={loadingMore}
+                        >
+                            {loadingMore ? (
+                                <>
+                                    <Spinner animation="border" size="sm" className="me-2" />
+                                    Loading…
+                                </>
+                            ) : (
+                                "Show more"
+                            )}
                         </Button>
                     </div>
                 )}

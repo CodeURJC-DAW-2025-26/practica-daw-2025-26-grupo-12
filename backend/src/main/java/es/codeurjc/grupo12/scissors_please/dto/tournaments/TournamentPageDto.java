@@ -5,11 +5,21 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 
 public record TournamentPageDto(
-    List<TournamentListItemDto> content, int pageNumber, int totalPages, long totalElements) {
+    List<TournamentListItemDto> content,
+    int number,
+    int size,
+    int totalPages,
+    long totalElements,
+    boolean last) {
   public static TournamentPageDto fromPage(Page<TournamentListItem> page) {
     List<TournamentListItemDto> content =
         page.getContent().stream().map(TournamentListItemDto::from).toList();
     return new TournamentPageDto(
-        content, page.getNumber(), page.getTotalPages(), page.getTotalElements());
+        content,
+        page.getNumber(),
+        page.getSize(),
+        page.getTotalPages(),
+        page.getTotalElements(),
+        page.isLast());
   }
 }

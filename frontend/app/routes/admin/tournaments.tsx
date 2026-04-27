@@ -1,6 +1,17 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, Link, useLoaderData } from "react-router";
-import { Container, Row, Col, Card, Table, Form, Button, Badge, Modal } from "react-bootstrap";
+import {
+    Container,
+    Row,
+    Col,
+    Card,
+    Table,
+    Form,
+    Button,
+    Badge,
+    Modal,
+    Spinner,
+} from "react-bootstrap";
 import type { Route } from "./+types/tournaments";
 import { adminTournamentService } from "../../services/admin-tournament-service";
 
@@ -19,7 +30,7 @@ export default function AdminTournaments() {
     const { data: initialData, query: initialQuery } = useLoaderData<typeof clientLoader>();
     const [tournaments, setTournaments] = useState(initialData.content);
     const [page, setPage] = useState(0);
-    const [hasMore, setHasMore] = useState(initialData.number < initialData.totalPages - 1);
+    const [hasMore, setHasMore] = useState(!initialData.last);
     const [searchParams, setSearchParams] = useSearchParams();
     const [query, setQuery] = useState(initialQuery);
 
@@ -31,7 +42,7 @@ export default function AdminTournaments() {
     useEffect(() => {
         setTournaments(initialData.content);
         setPage(0);
-        setHasMore(initialData.number < initialData.totalPages - 1);
+        setHasMore(!initialData.last);
         setQuery(initialQuery);
     }, [initialData, initialQuery]);
 
@@ -40,19 +51,31 @@ export default function AdminTournaments() {
         setSearchParams({ query });
     };
 
+    const [loadingMore, setLoadingMore] = useState(false);
+
     const handleLoadMore = async () => {
+        setLoadingMore(true);
         const nextPage = page + 1;
         try {
             const data = await adminTournamentService.getTournaments(nextPage, 10, query);
             setTournaments((prev) => [...prev, ...data.content]);
             setPage(nextPage);
-            setHasMore(data.number < data.totalPages - 1);
+            setHasMore(!data.last);
         } catch (error) {
             alert("Error loading more tournaments");
+        } finally {
+            setLoadingMore(false);
         }
     };
 
     const onDelete = async () => {
+        if (!targetTournament) return;
+        try {
+            await adminTournamentService.deleteTournament(targetTournament.id);
+            setTournaments((prev) => prev.filter((t) => t.id !== targetTournament.id));
+        } catch (error) {
+            alert("Error deleting tournament");
+        }
         setShowDeleteModal(false);
     };
 
@@ -127,7 +150,7 @@ export default function AdminTournaments() {
                                 </Badge>
                                 <Button
                                     as={Link as any}
-                                    to="/admin/tournaments/create"
+                                    to="/admin/tournaments/new"
                                     variant="outline-muted"
                                     size="sm"
                                 >
@@ -229,8 +252,24 @@ export default function AdminTournaments() {
                         </div>
                         {hasMore && (
                             <div className="d-flex justify-content-center mt-3">
-                                <Button variant="outline-muted" size="sm" onClick={handleLoadMore}>
-                                    Show more
+                                <Button
+                                    variant="outline-secondary"
+                                    size="sm"
+                                    onClick={handleLoadMore}
+                                    disabled={loadingMore}
+                                >
+                                    {loadingMore ? (
+                                        <>
+                                            <Spinner
+                                                animation="border"
+                                                size="sm"
+                                                className="me-2"
+                                            />
+                                            Loading…
+                                        </>
+                                    ) : (
+                                        "Show more"
+                                    )}
                                 </Button>
                             </div>
                         )}
@@ -247,23 +286,53 @@ export default function AdminTournaments() {
                             </h2>
                             <Badge bg="primary">Live</Badge>
                         </div>
-                        <Row className="g-3">
-                            <Col md={5}>
-                                <Form.Label className="text-secondary small">
-                                    Target Username (Leave empty for ALL users)
-                                </Form.Label>
-                                <Form.Control type="text" placeholder="e.g. user1" />
-                            </Col>
-                            <Col md={5}>
-                                <Form.Label className="text-secondary small">Message</Form.Label>
-                                <Form.Control type="text" placeholder="Hello World!" />
-                            </Col>
-                            <Col md={2} className="d-flex align-items-end">
-                                <Button variant="primary" className="w-100">
-                                    Send
-                                </Button>
-                            </Col>
-                        </Row>
+                        <Form
+                            onSubmit={async (e) => {
+                                e.preventDefault();
+                                const target = (e.target as any)[0].value;
+                                const msg = (e.target as any)[1].value;
+                                if (!msg) return;
+                                try {
+                                    const usernames = target
+                                        ? target
+                                              .split(",")
+                                              .map((u: string) => u.trim())
+                                              .filter((u: string) => u.length > 0)
+                                        : [];
+                                    await fetch("/api/v1/notifications/admin", {
+                                        method: "POST",
+                                        headers: { "Content-Type": "application/json" },
+                                        body: JSON.stringify({ usernames, message: msg }),
+                                        credentials: "include",
+                                    });
+                                    (e.target as any)[0].value = "";
+                                    (e.target as any)[1].value = "";
+                                    alert("Notification sent!");
+                                } catch (err) {
+                                    alert("Failed to send notification");
+                                }
+                            }}
+                        >
+                            <Row className="g-3">
+                                <Col md={5}>
+                                    <Form.Label className="text-secondary small">
+                                        Target Username (Leave empty for ALL users)
+                                    </Form.Label>
+                                    <Form.Control type="text" placeholder="e.g. user1" />
+                                </Col>
+                                <Col md={5}>
+                                    <Form.Label className="text-secondary small">
+                                        Message
+                                    </Form.Label>
+                                    <Form.Control type="text" placeholder="Hello World!" required />
+                                </Col>
+                                <Col md={2} className="d-flex align-items-end">
+                                    <Button type="submit" variant="primary" className="w-100">
+                                        Send
+                                    </Button>
+                                </Col>
+                            </Row>
+                        </Form>
                     </Card>
                 </Col>
             </Row>
