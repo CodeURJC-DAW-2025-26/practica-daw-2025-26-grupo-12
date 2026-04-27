@@ -46,6 +46,9 @@ export default function AppNavbar() {
                                 <Nav.Link as={Link} to="/admin/bots">
                                     Bots
                                 </Nav.Link>
+                                <Nav.Link as={Link} to="/admin/notifications">
+                                    Notifications
+                                </Nav.Link>
                             </>
                         ) : (
                             <Nav.Link as={Link} to="/tournaments">

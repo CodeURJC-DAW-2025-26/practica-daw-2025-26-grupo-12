@@ -4,6 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import type { Route } from "./+types/root";
 import "./app.css";
 import { Spinner } from "react-bootstrap";
+import GlobalNotification from "./components/global-notification";
 
 export const links: Route.LinksFunction = () => [
     {
@@ -66,6 +67,7 @@ export default function App() {
     return (
         <>
             <GlobalSpinner />
+            <GlobalNotification />
             <Outlet />
         </>
     );
