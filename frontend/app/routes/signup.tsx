@@ -166,7 +166,7 @@ export default function Signup() {
                     <div className="text-center">
                         <p className="text-secondary small mb-0">
                             Already have an account?{" "}
-                            <a href="/login" className="text-primary text-decoration-none fw-bold">
+                            <a href="login" className="text-primary text-decoration-none fw-bold">
                                 Log in
                             </a>
                         </p>
