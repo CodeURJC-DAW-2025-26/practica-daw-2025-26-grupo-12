@@ -30,7 +30,7 @@ export default function UserMatches() {
                 <div className="mb-4">
                     <h1 className="h3 fw-bold mb-1">My Match History</h1>
                     <p className="text-secondary">
-                        You have played {recentMatches.totalMatches} matches total.
+                        You have played {recentMatches.matches.length} matches total.
                     </p>
                 </div>
 
@@ -40,9 +40,8 @@ export default function UserMatches() {
                             <thead>
                                 <tr className="text-secondary small text-uppercase">
                                     <th className="ps-4">Matchup</th>
-                                    <th>Winner</th>
-                                    <th>Max ELO</th>
-                                    <th>Played At</th>
+                                    <th>Result</th>
+                                    <th>Date</th>
                                     <th className="text-end pe-4">Details</th>
                                 </tr>
                             </thead>
@@ -53,29 +52,23 @@ export default function UserMatches() {
                                             <td className="ps-4">
                                                 <div className="d-flex align-items-center gap-2">
                                                     <span className="fw-bold">
-                                                        {match.bot1Name}
+                                                        {match.myBotName}
                                                     </span>
                                                     <span className="text-secondary small">vs</span>
                                                     <span className="fw-bold">
-                                                        {match.bot2Name}
+                                                        {match.opponentName}
                                                     </span>
                                                 </div>
                                             </td>
                                             <td>
-                                                {match.winnerBotId ? (
-                                                    <Badge bg="success" className="rounded-pill">
-                                                        {match.winnerBotId === match.bot1Id
-                                                            ? match.bot1Name
-                                                            : match.bot2Name}
-                                                    </Badge>
-                                                ) : (
-                                                    <Badge bg="secondary" className="rounded-pill">
-                                                        Draw
-                                                    </Badge>
-                                                )}
+                                                <Badge
+                                                    bg={match.resultBadgeClass || "secondary"}
+                                                    className="rounded-pill"
+                                                >
+                                                    {match.result}
+                                                </Badge>
                                             </td>
-                                            <td className="text-secondary">{match.maxElo}</td>
-                                            <td className="text-secondary">{match.playedAt}</td>
+                                            <td className="text-secondary">{match.date}</td>
                                             <td className="text-end pe-4">
                                                 <Button
                                                     as={Link as any}
@@ -90,7 +83,7 @@ export default function UserMatches() {
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan={5} className="py-5 text-center text-secondary">
+                                        <td colSpan={4} className="py-5 text-center text-secondary">
                                             No recent matches.{" "}
                                             <Link to="/matches/search" className="text-primary">
                                                 Start matchmaking!

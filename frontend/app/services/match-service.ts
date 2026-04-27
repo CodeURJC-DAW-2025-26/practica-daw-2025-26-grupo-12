@@ -1,12 +1,11 @@
-import type { MatchSummary, MatchStats, Page } from "~/types";
+import type { MatchSummary, MatchStats, Page, RecentMatchItem } from "~/types";
 export interface MatchmakingStatus {
     status: "IDLE" | "SEARCHING" | "FOUND";
     matchId?: number;
 }
 
 export interface RecentMatches {
-    matches: MatchSummary[];
-    totalMatches: number;
+    matches: RecentMatchItem[];
 }
 
 const BASE = "/api/v1/matches";
