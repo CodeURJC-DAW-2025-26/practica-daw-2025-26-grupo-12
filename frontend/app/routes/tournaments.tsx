@@ -56,7 +56,7 @@ export default function Tournaments() {
         setLoadingMore(true);
         try {
             const nextPage = page + 1;
-            const data = await getTournaments(nextPage, 10, query || undefined);
+            const data = await getTournaments(nextPage, 10, searchQuery || undefined);
             setTournaments((prev) => [...prev, ...data.content]);
             setPage(nextPage);
             setHasMore(!data.last);
@@ -215,7 +215,7 @@ export default function Tournaments() {
                             </tbody>
                         </Table>
                     </div>
-                    {hasMore && (
+                    {hasMore && tournaments.length < total && (
                         <div className="d-flex justify-content-center mt-3">
                             <Button
                                 id="show-more-tournaments-btn"

@@ -7,7 +7,7 @@ import Footer from "~/components/footer";
 import { useAuthStore, type AuthUser } from "~/stores/auth-store";
 import { getMe } from "~/services/auth-service";
 import { getMyBots } from "~/services/bot-service";
-import type { BotDetail, MatchSummary, TournamentSummary } from "~/types";
+import type { BotDetail, RecentMatchItem, TournamentSummary } from "~/types";
 import { getMyTournaments } from "~/services/tournament-service";
 import { getRecentMatches } from "~/services/match-service";
 import Chart from "~/components/chart";
@@ -224,7 +224,7 @@ function UserHome({
     const tournaments: TournamentSummary[] = tournamentsPage?.content ?? [];
     const hasTournaments = tournaments.length > 0;
 
-    const matches: MatchSummary[] = matchesPage?.content ?? [];
+    const matches: RecentMatchItem[] = matchesPage?.matches ?? [];
     const hasMatches = matches.length > 0;
 
     return (
@@ -350,18 +350,18 @@ function UserHome({
                                                                 Match #{match.id}
                                                             </div>
                                                             <div className="text-muted">
-                                                                {match.bot1Name} vs {match.bot2Name}
+                                                                {match.myBotName} vs{" "}
+                                                                {match.opponentName}
                                                             </div>
                                                         </div>
                                                         <Badge
                                                             bg={
-                                                                match.winnerBotId
-                                                                    ? "primary"
-                                                                    : "secondary"
+                                                                match.resultBadgeClass ||
+                                                                "secondary"
                                                             }
                                                             pill
                                                         >
-                                                            {match.winnerBotId ? "FINISH" : "DRAW"}
+                                                            {match.result}
                                                         </Badge>
                                                     </div>
                                                 ))}

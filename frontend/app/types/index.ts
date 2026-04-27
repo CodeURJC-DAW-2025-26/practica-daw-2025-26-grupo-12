@@ -54,9 +54,26 @@ export interface MatchSummary {
     bot2Name: string;
     bot1OwnerName: string;
     bot2OwnerName: string;
-    winnerBotId?: number | null;
-    maxElo: number;
-    playedAt: string;
+    topElo: number;
+    result: string;
+    resultBadgeClass: string;
+    date: string;
+    actionHref: string;
+}
+
+export interface RecentMatchItem {
+    id: number;
+    myBotId: number;
+    myBotName: string;
+    myBotHasImage: boolean;
+    opponentBotId: number;
+    opponentName: string;
+    opponentOwnerName: string;
+    opponentHasImage: boolean;
+    result: string;
+    resultBadgeClass: string;
+    date: string;
+    actionHref: string;
 }
 
 export interface RoundDetail {

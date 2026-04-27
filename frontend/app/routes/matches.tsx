@@ -60,9 +60,7 @@ export default function Matches() {
     }
 
     function getResultBadge(m: MatchSummary) {
-        if (!m.winnerBotId) return <Badge bg="secondary">Draw</Badge>;
-        if (m.winnerBotId === m.bot1Id) return <Badge bg="success">{m.bot1Name} wins</Badge>;
-        return <Badge bg="danger">{m.bot2Name} wins</Badge>;
+        return <Badge bg={m.resultBadgeClass || "secondary"}>{m.result}</Badge>;
     }
 
     return (
@@ -153,9 +151,9 @@ export default function Matches() {
                                                     ({m.bot2OwnerName})
                                                 </span>
                                             </td>
-                                            <td>{m.maxElo}</td>
+                                            <td className="fw-bold text-primary">{m.topElo}</td>
                                             <td>{getResultBadge(m)}</td>
-                                            <td className="text-secondary small">{m.playedAt}</td>
+                                            <td className="text-secondary small">{m.date}</td>
                                             <td className="text-end pe-4">
                                                 <Button
                                                     as={Link as any}
@@ -172,7 +170,7 @@ export default function Matches() {
                             </tbody>
                         </Table>
                     </div>
-                    {hasMore && (
+                    {hasMore && matches.length < total && (
                         <div className="d-flex justify-content-center mt-3">
                             <Button
                                 id="show-more-matches-btn"

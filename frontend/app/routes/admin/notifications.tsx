@@ -10,7 +10,7 @@ export default function AdminNotifications() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!usernames.trim() || !message.trim()) return;
+        if (!message.trim()) return;
 
         setIsSubmitting(true);
         setSuccess(false);
@@ -26,6 +26,7 @@ export default function AdminNotifications() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ usernames: parsedUsernames, message }),
+                credentials: "include",
             });
 
             if (!req.ok) throw new Error("Failed to broadcast notifications");
@@ -84,15 +85,15 @@ export default function AdminNotifications() {
                                     Target Users <Badge bg="primary">Required</Badge>
                                 </Form.Label>
                                 <Form.Control
-                                    required
                                     type="text"
-                                    placeholder="e.g. admin, bot_master, john_doe"
+                                    placeholder="e.g. admin, bot_master, john_doe (leave empty for all)"
                                     value={usernames}
                                     onChange={(e) => setUsernames(e.target.value)}
                                     className="bg-dark text-light border-secondary form-control-lg"
                                 />
                                 <Form.Text className="text-muted">
                                     Comma-separated list of usernames to send the notification to.
+                                    Leave empty to broadcast to everyone.
                                 </Form.Text>
                             </Form.Group>
                         </Col>
@@ -133,7 +134,7 @@ export default function AdminNotifications() {
                             type="submit"
                             variant="primary"
                             className="btn-gradient-primary rounded-pill px-5"
-                            disabled={isSubmitting || !usernames || !message}
+                            disabled={isSubmitting || !message}
                         >
                             {isSubmitting ? "Sending..." : "Send Notifications"}
                         </Button>
