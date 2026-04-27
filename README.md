@@ -601,8 +601,8 @@ Me he centrado sobre todo en la evolución de la API REST, añadiendo paginació
 
 2. **Clonar el repositorio** (si no lo has hecho ya)
    ```bash
-   git clone https://github.com/[usuario]/[nombre-repositorio].git
-   cd [nombre-repositorio]
+   git clone github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12.git
+   cd practica-daw-2025-26-grupo-12
    ```
 
 3. **Navegar a la carpeta del proyecto React**
@@ -610,7 +610,15 @@ Me he centrado sobre todo en la evolución de la API REST, añadiendo paginació
    cd frontend
    ```
 
-4. **AQUÍ LOS SIGUIENTES PASOS**
+4. **Instalar dependencias**
+   ```bash
+   npm install
+   ```
+
+5. **Ejecutar la aplicación**
+   ```bash
+   npm run dev
+   ```
 
 ### **Diagrama de Clases y Templates de la SPA**
 
@@ -620,17 +628,17 @@ Diagrama mostrando los componentes React, hooks personalizados, servicios y sus 
 
 ### **Participación de Miembros en la Práctica 3**
 
-#### **Alumno 1 - [Nombre Completo]**
+#### **Alumno 1 - Marcelo Atanasio Domínguez Mateo**
 
-[Descripción de las tareas y responsabilidades principales del alumno en el proyecto]
+He migrado gran parte de las rutas públicas (usuario no autenticado) a React, añadido la persistencia de la sesión en el *frontend*, así como múltiples *bug fixes* y detalles menores, para asegurar el correcto funcionamiento de la aplicación y su correspondencia con el *frontend* anterior.
 
 | Nº    | Commits      | Files      |
 |:------------: |:------------:| :------------:|
-|1| [Descripción commit 1](URL_commit_1)  | [Archivo1](URL_archivo_1)   |
-|2| [Descripción commit 2](URL_commit_2)  | [Archivo2](URL_archivo_2)   |
-|3| [Descripción commit 3](URL_commit_3)  | [Archivo3](URL_archivo_3)   |
-|4| [Descripción commit 4](URL_commit_4)  | [Archivo4](URL_archivo_4)   |
-|5| [Descripción commit 5](URL_commit_5)  | [Archivo5](URL_archivo_5)   |
+|1| [Define root layout, global styles, and shared components](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/ff8cc2e)  | [root.tsx](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/frontend/app/root.tsx)   |
+|2| [Implement home page, authentication forms, and error handling](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/ea639b3)  | [home.tsx](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/frontend/app/routes/home.tsx)   |
+|3| [Implement public listing and detail pages for bots, matches, and tournaments](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/4368258)  | [bots.tsx](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/frontend/app/routes/bots.tsx)   |
+|4| [Implement session bootstrap flow and GET /me endpoint](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/77966ec)  | [auth-store.ts](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/frontend/app/stores/auth-store.ts)   |
+|5| [Implement admin  bots, tournaments, and notifications](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/commit/8330436)  | [admin-bot-service.ts](https://github.com/CodeURJC-DAW-2025-26/practica-daw-2025-26-grupo-12/blob/main/frontend/app/services/admin-bot-service.ts)   |
 
 ---
 
