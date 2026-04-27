@@ -1,10 +1,13 @@
-import { Links, Meta, Outlet, Scripts, ScrollRestoration, useNavigation } from "react-router";
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData, useNavigation } from "react-router";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import type { Route } from "./+types/root";
 import "./app.css";
 import { Spinner } from "react-bootstrap";
 import GlobalNotification from "./components/global-notification";
+import { useAuthStore } from "./stores/auth-store";
+import { useEffect } from "react";
+import { getMe } from "./services/auth-service";
 
 export const links: Route.LinksFunction = () => [
     {
@@ -62,8 +65,21 @@ function GlobalSpinner() {
         </div>
     );
 }
+export async function clientLoader() {
+    const user = await getMe();
+    return { user };
+}
 
 export default function App() {
+    const { user: loadedUser } = useLoaderData<typeof clientLoader>();
+
+    const { setUser, setInitialized } = useAuthStore();
+
+    useEffect(() => {
+        setUser(loadedUser);
+        setInitialized(true);
+    }, [loadedUser, setUser, setInitialized]);
+
     return (
         <>
             <GlobalSpinner />
@@ -72,6 +88,7 @@ export default function App() {
         </>
     );
 }
+
 
 export function ErrorBoundary({ error }: { error: unknown }) {
     const message = error instanceof Error ? error.message : "An unexpected error occurred.";

@@ -48,6 +48,8 @@ export default function BotDetail() {
     const [loading, setLoading] = useState(false);
 
     const isOwner = user?.id === bot.ownerId;
+    console.log(user?.id);
+    console.log(bot.ownerId)
     const canManage = isOwner || useAuthStore.getState().isAdmin();
     const initial = bot.name.charAt(0).toUpperCase();
     const totalMatches = bot.wins + bot.losses + bot.draws;
@@ -137,34 +139,9 @@ export default function BotDetail() {
 
                 <div className="row g-4 mb-5">
                     <div className="col-lg-8">
-                        {bot.code && isOwner && (
-                            <Card className="p-4 h-100 mb-4">
-                                <h3 className="h6 fw-bold mb-3">Bot Logic (Python)</h3>
-                                <div
-                                    className="bg-black border border-secondary rounded p-3 overflow-auto"
-                                    style={{ maxHeight: 400 }}
-                                >
-                                    <pre
-                                        className="font-monospace text-info mb-0"
-                                        style={{ fontSize: "0.9rem" }}
-                                    >
-                                        <code>{bot.code}</code>
-                                    </pre>
-                                </div>
-                            </Card>
-                        )}
+                        
 
                         <div className="row g-4">
-                            <div className="col-md-4">
-                                <Card className="p-3 stat-card h-100">
-                                    <h6 className="text-secondary text-uppercase small fw-bold mb-2">
-                                        Global Rank
-                                    </h6>
-                                    <div className="d-flex align-items-baseline">
-                                        <span className="h2 fw-bold mb-0 text-white">#?</span>
-                                    </div>
-                                </Card>
-                            </div>
                             <div className="col-md-4">
                                 <Card className="p-3 stat-card h-100">
                                     <h6 className="text-secondary text-uppercase small fw-bold mb-2">
@@ -192,6 +169,22 @@ export default function BotDetail() {
                                     </div>
                                 </Card>
                             </div>
+                            {bot.code && isOwner && (
+                            <Card className="p-4 h-100 mb-4">
+                                <h3 className="h6 fw-bold mb-3">Bot Logic (Python)</h3>
+                                <div
+                                    className="bg-black border border-secondary rounded p-3 overflow-auto"
+                                    style={{ maxHeight: 400 }}
+                                >
+                                    <pre
+                                        className="font-monospace text-info mb-0"
+                                        style={{ fontSize: "0.9rem" }}
+                                    >
+                                        <code>{bot.code}</code>
+                                    </pre>
+                                </div>
+                            </Card>
+                        )}
                         </div>
                     </div>
 
