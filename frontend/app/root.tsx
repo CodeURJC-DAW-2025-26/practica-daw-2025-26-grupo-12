@@ -1,4 +1,12 @@
-import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData, useNavigation } from "react-router";
+import {
+    Links,
+    Meta,
+    Outlet,
+    Scripts,
+    ScrollRestoration,
+    useLoaderData,
+    useNavigation,
+} from "react-router";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import type { Route } from "./+types/root";
@@ -88,7 +96,6 @@ export default function App() {
         </>
     );
 }
-
 
 export function ErrorBoundary({ error }: { error: unknown }) {
     const message = error instanceof Error ? error.message : "An unexpected error occurred.";

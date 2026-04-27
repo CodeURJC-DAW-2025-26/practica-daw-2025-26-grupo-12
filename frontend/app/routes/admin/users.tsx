@@ -183,7 +183,14 @@ export default function AdminUsers() {
                                             className="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold"
                                             style={{ width: 40, height: 40 }}
                                         >
-                                            {user.username.charAt(0).toUpperCase()}
+                                            {user.imageUrl ? (
+                                                <img
+                                                    src={user.imageUrl}
+                                                    style={{ width: 40, height: 40 }}
+                                                />
+                                            ) : (
+                                                user.username.charAt(0).toUpperCase()
+                                            )}
                                         </div>
                                     </td>
                                     <td className="fw-semibold text-white">{user.username}</td>

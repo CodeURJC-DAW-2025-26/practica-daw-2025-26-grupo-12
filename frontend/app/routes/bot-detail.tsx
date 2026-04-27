@@ -49,7 +49,7 @@ export default function BotDetail() {
 
     const isOwner = user?.id === bot.ownerId;
     console.log(user?.id);
-    console.log(bot.ownerId)
+    console.log(bot.ownerId);
     const canManage = isOwner || useAuthStore.getState().isAdmin();
     const initial = bot.name.charAt(0).toUpperCase();
     const totalMatches = bot.wins + bot.losses + bot.draws;
@@ -139,8 +139,6 @@ export default function BotDetail() {
 
                 <div className="row g-4 mb-5">
                     <div className="col-lg-8">
-                        
-
                         <div className="row g-4">
                             <div className="col-md-4">
                                 <Card className="p-3 stat-card h-100">
@@ -170,21 +168,21 @@ export default function BotDetail() {
                                 </Card>
                             </div>
                             {bot.code && isOwner && (
-                            <Card className="p-4 h-100 mb-4">
-                                <h3 className="h6 fw-bold mb-3">Bot Logic (Python)</h3>
-                                <div
-                                    className="bg-black border border-secondary rounded p-3 overflow-auto"
-                                    style={{ maxHeight: 400 }}
-                                >
-                                    <pre
-                                        className="font-monospace text-info mb-0"
-                                        style={{ fontSize: "0.9rem" }}
+                                <Card className="p-4 h-100 mb-4">
+                                    <h3 className="h6 fw-bold mb-3">Bot Logic (Python)</h3>
+                                    <div
+                                        className="bg-black border border-secondary rounded p-3 overflow-auto"
+                                        style={{ maxHeight: 400 }}
                                     >
-                                        <code>{bot.code}</code>
-                                    </pre>
-                                </div>
-                            </Card>
-                        )}
+                                        <pre
+                                            className="font-monospace text-info mb-0"
+                                            style={{ fontSize: "0.9rem" }}
+                                        >
+                                            <code>{bot.code}</code>
+                                        </pre>
+                                    </div>
+                                </Card>
+                            )}
                         </div>
                     </div>
 
